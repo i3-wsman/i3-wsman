@@ -18,6 +18,7 @@ fn main() {
 	commands.insert("next", commands::next::exec as CommandFn);
 	commands.insert("adjacent", commands::adjacent::exec as CommandFn);
 	commands.insert("polybar", commands::polybar::exec as CommandFn);
+	commands.insert("poke-poly", commands::poke::exec as CommandFn);
 
 	let command = if args.len() > 1 { args[1].as_str() } else { "" };
 	match commands.get(command) {

@@ -30,13 +30,13 @@ pub fn exec(args: Vec<String>) {
 
 		let mut label = "";
 
-		if ws.urgent {
-			fgcolor = "ffc2bd60";
-			label = "";
-		} else if ws.focused {
+		if ws.focused {
 			fgcolor = "ff8080f0";
 			bgcolor = "b9010202";
 			label = "";
+		} else if ws.urgent {
+			fgcolor = "ffc2bd60";
+			label = "";
 		} else if ws.visible {
 			fgcolor = "ccfdfefe";
 			bgcolor = "99010202";

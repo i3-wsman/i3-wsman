@@ -27,7 +27,9 @@ pub fn exec(mut args: Vec<String>) {
 
 	let create = args.len() > 1 && args[0] == "create";
 
-	if create || args[0] == "loop" { args.remove(0); }
+	if create || args.len() > 1 && args[0] == "loop" {
+		args.remove(0);
+	}
 
 	let mut constraints = get_constraints(args.to_owned());
 
