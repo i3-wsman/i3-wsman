@@ -19,18 +19,29 @@ fn main() {
 	commands.insert("adjacent", commands::adjacent::exec as CommandFn);
 	commands.insert("polybar", commands::polybar::exec as CommandFn);
 
-	let command = if args.len() > 1 { args[1].as_str() } else { "help" };
+	let command = if args.len() > 1 { args[1].as_str() } else { "" };
 	match commands.get(command) {
 		Some(&func) => {
 			func(args[2..].to_vec());
 		}
-		_ => {
+		None if command == "help" => {
 			println!("Usage: {} <command> <...args>", common::this_command());
 
 			for &func in commands.values() {
 				println!("");
 				func(vec!["help".to_string()]);
 			}
+		}
+		_ => {
+			println!("Usage: {} <command> <...args>", common::this_command());
+
+			println!("\r\nFor detailed usage, run:");
+			println!("    {} <command> help", common::this_command());
+			println!("\r\nAvailable commands:");
+			for &cmd in commands.keys() {
+				println!("    {} {}", common::this_command(), cmd);
+			}
+			println!("    {} help", common::this_command());
 		}
 	}
 

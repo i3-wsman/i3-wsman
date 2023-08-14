@@ -13,9 +13,10 @@ use crate::common::{
 
 pub fn exec(args: Vec<String>) {
 	if args.contains(&"help".to_string()) {
-		println!("{} adjacent <direction>", this_command());
+		println!("{} adjacent <right|left>", this_command());
 		println!("    Creates a new workspace next to the current workspace\n\r");
-		println!("    Directions: right, left");
+		println!("    {} adjacent right\t- Creates a workspace to the right", this_command());
+		println!("    {} adjacent left \t- Creates a workspace to the left", this_command());
 		return;
 	}
 

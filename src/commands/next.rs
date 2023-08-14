@@ -18,9 +18,10 @@ pub fn exec(mut args: Vec<String>) {
 	if args.contains(&"help".to_string()) {
 		println!("{} next [create|loop] [...constraints]", this_command());
 		println!("    Focuses on the next workspace\n\r");
-		println!("    Options:");
-		println!("      create: Optional: If there is no next workspace, create it");
-		println!("      ...constraints: Defaults to 'output'. See get-workspaces.");
+		println!("    {} next create [...constraints]\tOn last workspace, creates a new workspace", this_command());
+		println!("    {} next loop [...constraints]  \tOn last workspace, loops back to the first", this_command());
+		println!("");
+		println!("    For constraints, run: {} get-workspaces help", this_command());
 		return;
 	}
 

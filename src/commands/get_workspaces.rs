@@ -15,7 +15,6 @@ pub fn exec(args: Vec<String>) {
 		println!("      hidden: Hidden Workspaces");
 		println!("      group: Workspaces apart of the active Group");
 		println!("      output: Workspaces on the output ");
-		println!("          (Expects MONITOR env variable to be set)");
 		println!("      output=xyz: Workspaces on the output xyz");
 		println!("");
 		println!("    For instance, to get all hidden workspaces on the current monitor:");
