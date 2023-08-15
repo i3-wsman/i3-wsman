@@ -4,7 +4,7 @@ use crate::common::{
 	this_command,
 	this_command_abs,
 	groups,
-	// name,
+	name,
 	outputs,
 	polybar,
 	workspaces,
@@ -78,12 +78,16 @@ pub fn workspace(args: Vec<String>) {
 }
 
 pub fn exec(_: Vec<String>) {
-	let mut constraints = Constraints::new();
+	let mut show_constraints = Constraints::new();
+	show_constraints.add(Constraint::Output);
+	show_constraints.add(Constraint::Group);
+	show_constraints.output = outputs::focused();
 
-	constraints.add(Constraint::Output);
-	constraints.output = outputs::focused();
+	let mut avail_constraints = Constraints::new();
+	avail_constraints.add(Constraint::Output);
+	avail_constraints.output = outputs::focused();
 
-	let groups = groups::available(constraints.clone());
+	let groups = groups::available(avail_constraints);
 	let mut active_groups = groups::active(outputs::focused());
 
 	let mut fgcolor = "ccfdfefe";
@@ -99,9 +103,15 @@ pub fn exec(_: Vec<String>) {
 	let suffix = "%{A}%{F-}%{B-}%{T-}";
 	print!("{} all {}", prefix, suffix);
 
+	let focused_ws = workspaces::focused();
+	let focused_group = name::group(focused_ws.name.as_str());
 	for g in groups {
 		let mut fgcolor = "ccfdfefe";
 		let mut bgcolor = "82010202";
+
+		if &g == &focused_group {
+			bgcolor = "99010202";
+		}
 
 		if active_groups.contains(&g) {
 			fgcolor = "ff8080f0";
@@ -117,7 +127,7 @@ pub fn exec(_: Vec<String>) {
 
 	print!("  %{{T3}}");
 
-	let workspaces = workspaces::get(constraints, false);
+	let workspaces = workspaces::get(show_constraints, false);
 
 	for ws in workspaces {
 		let mut fgcolor = "33fdfefe";

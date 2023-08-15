@@ -1,5 +1,6 @@
 use i3_ipc::{Connect, I3, reply::Workspace};
 
+use super::{name, groups, outputs};
 use super::constraint::{ Constraints, Constraint };
 
 fn get_ws() -> Vec<Workspace> {
@@ -43,7 +44,16 @@ pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
 			}
 
 			if constraints.contains(Constraint::Group) {
-				todo!();
+				let output = if constraints.output != "none" {
+					constraints.output.clone()
+				} else {
+					outputs::focused()
+				};
+				let active_groups = groups::active(output);
+				if active_groups.len() > 0 {
+					let ws_group = name::group(ws.name.as_ref());
+					return active_groups.contains(&ws_group);
+				}
 			}
 
 			return true
