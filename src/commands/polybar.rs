@@ -241,6 +241,11 @@ pub fn module_workspaces(_: Vec<String>) {
 					polybar::defaults::VISIBLE_BG
 				);
 				ws_label_btn.label = polybar::defaults::VISIBLE_WS_LABEL.to_string();
+			} else {
+				ws_label_btn.set_colors(
+					polybar::defaults::FG,
+					polybar::defaults::BG
+				);
 			}
 		} else {
 			if ws.focused {
