@@ -24,7 +24,7 @@ const ON_LAST_LOOP: &str = "loop";
 const ON_LAST_STOP: &str = "stop";
 
 lazy_static! {
-	pub static ref CMD: String = "next".to_string();
+	pub static ref CMD: String = "prev".to_string();
 
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
@@ -37,10 +37,10 @@ lazy_static! {
 
 pub fn help(_: Vec<String>) {
 	println!("{} {} [{}|{}|{}] [...constraints]", this_command(), CMD.as_str(), ON_LAST_CREATE, ON_LAST_LOOP, ON_LAST_STOP);
-	println!("    Focuses on the next workspace\n\r");
-	println!("    {} next {} [...constraints]\tOn last workspace, creates a new workspace", this_command(), ON_LAST_CREATE);
-	println!("    {} next {} [...constraints]  \tOn last workspace, loops back to the first", this_command(), ON_LAST_LOOP);
-	println!("    {} next {} [...constraints]  \tOn last workspace, stops", this_command(), ON_LAST_STOP);
+	println!("    Focuses on the previous workspace\n\r");
+	println!("    {} next {} [...constraints]\tOn first workspace, creates a new workspace", this_command(), ON_LAST_CREATE);
+	println!("    {} next {} [...constraints]  \tOn first workspace, loops back to the first", this_command(), ON_LAST_LOOP);
+	println!("    {} next {} [...constraints]  \tOn first workspace, stops", this_command(), ON_LAST_STOP);
 	println!("");
 	println!("    For constraints, run: {} get-workspaces help", this_command());
 }
@@ -62,7 +62,7 @@ pub fn exec(mut args: Vec<String>) {
 
 	let focused_ws = workspaces::focused();
 
-	let neighbor = neighbor::get(focused_ws, constraints.clone(), Direction::Right);
+	let neighbor = neighbor::get(focused_ws, constraints.clone(), Direction::Left);
 
 	if let Some(next) = neighbor {
 		let mut i3 = I3::connect().unwrap();
@@ -71,10 +71,10 @@ pub fn exec(mut args: Vec<String>) {
 	} else {
 		match last_action.as_str() {
 			ON_LAST_CREATE => {
-				crate::commands::adjacent::exec(vec!["right".to_owned()]);
+				crate::commands::adjacent::exec(vec!["left".to_owned()]);
 			}
 			ON_LAST_LOOP => {
-				let first_ws = workspaces::first(constraints);
+				let first_ws = workspaces::last(constraints);
 				let mut i3 = I3::connect().unwrap();
 				let cmd = format!("workspace {}", first_ws.name);
 				i3.run_command(cmd).ok();

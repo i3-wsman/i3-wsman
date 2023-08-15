@@ -26,6 +26,7 @@ lazy_static! {
 		cmds.insert(HELP_CMD, help as CommandFn);
 		cmds.insert("workspace", workspace as CommandFn);
 		cmds.insert("group", group as CommandFn);
+		cmds.insert("toggle-hidden", toggle_hidden as CommandFn);
 		cmds
 	};
 }
@@ -38,6 +39,11 @@ pub fn help(_: Vec<String>) {
 	println!("    type = custom/ipc");
 	println!("    hook-0 = {} polybar", this_command());
 	println!("    initial = 1");
+}
+
+pub fn toggle_hidden(_: Vec<String>) {
+	groups::toggle_hidden();
+	polybar::update();
 }
 
 pub fn group(args: Vec<String>) {
@@ -78,9 +84,13 @@ pub fn workspace(args: Vec<String>) {
 }
 
 pub fn exec(_: Vec<String>) {
+	let show_hidden = groups::show_hidden_enabled();
+
 	let mut show_constraints = Constraints::new();
 	show_constraints.add(Constraint::Output);
-	show_constraints.add(Constraint::Group);
+	if !show_hidden {
+		show_constraints.add(Constraint::Group);
+	}
 	show_constraints.output = outputs::focused();
 
 	let mut avail_constraints = Constraints::new();
@@ -89,10 +99,11 @@ pub fn exec(_: Vec<String>) {
 
 	let groups = groups::available(avail_constraints);
 	let mut active_groups = groups::active(outputs::focused());
+	let show_all = active_groups.len() == 0 || groups == active_groups;
 
 	let mut fgcolor = "ccfdfefe";
 	let mut bgcolor = "82010202";
-	if active_groups.len() == 0 || groups == active_groups {
+	if show_all {
 		fgcolor = "ff8080f0";
 		bgcolor = "b9010202";
 		active_groups = vec![];
@@ -125,12 +136,34 @@ pub fn exec(_: Vec<String>) {
 		print!("{} {} {}", prefix, g, suffix);
 	}
 
-	print!("  %{{T3}}");
+	let toggle_hidden_label = "";
 
-	let workspaces = workspaces::get(show_constraints, false);
+	let fgcolor = if show_all {
+		"00000000"
+	} else if show_hidden {
+		"ccfdfefe"
+	} else {
+		"33fdfefe"
+	};
 
+	let cmd = this_command_abs() + " polybar toggle-hidden";
+	let prefix = format!("%{{T2}}%{{F#{}}}%{{A1:{}:}}", fgcolor, cmd);
+	let suffix = "%{A}%{F-}%{B-}";
+	print!("{} {} {}", prefix, toggle_hidden_label, suffix);
+
+	let mut workspaces = workspaces::get(show_constraints, false);
+
+	if !workspaces.contains(&focused_ws) {
+		workspaces.push(focused_ws);
+	}
+
+	workspaces.sort_by(
+		|w1, w2| w1.num.cmp(&w2.num)
+	);
+
+	print!("%{{T3}}");
 	for ws in workspaces {
-		let mut fgcolor = "33fdfefe";
+		let mut fgcolor = "55fdfefe";
 		let mut bgcolor = "77000000";
 
 		let mut label = "";
@@ -146,6 +179,24 @@ pub fn exec(_: Vec<String>) {
 			fgcolor = "ccfdfefe";
 			bgcolor = "99010202";
 			label = "";
+		}
+
+		let ws_group = name::group(ws.name.as_str());
+		if active_groups.len() > 0 && !active_groups.contains(&ws_group) {
+			label = "";
+			if ws.focused {
+				fgcolor = "cc8080f0";
+				bgcolor = "99010202";
+			} else if ws.urgent {
+				fgcolor = "ffc2bd60";
+				label = "";
+			} else if ws.visible {
+				fgcolor = "aafdfefe";
+				bgcolor = "99010202";
+			} else {
+				fgcolor = "11fdfefe";
+				bgcolor = "77000000";
+			}
 		}
 
 		let cmd = this_command_abs() + " polybar workspace " + ws.num.to_string().as_ref();

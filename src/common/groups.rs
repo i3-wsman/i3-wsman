@@ -31,6 +31,22 @@ pub fn available_output(output: String) -> Vec<String> {
 	available(constraints)
 }
 
+pub fn show_hidden_enabled() -> bool {
+	let state = state::get();
+	state.show_hidden
+}
+
+pub fn toggle_hidden() -> bool {
+	let mut state = state::get();
+
+	let new_state = !state.show_hidden;
+	state.show_hidden = new_state;
+
+	state::set(state);
+
+	new_state
+}
+
 pub fn active(output: String) -> Vec<String> {
 	let state = state::get();
 

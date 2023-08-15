@@ -9,6 +9,7 @@ use fs2::FileExt;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct State {
 	pub groups: HashMap<String, Vec<String>>,
+	pub show_hidden: bool,
 }
 
 fn usid() -> String {
@@ -34,7 +35,10 @@ fn get_tmpf(filename: &str) -> PathBuf {
 	// Create the file only if it doesn't exist
 	if !temp_file_path.exists() {
 		File::create(&temp_file_path).expect("Failed to create temporary file");
-		set(State { groups: HashMap::new() });
+		set(State {
+			groups: HashMap::new(),
+			show_hidden: false,
+		});
 	}
 
 	temp_file_path
