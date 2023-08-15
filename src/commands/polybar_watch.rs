@@ -39,4 +39,5 @@ pub fn exec(_: Vec<String>) {
 			_ => {}
 		}
 	}
+	exec(vec![]);
 }
