@@ -24,6 +24,7 @@ fn main() {
 	let mut cmds: CommandMap = HashMap::new();
 	cmds.insert(commands::adjacent::CMD.as_str(), commands::adjacent::SUBCMDS.clone());
 	cmds.insert(commands::get_workspaces::CMD.as_str(), commands::get_workspaces::SUBCMDS.clone());
+	cmds.insert(commands::goto::CMD.as_str(), commands::goto::SUBCMDS.clone());
 	cmds.insert(commands::group::CMD.as_str(), commands::group::SUBCMDS.clone());
 	cmds.insert(commands::next::CMD.as_str(), commands::next::SUBCMDS.clone());
 	cmds.insert(commands::poke::CMD.as_str(), commands::poke::SUBCMDS.clone());

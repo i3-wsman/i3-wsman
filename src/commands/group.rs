@@ -1,5 +1,3 @@
-use i3_ipc::{Connect, I3};
-
 use crate::common::{
 	constraint,
 	constraint::Constraint,
