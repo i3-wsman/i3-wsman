@@ -4,7 +4,7 @@ use crate::common::{
 	workspaces,
 };
 
-use crate::{DEFAULT_CMD, HELP_CMD, Commands, CommandFn};
+use crate::{DEFAULT_CMD, HELP_CMD, WILD_CMD, Commands, CommandFn};
 use std::collections::HashMap;
 
 lazy_static! {
@@ -13,6 +13,7 @@ lazy_static! {
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);
+		cmds.insert(WILD_CMD, exec as CommandFn);
 		cmds.insert(HELP_CMD, help as CommandFn);
 		cmds
 	};
