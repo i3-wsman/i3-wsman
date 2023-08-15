@@ -3,10 +3,9 @@ use i3_ipc::{Connect, I3};
 use crate::common::{
 	this_command,
 	this_command_abs,
-	get_output,
-	get_workspaces,
-	get_workspace_by_num,
-	polybar_update,
+	outputs,
+	workspaces,
+	polybar,
 	constraint::{ Constraints, Constraint }
 };
 
@@ -42,7 +41,7 @@ pub fn action(args: Vec<String>) {
 	let wsarg = args[0].parse::<i32>();
 	match wsarg {
 		Ok(ws_num) => {
-			if let Some(ws) = get_workspace_by_num(ws_num) {
+			if let Some(ws) = workspaces::by_num(ws_num) {
 				let mut i3 = I3::connect().unwrap();
 				let cmd = format!("workspace {}", ws.name);
 				i3.run_command(cmd).ok();
@@ -54,16 +53,16 @@ pub fn action(args: Vec<String>) {
 			exec(vec!["help".to_string()]);
 		}
 	}
-	polybar_update();
+	polybar::update();
 }
 
 pub fn exec(_: Vec<String>) {
 	let mut constraints = Constraints::new();
 
 	constraints.add(Constraint::Output);
-	constraints.output = get_output();
+	constraints.output = outputs::active();
 
-	let workspaces = get_workspaces(constraints, false);
+	let workspaces = workspaces::get(constraints, false);
 
 	for ws in workspaces {
 		let mut fgcolor = "33fdfefe";

@@ -1,7 +1,7 @@
 use crate::common::{
 	this_command,
-	get_constraints,
-	get_workspaces,
+	constraint,
+	workspaces,
 };
 
 use crate::{DEFAULT_CMD, HELP_CMD, Commands, CommandFn};
@@ -35,9 +35,9 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(args: Vec<String>) {
-	let constraints = get_constraints(args.to_owned());
+	let constraints = constraint::parse(args.to_owned());
 
-	let workspaces = get_workspaces(constraints, false);
+	let workspaces = workspaces::get(constraints, false);
 	let output = serde_json::to_string_pretty(&workspaces).unwrap();
 	println!("{}", output);
 }

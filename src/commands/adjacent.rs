@@ -4,11 +4,10 @@ use i3_ipc::{Connect, I3};
 
 use crate::common::{
 	this_command,
-	polybar_update,
-	get_active_workspace,
-	move_workspace_right,
-	get_workspace_by_num,
-	change_prefix,
+	polybar,
+	workspaces,
+	moves,
+	name,
 };
 
 use crate::{
@@ -37,23 +36,23 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(args: Vec<String>) {
-	let active_ws = get_active_workspace();
+	let active_ws = workspaces::active();
 	let active_ws_name = active_ws.name.to_owned();
 	let active_ws_num = active_ws.num;
 
 	let new_ws_num = if args[0] == "left" {
-		move_workspace_right(active_ws);
+		moves::right(active_ws);
 		active_ws_num
 	} else {
 		let nn = active_ws_num + 1;
-		let ws_to_move = get_workspace_by_num(nn);
+		let ws_to_move = workspaces::by_num(nn);
 		if let Some(moveit) = ws_to_move {
-			move_workspace_right(moveit);
+			moves::right(moveit);
 		}
 		nn
 	};
 
-	let new_ws_name = change_prefix(
+	let new_ws_name = name::change_prefix(
 		&active_ws_name,
 		new_ws_num
 	);
@@ -62,5 +61,5 @@ pub fn exec(args: Vec<String>) {
 	let cmd = format!("workspace {}", new_ws_name);
 	i3.run_command(cmd).ok();
 
-	polybar_update();
+	polybar::update();
 }

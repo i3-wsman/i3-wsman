@@ -5,12 +5,11 @@ use i3_ipc::{Connect, I3};
 use crate::common::{
 	Direction,
 	this_command,
-	polybar_update,
-	get_active_workspace,
-	get_first_workspace,
-	get_output,
-	get_neighbor,
-	get_constraints,
+	polybar,
+	workspaces,
+	outputs,
+	neighbor,
+	constraint,
 	constraint::Constraint,
 };
 
@@ -48,16 +47,16 @@ pub fn exec(mut args: Vec<String>) {
 		args.remove(0);
 	}
 
-	let mut constraints = get_constraints(args.to_owned());
+	let mut constraints = constraint::parse(args.to_owned());
 
 	if args.len() == 0 {
 		constraints.add(Constraint::Output);
-		constraints.output = get_output();
+		constraints.output = outputs::active();
 	}
 
-	let active_ws = get_active_workspace();
+	let active_ws = workspaces::active();
 
-	let neighbor = get_neighbor(active_ws, constraints.clone(), Direction::Right);
+	let neighbor = neighbor::get(active_ws, constraints.clone(), Direction::Right);
 
 	if let Some(next) = neighbor {
 		let mut i3 = I3::connect().unwrap();
@@ -66,11 +65,11 @@ pub fn exec(mut args: Vec<String>) {
 	} else if create {
 		crate::commands::adjacent::exec(vec!["right".to_owned()]);
 	} else {
-		let first_ws = get_first_workspace(constraints);
+		let first_ws = workspaces::first(constraints);
 		let mut i3 = I3::connect().unwrap();
 		let cmd = format!("workspace {}", first_ws.name);
 		i3.run_command(cmd).ok();
 	}
 
-	polybar_update();
+	polybar::update();
 }

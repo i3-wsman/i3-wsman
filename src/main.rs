@@ -22,6 +22,7 @@ fn main() {
 	}
 
 	let mut cmds: CommandMap = HashMap::new();
+	cmds.insert(commands::group::CMD.as_str(), commands::group::SUBCMDS.clone());
 	cmds.insert(commands::get_workspaces::CMD.as_str(), commands::get_workspaces::SUBCMDS.clone());
 	cmds.insert(commands::poke::CMD.as_str(), commands::poke::SUBCMDS.clone());
 	cmds.insert(commands::polybar::CMD.as_str(), commands::polybar::SUBCMDS.clone());

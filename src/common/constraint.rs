@@ -1,3 +1,5 @@
+use super::outputs;
+
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 pub enum Constraint {
@@ -37,18 +39,34 @@ impl Constraints {
 	}
 }
 
-/*
-fn main() {
+pub fn parse(nouns: Vec<String>) -> Constraints {
 	let mut constraints = Constraints::new();
-	constraints.add(Constraint::Visible);
-	constraints.add(Constraint::Group);
 
-	if constraints.contains(Constraint::Visible) {
-		println!("Constraint is visible!");
+	for noun in &nouns {
+		if noun.contains(&"output=") {
+			constraints.add(Constraint::Output);
+			constraints.output = noun
+				.split("=")
+				.nth(1)
+				.unwrap_or("none")
+				.to_string();
+			continue;
+		}
+
+		match noun.as_ref() {
+			"focused" => constraints.add(Constraint::Focused),
+			"visible" => constraints.add(Constraint::Visible),
+			"hidden" => constraints.add(Constraint::Hidden),
+			"group" => constraints.add(Constraint::Group),
+			"output" => {
+				if !constraints.contains(Constraint::Output) {
+					constraints.add(Constraint::Output);
+					constraints.output = outputs::active();
+				}
+			},
+			_ => {},
+		}
 	}
 
-	if constraints.contains(Constraint::Group) {
-		println!("Constraint is grouped!");
-	}
+	constraints
 }
-*/
