@@ -29,6 +29,10 @@ pub fn polybar_update() {
 		.ok();
 }
 
+pub fn this_command_abs() -> String {
+	env::current_exe().unwrap().to_str().unwrap().to_string()
+}
+
 pub fn this_command() -> String {
 	let path: PathBuf = env::current_exe().unwrap();
 	path.file_name().unwrap().to_str().unwrap().to_string()

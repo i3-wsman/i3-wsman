@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 i3_ipc = "^0.16.0"
+lazy_static = "1.4.0"
 serde_json = "^1.0.104"
