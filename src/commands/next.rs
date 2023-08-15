@@ -32,7 +32,7 @@ lazy_static! {
 }
 
 pub fn help(_: Vec<String>) {
-	println!("{} next [create|loop] [...constraints]", this_command());
+	println!("{} {} [create|loop] [...constraints]", this_command(), CMD.as_str());
 	println!("    Focuses on the next workspace\n\r");
 	println!("    {} next create [...constraints]\tOn last workspace, creates a new workspace", this_command());
 	println!("    {} next loop [...constraints]  \tOn last workspace, loops back to the first", this_command());
@@ -51,12 +51,12 @@ pub fn exec(mut args: Vec<String>) {
 
 	if args.len() == 0 {
 		constraints.add(Constraint::Output);
-		constraints.output = outputs::active();
+		constraints.output = outputs::focused();
 	}
 
-	let active_ws = workspaces::active();
+	let focused_ws = workspaces::focused();
 
-	let neighbor = neighbor::get(active_ws, constraints.clone(), Direction::Right);
+	let neighbor = neighbor::get(focused_ws, constraints.clone(), Direction::Right);
 
 	if let Some(next) = neighbor {
 		let mut i3 = I3::connect().unwrap();

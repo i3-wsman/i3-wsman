@@ -2,11 +2,13 @@ extern crate i3_ipc;
 extern crate serde_json;
 
 pub mod constraint;
+pub mod groups;
 pub mod moves;
 pub mod name;
 pub mod neighbor;
 pub mod outputs;
 pub mod polybar;
+pub mod state;
 pub mod workspaces;
 
 use std::env;

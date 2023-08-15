@@ -22,12 +22,13 @@ fn main() {
 	}
 
 	let mut cmds: CommandMap = HashMap::new();
-	cmds.insert(commands::group::CMD.as_str(), commands::group::SUBCMDS.clone());
+	cmds.insert(commands::adjacent::CMD.as_str(), commands::adjacent::SUBCMDS.clone());
 	cmds.insert(commands::get_workspaces::CMD.as_str(), commands::get_workspaces::SUBCMDS.clone());
+	cmds.insert(commands::group::CMD.as_str(), commands::group::SUBCMDS.clone());
+	cmds.insert(commands::next::CMD.as_str(), commands::next::SUBCMDS.clone());
 	cmds.insert(commands::poke::CMD.as_str(), commands::poke::SUBCMDS.clone());
 	cmds.insert(commands::polybar::CMD.as_str(), commands::polybar::SUBCMDS.clone());
-	cmds.insert(commands::next::CMD.as_str(), commands::next::SUBCMDS.clone());
-	cmds.insert(commands::adjacent::CMD.as_str(), commands::adjacent::SUBCMDS.clone());
+	cmds.insert(commands::polybar_watch::CMD.as_str(), commands::polybar_watch::SUBCMDS.clone());
 
 	let command = if args.len() > 1 { args[1].as_str() } else { DEFAULT_CMD };
 
@@ -35,8 +36,11 @@ fn main() {
 		Some(cmd_map) => {
 			let subcmd = if args.len() > 2 { args[2].as_str() } else { DEFAULT_CMD };
 			match cmd_map.get(subcmd) {
-				Some(func) => {
+				Some(func) if subcmd == DEFAULT_CMD => {
 					func(args[2..].to_vec());
+				}
+				Some(func) => {
+					func(args[3..].to_vec());
 				}
 				None => {
 					let func = if cmd_map.contains_key(WILD_CMD) {

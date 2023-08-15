@@ -56,11 +56,12 @@ pub fn first(constraints: Constraints) -> Workspace {
 	get(constraints, false).first().unwrap().to_owned()
 }
 
+#[allow(dead_code)]
 pub fn last(constraints: Constraints) -> Workspace {
 	get(constraints, true).first().unwrap().to_owned()
 }
 
-pub fn active() -> Workspace {
+pub fn focused() -> Workspace {
 	let workspaces = get_ws();
 
 	workspaces
@@ -68,6 +69,19 @@ pub fn active() -> Workspace {
 		.find(|ws| ws.focused)
 		.unwrap()
 		.to_owned()
+}
+
+pub fn by_name(name: String) -> Option<Workspace> {
+	let workspaces = get_ws();
+
+	let ws = workspaces
+		.iter()
+		.find(|ws| ws.name == name);
+
+	match ws {
+		Some(w) => Some(w.to_owned()),
+		None => None,
+	}
 }
 
 pub fn by_num(n: i32) -> Option<Workspace> {

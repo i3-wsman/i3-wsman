@@ -61,7 +61,7 @@ pub fn parse(nouns: Vec<String>) -> Constraints {
 			"output" => {
 				if !constraints.contains(Constraint::Output) {
 					constraints.add(Constraint::Output);
-					constraints.output = outputs::active();
+					constraints.output = outputs::focused();
 				}
 			},
 			_ => {},

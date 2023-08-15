@@ -3,14 +3,16 @@ use i3_ipc::{Connect, I3};
 use crate::common::{
 	this_command,
 	this_command_abs,
+	groups,
+	// name,
 	outputs,
-	workspaces,
 	polybar,
+	workspaces,
 	constraint::{ Constraints, Constraint }
 };
 
 use crate::{
-	DEFAULT_CMD, HELP_CMD, WILD_CMD,
+	DEFAULT_CMD, HELP_CMD,
 	Commands, CommandFn
 };
 use std::collections::HashMap;
@@ -22,13 +24,14 @@ lazy_static! {
 		let mut cmds = HashMap::new();
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);
 		cmds.insert(HELP_CMD, help as CommandFn);
-		cmds.insert(WILD_CMD, action as CommandFn);
+		cmds.insert("workspace", workspace as CommandFn);
+		cmds.insert("group", group as CommandFn);
 		cmds
 	};
 }
 
 pub fn help(_: Vec<String>) {
-	println!("{} polybar", this_command());
+	println!("{} {}", this_command(), CMD.as_str());
 	println!("    The i3 Workspace Manager Polybar module");
 	println!("    To use, add the following to your polybar config.ini:\n\r");
 	println!("    [module/i3wsm]");
@@ -37,7 +40,25 @@ pub fn help(_: Vec<String>) {
 	println!("    initial = 1");
 }
 
-pub fn action(args: Vec<String>) {
+pub fn group(args: Vec<String>) {
+	let group_action = args[0].clone();
+
+	let groups = if group_action == "toggle" {
+		let group_name = args[1].clone();
+		groups::toggle(group_name, outputs::focused())
+	} else if group_action == "only" {
+		let group_name = args[1].clone();
+		groups::only(group_name, outputs::focused())
+	} else { // "all"
+		groups::all( outputs::focused())
+	};
+
+	let output = serde_json::to_string_pretty(&groups).unwrap();
+	println!("{}", output);
+	polybar::update();
+}
+
+pub fn workspace(args: Vec<String>) {
 	let wsarg = args[0].parse::<i32>();
 	match wsarg {
 		Ok(ws_num) => {
@@ -60,7 +81,41 @@ pub fn exec(_: Vec<String>) {
 	let mut constraints = Constraints::new();
 
 	constraints.add(Constraint::Output);
-	constraints.output = outputs::active();
+	constraints.output = outputs::focused();
+
+	let groups = groups::available(constraints.clone());
+	let mut active_groups = groups::active(outputs::focused());
+
+	let mut fgcolor = "ccfdfefe";
+	let mut bgcolor = "82010202";
+	if active_groups.len() == 0 || groups == active_groups {
+		fgcolor = "ff8080f0";
+		bgcolor = "b9010202";
+		active_groups = vec![];
+	}
+
+	let cmd = this_command_abs() + " polybar group all";
+	let prefix = format!("%{{T1}}%{{B#{}}}%{{F#{}}}%{{A1:{}:}}", bgcolor, fgcolor, cmd);
+	let suffix = "%{A}%{F-}%{B-}%{T-}";
+	print!("{} all {}", prefix, suffix);
+
+	for g in groups {
+		let mut fgcolor = "ccfdfefe";
+		let mut bgcolor = "82010202";
+
+		if active_groups.contains(&g) {
+			fgcolor = "ff8080f0";
+			bgcolor = "b9010202";
+		}
+
+		let cmd1 = this_command_abs() + " polybar group only " + g.as_ref();
+		let cmd2 = this_command_abs() + " polybar group toggle " + g.as_ref();
+		let prefix = format!("%{{B#{}}}%{{F#{}}}%{{A1:{}:}}%{{A2:{}:}}%{{A3:{}:}}", bgcolor, fgcolor, cmd1, cmd2, cmd2);
+		let suffix = "%{A}%{A}%{A}%{F-}%{B-}";
+		print!("{} {} {}", prefix, g, suffix);
+	}
+
+	print!("  %{{T3}}");
 
 	let workspaces = workspaces::get(constraints, false);
 
@@ -83,10 +138,11 @@ pub fn exec(_: Vec<String>) {
 			label = "";
 		}
 
-		let cmd = this_command_abs() + " polybar " + ws.num.to_string().as_ref();
+		let cmd = this_command_abs() + " polybar workspace " + ws.num.to_string().as_ref();
 
 		let prefix = format!("%{{B#{}}}%{{F#{}}}%{{A1:{}:}}", bgcolor, fgcolor, cmd);
 		let suffix = "%{A}%{F-}%{B-}";
 		print!("{}  {}  {}", prefix, label, suffix);
 	}
+	print!("%{{T-}}");
 }

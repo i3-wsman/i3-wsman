@@ -18,7 +18,7 @@ lazy_static! {
 }
 
 pub fn help(_: Vec<String>) {
-	println!("{} poke-poly", this_command());
+	println!("{} {}", this_command(), CMD.as_str());
 	println!("    Pokes polybar to update");
 }
 

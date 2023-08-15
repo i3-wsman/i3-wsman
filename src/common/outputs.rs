@@ -2,9 +2,9 @@ use std::env;
 
 use super::workspaces;
 
-pub fn active() -> String {
+pub fn focused() -> String {
 	match env::var("MONITOR") {
 		Ok(val) => val as String,
-		Err(_e) => workspaces::active().output,
+		Err(_e) => workspaces::focused().output,
 	}
 }
