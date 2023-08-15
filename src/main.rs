@@ -45,7 +45,7 @@ fn main() {
 						cmd_map.get(HELP_CMD).unwrap()
 					};
 
-					func(args[1..].to_vec());
+					func(args[2..].to_vec());
 				}
 			}
 
