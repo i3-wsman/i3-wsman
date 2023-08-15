@@ -8,6 +8,7 @@ pub enum Constraint {
 	Visible = 1 << 2,
 	Hidden = 1 << 3,
 	Group = 1 << 4,
+	NoGroup = 1 << 5,
 }
 
 #[derive(Debug, Clone)]
@@ -57,6 +58,7 @@ pub fn parse(nouns: Vec<String>) -> Constraints {
 			"visible" => constraints.add(Constraint::Visible),
 			"hidden" => constraints.add(Constraint::Hidden),
 			"group" => constraints.add(Constraint::Group),
+			"nogroup" => constraints.add(Constraint::NoGroup),
 			"output" => {
 				if !constraints.contains(Constraint::Output) {
 					constraints.add(Constraint::Output);

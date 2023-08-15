@@ -40,10 +40,29 @@ pub fn help(_: Vec<String>) {
 	println!("{} {}", this_command(), CMD.as_str());
 	println!("    The i3 Workspace Manager Polybar module");
 	println!("    To use, add the following to your polybar config.ini:\n\r");
-	println!("    [module/i3wsm]");
-	println!("    type = custom/ipc");
-	println!("    hook-0 = {} polybar", this_command());
-	println!("    initial = 1");
+	println!("      [module/i3wsm]");
+	println!("      type = custom/ipc");
+	println!("      hook-0 = {} polybar", this_command());
+	println!("      initial = 1\n\r");
+	println!("    Or, use modules individually:\n\r");
+	println!("      [module/i3wsm-groups]");
+	println!("      type = custom/ipc");
+	println!("      hook-0 = /home/jdalrymple/src/i3-wsman-rs/target/debug/i3-wsman-rs polybar module-groups");
+	println!("      initial = 1");
+	println!("      format = <label>");
+	println!("      format-font = 3\n\r");
+	println!("      [module/i3wsm-toggle-hidden]");
+	println!("      type = custom/ipc");
+	println!("      hook-0 = /home/jdalrymple/src/i3-wsman-rs/target/debug/i3-wsman-rs polybar module-show-hidden");
+	println!("      initial = 1");
+	println!("      format = <label>");
+	println!("      format-font = 3\n\r");
+	println!("      [module/i3wsm-workspaces]");
+	println!("      type = custom/ipc");
+	println!("      hook-0 = /home/jdalrymple/src/i3-wsman-rs/target/debug/i3-wsman-rs polybar module-workspaces");
+	println!("      initial = 1");
+	println!("      format = <label>");
+	println!("      format-font = 3\n\r");
 }
 
 pub fn toggle_hidden(_: Vec<String>) {
@@ -88,7 +107,9 @@ pub fn workspace(args: Vec<String>) {
 	polybar::update();
 }
 
-pub fn module_groups(_: Vec<String>) {
+pub fn module_groups(mut args: Vec<String>) {
+	let hide_all_button = args.len() > 0 && args.remove(0) == "no-all";
+
 	let show_hidden = groups::show_hidden_enabled();
 	let focused_output = outputs::focused();
 
@@ -107,24 +128,30 @@ pub fn module_groups(_: Vec<String>) {
 	let mut active_groups = groups::active(focused_output.clone());
 	let showing_all = active_groups.len() == 0 || groups == active_groups;
 
-	let mut all_button = polybar::Label::new("all", 1, 0);
-	let cmd = this_command_abs() + " polybar set-group all";
-	all_button.set_action(polybar::LEFT_CLICK, &cmd);
-	all_button.font = Some(1);
+	if !hide_all_button {
+		let mut all_button = polybar::Label::new(polybar::defaults::GROUP_ALL_LABEL, 1, 0);
+		let cmd = this_command_abs() + " polybar set-group all";
+		all_button.set_action(polybar::LEFT_CLICK, &cmd);
+		all_button.font = Some(1);
 
-	if showing_all {
-		all_button.set_colors(polybar::defaults::FOCUSED_FG, polybar::defaults::FOCUSED_BG);
-		active_groups = vec![];
-	} else {
-		all_button.set_colors(polybar::defaults::FG, polybar::defaults::BG);
+		if showing_all {
+			all_button.set_colors(polybar::defaults::FOCUSED_FG, polybar::defaults::FOCUSED_BG);
+		} else {
+			all_button.set_colors(polybar::defaults::FG, polybar::defaults::BG);
+		}
+
+		print!("{}", all_button);
 	}
 
-	print!("{}", all_button);
+	if showing_all {
+		active_groups = vec![];
+	}
 
 	let focused_ws = workspaces::focused();
 	let focused_group = name::group(focused_ws.name.as_str());
 	for g in groups {
 		let mut group_btn = polybar::Label::new(&g, 1, 0);
+		group_btn.font = Some(1);
 
 		let left_click = this_command_abs() + " polybar set-group only " + g.as_ref();
 		let secondary_click = this_command_abs() + " polybar set-group toggle " + g.as_ref();
@@ -172,7 +199,7 @@ pub fn module_show_hidden(_: Vec<String>) {
 	let mut toggle_hidden = polybar::Label::new(
 		polybar::defaults::TOGGLE_HIDDEN_LABEL,
 		1,
-		1
+		0
 	);
 
 	if showing_all {
@@ -195,6 +222,7 @@ pub fn module_workspaces(_: Vec<String>) {
 
 	let mut show_constraints = Constraints::new();
 	show_constraints.add(Constraint::Output);
+	show_constraints.add(Constraint::NoGroup);
 	if !show_hidden {
 		show_constraints.add(Constraint::Group);
 	}

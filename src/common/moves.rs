@@ -21,6 +21,10 @@ pub fn rename(ws: Workspace, new_name: String) {
 	let ws_name = ws.name.to_owned();
 	let ws_num = ws.num.to_owned();
 	let mut i3 = I3::connect().unwrap();
-	let cmd = format!("rename workspace {} to {}:{}", ws_name, ws_num,new_name);
+	let cmd = if new_name == "" {
+		format!("rename workspace {} to {}", ws_name, ws_num)
+	} else {
+		format!("rename workspace {} to {}:{}", ws_name, ws_num, new_name)
+	};
 	i3.run_command(cmd).ok();
 }

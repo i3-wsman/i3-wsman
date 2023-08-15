@@ -58,7 +58,12 @@ pub fn exec(args: Vec<String>) {
 }
 
 pub fn set(args: Vec<String>) {
-	let group_name = if args.len() > 1 { args[1].clone() } else { args[0].clone() };
+	let group_name = if args.len() > 1 {
+		args[1].clone()
+	} else if args.len() == 1 {
+		args[0].clone()
+	} else { "".to_owned() };
+
 	let possible_ws = if args.len() > 1 {
 		let ws_name = args[0].clone();
 		workspaces::by_name(ws_name.clone())

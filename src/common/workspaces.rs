@@ -43,6 +43,11 @@ pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
 				if constraints.output != ws.output { return false }
 			}
 
+			let ws_group = name::group(ws.name.as_ref());
+			if ws_group.len() == 0 && constraints.contains(Constraint::NoGroup) {
+				return true;
+			}
+
 			if constraints.contains(Constraint::Group) {
 				let output = if constraints.output != "none" {
 					constraints.output.clone()

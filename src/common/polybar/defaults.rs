@@ -39,6 +39,7 @@ pub const HIDDEN_VISIBLE_BG: &str = VISIBLE_BG;
 pub const HIDDEN_VISIBLE_WS_LABEL: &str = HIDDEN_WS_LABEL;
 
 // Toggle Hidden Button
+pub const GROUP_ALL_LABEL: &str = "";
 pub const TOGGLE_HIDDEN_LABEL: &str = "";
 pub const TOGGLE_HIDDEN_ALL_FG: &str = "00000000";
 pub const TOGGLE_HIDDEN_ON_FG: &str = VISIBLE_FG;
