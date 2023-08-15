@@ -85,20 +85,21 @@ pub fn workspace(args: Vec<String>) {
 
 pub fn exec(_: Vec<String>) {
 	let show_hidden = groups::show_hidden_enabled();
+	let focused_output = outputs::focused();
 
 	let mut show_constraints = Constraints::new();
 	show_constraints.add(Constraint::Output);
 	if !show_hidden {
 		show_constraints.add(Constraint::Group);
 	}
-	show_constraints.output = outputs::focused();
+	show_constraints.output = focused_output.clone();
 
 	let mut avail_constraints = Constraints::new();
 	avail_constraints.add(Constraint::Output);
-	avail_constraints.output = outputs::focused();
+	avail_constraints.output = focused_output.clone();
 
 	let groups = groups::available(avail_constraints);
-	let mut active_groups = groups::active(outputs::focused());
+	let mut active_groups = groups::active(focused_output.clone());
 	let show_all = active_groups.len() == 0 || groups == active_groups;
 
 	let mut fgcolor = "ccfdfefe";
@@ -153,7 +154,7 @@ pub fn exec(_: Vec<String>) {
 
 	let mut workspaces = workspaces::get(show_constraints, false);
 
-	if !workspaces.contains(&focused_ws) {
+	if !workspaces.contains(&focused_ws) && focused_ws.output == focused_output {
 		workspaces.push(focused_ws);
 	}
 
@@ -163,7 +164,7 @@ pub fn exec(_: Vec<String>) {
 
 	print!("%{{T3}}");
 	for ws in workspaces {
-		let mut fgcolor = "55fdfefe";
+		let mut fgcolor = "77fdfefe";
 		let mut bgcolor = "77000000";
 
 		let mut label = "";
@@ -188,7 +189,7 @@ pub fn exec(_: Vec<String>) {
 				fgcolor = "cc8080f0";
 				bgcolor = "99010202";
 			} else if ws.urgent {
-				fgcolor = "ffc2bd60";
+				fgcolor = "88c2bd60";
 				label = "";
 			} else if ws.visible {
 				fgcolor = "aafdfefe";

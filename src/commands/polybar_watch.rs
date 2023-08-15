@@ -1,7 +1,11 @@
+use i3_ipc::{
+	event::{Event, Subscribe},
+	I3Stream,
+};
+
 use crate::common::{
 	this_command,
-	constraint,
-	workspaces,
+	polybar,
 };
 
 use crate::{DEFAULT_CMD, HELP_CMD, Commands, CommandFn};
@@ -19,25 +23,20 @@ lazy_static! {
 }
 
 pub fn help(_: Vec<String>) {
-	println!("{} {} [...constraints]", this_command(), CMD.as_str());
-	println!("    Returns workspaces matching the constraints.");
-	println!("    Constraints are optional. If none are provided, all workspaces are returned.\n\r");
-	println!("    Constraints:");
-	println!("      focused: Focused Workspace");
-	println!("      visible: Visible Workspaces");
-	println!("      hidden: Hidden Workspaces");
-	println!("      group: Workspaces apart of the focused Group");
-	println!("      output: Workspaces on the output ");
-	println!("      output=xyz: Workspaces on the output xyz");
-	println!("");
-	println!("    For instance, to get all hidden workspaces on the current monitor:");
-	println!("        {} get-workspaces hidden output", this_command());
+	println!("{} {}", this_command(), CMD.as_str());
+	println!("  Listens for i3 events and updates polybar module.");
 }
 
-pub fn exec(args: Vec<String>) {
-	let constraints = constraint::parse(args.to_owned());
-
-	let workspaces = workspaces::get(constraints, false);
-	let output = serde_json::to_string_pretty(&workspaces).unwrap();
-	println!("{}", output);
+pub fn exec(_: Vec<String>) {
+	let mut i3 = I3Stream::conn_sub(&[Subscribe::Window, Subscribe::Workspace]).unwrap();
+	for e in i3.listen() {
+		match e.unwrap() {
+			Event::Workspace(_) => polybar::update(),
+			Event::Window(_) => polybar::update(),
+			Event::Output(_) => polybar::update(),
+			Event::Mode(_) => polybar::update(),
+			Event::BarConfig(_) => polybar::update(),
+			_ => {}
+		}
+	}
 }
