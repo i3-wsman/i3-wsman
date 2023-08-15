@@ -22,11 +22,16 @@ lazy_static! {
 
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
-		cmds.insert(DEFAULT_CMD, exec as CommandFn);
 		cmds.insert(HELP_CMD, help as CommandFn);
-		cmds.insert("workspace", workspace as CommandFn);
-		cmds.insert("group", group as CommandFn);
-		cmds.insert("toggle-hidden", toggle_hidden as CommandFn);
+
+		cmds.insert(DEFAULT_CMD, exec as CommandFn);
+		cmds.insert("module-groups", module_groups as CommandFn);
+		cmds.insert("module-show-hidden", module_show_hidden as CommandFn);
+		cmds.insert("module-workspaces", module_workspaces as CommandFn);
+
+		cmds.insert("set-workspace", workspace as CommandFn);
+		cmds.insert("set-group", group as CommandFn);
+		cmds.insert("toggle-show-hidden", toggle_hidden as CommandFn);
 		cmds
 	};
 }
@@ -83,7 +88,7 @@ pub fn workspace(args: Vec<String>) {
 	polybar::update();
 }
 
-pub fn exec(_: Vec<String>) {
+pub fn module_groups(_: Vec<String>) {
 	let show_hidden = groups::show_hidden_enabled();
 	let focused_output = outputs::focused();
 
@@ -100,58 +105,102 @@ pub fn exec(_: Vec<String>) {
 
 	let groups = groups::available(avail_constraints);
 	let mut active_groups = groups::active(focused_output.clone());
-	let show_all = active_groups.len() == 0 || groups == active_groups;
+	let showing_all = active_groups.len() == 0 || groups == active_groups;
 
-	let mut fgcolor = "ccfdfefe";
-	let mut bgcolor = "82010202";
-	if show_all {
-		fgcolor = "ff8080f0";
-		bgcolor = "b9010202";
+	let mut all_button = polybar::Label::new("all", 1, 0);
+	let cmd = this_command_abs() + " polybar set-group all";
+	all_button.set_action(polybar::LEFT_CLICK, &cmd);
+	all_button.font = Some(1);
+
+	if showing_all {
+		all_button.set_colors(polybar::defaults::FOCUSED_FG, polybar::defaults::FOCUSED_BG);
 		active_groups = vec![];
+	} else {
+		all_button.set_colors(polybar::defaults::FG, polybar::defaults::BG);
 	}
 
-	let cmd = this_command_abs() + " polybar group all";
-	let prefix = format!("%{{T1}}%{{B#{}}}%{{F#{}}}%{{A1:{}:}}", bgcolor, fgcolor, cmd);
-	let suffix = "%{A}%{F-}%{B-}%{T-}";
-	print!("{} all {}", prefix, suffix);
+	print!("{}", all_button);
 
 	let focused_ws = workspaces::focused();
 	let focused_group = name::group(focused_ws.name.as_str());
 	for g in groups {
-		let mut fgcolor = "ccfdfefe";
-		let mut bgcolor = "82010202";
+		let mut group_btn = polybar::Label::new(&g, 1, 0);
 
-		if &g == &focused_group {
-			bgcolor = "99010202";
-		}
+		let left_click = this_command_abs() + " polybar set-group only " + g.as_ref();
+		let secondary_click = this_command_abs() + " polybar set-group toggle " + g.as_ref();
+
+		group_btn.set_actions(
+			Some(left_click),
+			Some(secondary_click.clone()),
+			Some(secondary_click)
+		);
 
 		if active_groups.contains(&g) {
-			fgcolor = "ff8080f0";
-			bgcolor = "b9010202";
+			group_btn.set_colors(
+				"ff8080f0",
+				"b9010202"
+			);
+		} else {
+			let bg_color =if &g == &focused_group {
+				polybar::defaults::VISIBLE_BG
+			} else {
+				"82010202"
+			};
+
+			group_btn.set_colors(
+				polybar::defaults::VISIBLE_FG,
+				bg_color
+			);
 		}
 
-		let cmd1 = this_command_abs() + " polybar group only " + g.as_ref();
-		let cmd2 = this_command_abs() + " polybar group toggle " + g.as_ref();
-		let prefix = format!("%{{B#{}}}%{{F#{}}}%{{A1:{}:}}%{{A2:{}:}}%{{A3:{}:}}", bgcolor, fgcolor, cmd1, cmd2, cmd2);
-		let suffix = "%{A}%{A}%{A}%{F-}%{B-}";
-		print!("{} {} {}", prefix, g, suffix);
+		print!("{}", group_btn);
+	}
+}
+
+pub fn module_show_hidden(_: Vec<String>) {
+	let focused_output = outputs::focused();
+	let active_groups = groups::active(focused_output.clone());
+
+	let mut avail_constraints = Constraints::new();
+	avail_constraints.add(Constraint::Output);
+	avail_constraints.output = focused_output.clone();
+	let groups = groups::available(avail_constraints);
+
+	let show_hidden = groups::show_hidden_enabled();
+	let showing_all = active_groups.len() == 0 || groups == active_groups;
+
+	let mut toggle_hidden = polybar::Label::new(
+		polybar::defaults::TOGGLE_HIDDEN_LABEL,
+		1,
+		1
+	);
+
+	if showing_all {
+		toggle_hidden.fg_color = Some(polybar::defaults::TOGGLE_HIDDEN_ALL_FG.to_owned());
+	} else if show_hidden {
+		toggle_hidden.fg_color = Some(polybar::defaults::TOGGLE_HIDDEN_ON_FG.to_owned());
+	} else {
+		toggle_hidden.fg_color = Some(polybar::defaults::TOGGLE_HIDDEN_OFF_FG.to_owned());
 	}
 
-	let toggle_hidden_label = "";
+	let cmd = this_command_abs() + " polybar toggle-show-hidden";
+	toggle_hidden.set_actions(Some(cmd), None, None);
 
-	let fgcolor = if show_all {
-		"00000000"
-	} else if show_hidden {
-		"ccfdfefe"
-	} else {
-		"33fdfefe"
-	};
+	print!("{}", toggle_hidden);
+}
 
-	let cmd = this_command_abs() + " polybar toggle-hidden";
-	let prefix = format!("%{{T2}}%{{F#{}}}%{{A1:{}:}}", fgcolor, cmd);
-	let suffix = "%{A}%{F-}%{B-}";
-	print!("{} {} {}", prefix, toggle_hidden_label, suffix);
+pub fn module_workspaces(_: Vec<String>) {
+	let show_hidden = groups::show_hidden_enabled();
+	let focused_output = outputs::focused();
 
+	let mut show_constraints = Constraints::new();
+	show_constraints.add(Constraint::Output);
+	if !show_hidden {
+		show_constraints.add(Constraint::Group);
+	}
+	show_constraints.output = focused_output.clone();
+
+	let focused_ws = workspaces::focused();
 	let mut workspaces = workspaces::get(show_constraints, false);
 
 	if !workspaces.contains(&focused_ws) && focused_ws.output == focused_output {
@@ -162,49 +211,71 @@ pub fn exec(_: Vec<String>) {
 		|w1, w2| w1.num.cmp(&w2.num)
 	);
 
-	print!("%{{T3}}");
+	let active_groups = groups::active(focused_output.clone());
 	for ws in workspaces {
-		let mut fgcolor = "77fdfefe";
-		let mut bgcolor = "77000000";
+		let mut ws_label_btn = polybar::Label::new(
+			polybar::defaults::WS_LABEL, 2, 0
+		);
+		ws_label_btn.font = Some(3);
 
-		let mut label = "";
-
-		if ws.focused {
-			fgcolor = "ff8080f0";
-			bgcolor = "b9010202";
-			label = "";
-		} else if ws.urgent {
-			fgcolor = "ffc2bd60";
-			label = "";
-		} else if ws.visible {
-			fgcolor = "ccfdfefe";
-			bgcolor = "99010202";
-			label = "";
-		}
+		let cmd = this_command_abs() + " polybar set-workspace " + ws.num.to_string().as_ref();
+		ws_label_btn.set_action(polybar::LEFT_CLICK, &cmd);
 
 		let ws_group = name::group(ws.name.as_str());
-		if active_groups.len() > 0 && !active_groups.contains(&ws_group) {
-			label = "";
+		if active_groups.len() == 0 || active_groups.contains(&ws_group) {
 			if ws.focused {
-				fgcolor = "cc8080f0";
-				bgcolor = "99010202";
+				ws_label_btn.set_colors(
+					polybar::defaults::FOCUSED_FG,
+					polybar::defaults::FOCUSED_BG
+				);
+				ws_label_btn.label = polybar::defaults::FOCUSED_WS_LABEL.to_string();
 			} else if ws.urgent {
-				fgcolor = "88c2bd60";
-				label = "";
+				ws_label_btn.set_colors(
+					polybar::defaults::URGENT_FG,
+					polybar::defaults::URGENT_BG
+				);
+				ws_label_btn.label = polybar::defaults::URGENT_WS_LABEL.to_string();
 			} else if ws.visible {
-				fgcolor = "aafdfefe";
-				bgcolor = "99010202";
+				ws_label_btn.set_colors(
+					polybar::defaults::VISIBLE_FG,
+					polybar::defaults::VISIBLE_BG
+				);
+				ws_label_btn.label = polybar::defaults::VISIBLE_WS_LABEL.to_string();
+			}
+		} else {
+			if ws.focused {
+				ws_label_btn.set_colors(
+					polybar::defaults::HIDDEN_FOCUSED_FG,
+					polybar::defaults::HIDDEN_FOCUSED_BG
+				);
+				ws_label_btn.label = polybar::defaults::HIDDEN_FOCUSED_WS_LABEL.to_string();
+			} else if ws.urgent {
+				ws_label_btn.set_colors(
+					polybar::defaults::HIDDEN_URGENT_FG,
+					polybar::defaults::HIDDEN_URGENT_BG
+				);
+				ws_label_btn.label = polybar::defaults::HIDDEN_URGENT_WS_LABEL.to_string();
+			} else if ws.visible {
+				ws_label_btn.set_colors(
+					polybar::defaults::HIDDEN_VISIBLE_FG,
+					polybar::defaults::HIDDEN_VISIBLE_BG
+				);
+				ws_label_btn.label = polybar::defaults::HIDDEN_VISIBLE_WS_LABEL.to_string();
 			} else {
-				fgcolor = "11fdfefe";
-				bgcolor = "77000000";
+				ws_label_btn.set_colors(
+					polybar::defaults::HIDDEN_FG,
+					polybar::defaults::HIDDEN_BG
+				);
+				ws_label_btn.label = polybar::defaults::HIDDEN_WS_LABEL.to_string();
 			}
 		}
 
-		let cmd = this_command_abs() + " polybar workspace " + ws.num.to_string().as_ref();
-
-		let prefix = format!("%{{B#{}}}%{{F#{}}}%{{A1:{}:}}", bgcolor, fgcolor, cmd);
-		let suffix = "%{A}%{F-}%{B-}";
-		print!("{}  {}  {}", prefix, label, suffix);
+		print!("{}", ws_label_btn);
 	}
-	print!("%{{T-}}");
+}
+
+pub fn exec(_: Vec<String>) {
+	module_groups(vec![]);
+	module_show_hidden(vec![]);
+	module_workspaces(vec![]);
 }

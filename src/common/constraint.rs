@@ -1,6 +1,5 @@
 use super::outputs;
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 pub enum Constraint {
 	None = 0,
@@ -17,7 +16,6 @@ pub struct Constraints {
 	pub output: String,
 }
 
-#[allow(dead_code)]
 impl Constraints {
 	pub fn new() -> Self {
 		Constraints {
@@ -30,6 +28,7 @@ impl Constraints {
 		self.bit |= constraint as u32;
 	}
 
+	#[allow(dead_code)]
 	pub fn remove(&mut self, constraint: Constraint) {
 		self.bit &= !(constraint as u32);
 	}
