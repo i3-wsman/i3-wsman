@@ -59,7 +59,7 @@ pub fn group(args: Vec<String>) {
 		groups::toggle(group_name, outputs::focused())
 	} else if group_action == "only" {
 		let group_name = args[1].clone();
-		groups::only(group_name, outputs::focused())
+		groups::only_toggle(group_name, outputs::focused())
 	} else { // "all"
 		groups::all( outputs::focused())
 	};

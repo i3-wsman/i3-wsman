@@ -82,6 +82,27 @@ pub fn only(group_name: String, output: String) -> Vec<String> {
 	groups.to_owned()
 }
 
+pub fn only_toggle(group_name: String, output: String) -> Vec<String> {
+	let mut state = state::get();
+
+	let groups = if state.groups.contains_key(&output) {
+		let groups = state.groups.get(&output).unwrap().to_owned();
+		if groups.contains(&group_name) {
+			vec![]
+		} else {
+			vec![group_name.to_owned()]
+		}
+	} else {
+		vec![group_name.to_owned()]
+	};
+
+	state.groups.insert(output, groups.clone());
+
+	state::set(state);
+
+	groups.to_owned()
+}
+
 pub fn hide(group_name: String, output: String) -> Vec<String> {
 	let mut state = state::get();
 
