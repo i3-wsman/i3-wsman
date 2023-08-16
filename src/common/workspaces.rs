@@ -70,9 +70,18 @@ pub fn first(constraints: Constraints) -> Workspace {
 	get(constraints, false).first().unwrap().to_owned()
 }
 
-#[allow(dead_code)]
 pub fn last(constraints: Constraints) -> Workspace {
 	get(constraints, true).first().unwrap().to_owned()
+}
+
+pub fn visible(output: &str) -> Workspace {
+	let workspaces = get_ws();
+
+	workspaces
+		.iter()
+		.find(|ws| ws.output == output && (ws.focused || ws.visible))
+		.unwrap()
+		.to_owned()
 }
 
 pub fn focused() -> Workspace {

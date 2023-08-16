@@ -147,7 +147,7 @@ pub fn module_groups(mut args: Vec<String>) {
 		active_groups = vec![];
 	}
 
-	let focused_ws = workspaces::focused();
+	let focused_ws = workspaces::visible(&focused_output);
 	let focused_group = name::group(focused_ws.name.as_str());
 	for g in groups {
 		let mut group_btn = polybar::Label::new(&g, 1, 0);
