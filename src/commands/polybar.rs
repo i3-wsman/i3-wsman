@@ -223,6 +223,7 @@ pub fn module_workspaces(_: Vec<String>) {
 	let mut show_constraints = Constraints::new();
 	show_constraints.add(Constraint::Output);
 	show_constraints.add(Constraint::NoGroup);
+
 	if !show_hidden {
 		show_constraints.add(Constraint::Group);
 	}
@@ -250,7 +251,7 @@ pub fn module_workspaces(_: Vec<String>) {
 		ws_label_btn.set_action(polybar::LEFT_CLICK, &cmd);
 
 		let ws_group = name::group(ws.name.as_str());
-		if active_groups.len() == 0 || active_groups.contains(&ws_group) {
+		if ws_group == "" || active_groups.len() == 0 || active_groups.contains(&ws_group) {
 			if ws.focused {
 				ws_label_btn.set_colors(
 					polybar::defaults::FOCUSED_FG,

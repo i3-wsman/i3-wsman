@@ -58,6 +58,8 @@ pub fn exec(mut args: Vec<String>) {
 	if args.len() == 0 {
 		constraints.add(Constraint::Output);
 		constraints.output = outputs::focused();
+		constraints.add(Constraint::Group);
+		constraints.add(Constraint::NoGroup);
 	}
 
 	let focused_ws = workspaces::focused();

@@ -45,7 +45,7 @@ pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
 
 			let ws_group = name::group(ws.name.as_ref());
 			if ws_group.len() == 0 && constraints.contains(Constraint::NoGroup) {
-				return true;
+				return true
 			}
 
 			if constraints.contains(Constraint::Group) {
@@ -56,7 +56,6 @@ pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
 				};
 				let active_groups = groups::active(output);
 				if active_groups.len() > 0 {
-					let ws_group = name::group(ws.name.as_ref());
 					return active_groups.contains(&ws_group);
 				}
 			}

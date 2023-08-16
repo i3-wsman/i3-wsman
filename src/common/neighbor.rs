@@ -1,6 +1,9 @@
 use i3_ipc::reply::Workspace;
 
-use super::{ constraint::Constraints, Direction, workspaces };
+use super::{
+	constraint::Constraints,
+	Direction, workspaces
+};
 
 pub fn get(ws: Workspace, constraints: Constraints, direction: Direction) -> Option<Workspace> {
 	let workspaces = workspaces::get(constraints, direction == Direction::Left);
