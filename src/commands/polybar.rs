@@ -147,7 +147,7 @@ pub fn module_groups(mut args: Vec<String>) {
 		active_groups = vec![];
 	}
 
-	let focused_ws = workspaces::visible(&focused_output);
+	let focused_ws = workspaces::visible_or_focused(&focused_output);
 	let focused_group = name::group(focused_ws.name.as_str());
 	for g in groups {
 		let mut group_btn = polybar::Label::new(&g, 1, 0);
@@ -243,11 +243,13 @@ pub fn module_workspaces(_: Vec<String>) {
 	}
 	show_constraints.output = focused_output.clone();
 
-	let focused_ws = workspaces::focused();
+	let visible_workspaces = workspaces::visible();
 	let mut workspaces = workspaces::get(show_constraints, false);
 
-	if !workspaces.contains(&focused_ws) && focused_ws.output == focused_output {
-		workspaces.push(focused_ws);
+	for visible_ws in visible_workspaces {
+		if !workspaces.contains(&visible_ws) && visible_ws.output == focused_output {
+			workspaces.push(visible_ws);
+		}
 	}
 
 	workspaces.sort_by(

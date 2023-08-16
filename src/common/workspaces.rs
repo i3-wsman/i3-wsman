@@ -78,7 +78,7 @@ pub fn last(constraints: Constraints) -> Workspace {
 	get(constraints, true).first().unwrap().to_owned()
 }
 
-pub fn visible(output: &str) -> Workspace {
+pub fn visible_or_focused(output: &str) -> Workspace {
 	let workspaces = get_ws();
 
 	workspaces
@@ -86,6 +86,16 @@ pub fn visible(output: &str) -> Workspace {
 		.find(|ws| ws.output == output && (ws.focused || ws.visible))
 		.unwrap()
 		.to_owned()
+}
+
+pub fn visible() -> Vec<Workspace> {
+	let workspaces = get_ws();
+
+	workspaces
+		.iter()
+		.filter(|ws| ws.visible || ws.focused)
+		.cloned()
+		.collect::<Vec<Workspace>>()
 }
 
 pub fn focused() -> Workspace {
