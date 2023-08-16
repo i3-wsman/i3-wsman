@@ -28,8 +28,16 @@ pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
 	workspaces
 		.iter()
 		.filter(|ws| {
+			if constraints.contains(Constraint::Output) && constraints.output != "none" {
+				if constraints.output != ws.output { return false }
+			}
+
 			if constraints.contains(Constraint::AllowUrgent) && ws.urgent {
 				return true
+			}
+
+			if constraints.contains(Constraint::Focused) {
+				if !ws.focused { return false }
 			}
 
 			if constraints.contains(Constraint::Visible) {
@@ -37,14 +45,6 @@ pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
 			} else if constraints.contains(Constraint::Hidden) {
 				if ws.visible { return false }
 				if ws.focused { return false }
-			}
-
-			if constraints.contains(Constraint::Focused) {
-				if !ws.focused { return false }
-			}
-
-			if constraints.contains(Constraint::Output) && constraints.output != "none" {
-				if constraints.output != ws.output { return false }
 			}
 
 			let ws_group = name::group(ws.name.as_ref());
