@@ -51,10 +51,13 @@ pub fn active(output: String) -> Vec<String> {
 	let state = state::get();
 
 	if !state.groups.contains_key(&output) {
-		return vec![];
+		return available_output(output);
 	}
 
 	let mut groups = state.groups.get(&output).unwrap().to_owned();
+	if groups.len() == 0 {
+		return available_output(output);
+	}
 	groups.sort();
 	groups.dedup();
 	groups
