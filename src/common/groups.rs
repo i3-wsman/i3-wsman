@@ -90,7 +90,7 @@ pub fn only_toggle(group_name: String, output: String) -> Vec<String> {
 
 	let groups = if state.groups.contains_key(&output) {
 		let groups = state.groups.get(&output).unwrap().to_owned();
-		if groups.contains(&group_name) {
+		if groups.len() == 1 && groups.contains(&group_name) {
 			vec![]
 		} else {
 			vec![group_name.to_owned()]
