@@ -44,3 +44,25 @@ pub const TOGGLE_HIDDEN_LABEL: &str = "";
 pub const TOGGLE_HIDDEN_ALL_FG: &str = "00000000";
 pub const TOGGLE_HIDDEN_ON_FG: &str = VISIBLE_FG;
 pub const TOGGLE_HIDDEN_OFF_FG: &str = "33fdfefe";
+
+
+
+// Group
+pub const GROUP_FG: &str = "ccfdfefe";
+pub const GROUP_BG: &str = "82010202";
+
+// Group: Focused
+pub const GROUP_FOCUSED_FG: &str = "ccfdfefe";
+pub const GROUP_FOCUSED_BG: &str = VISIBLE_BG;
+
+// Group: Active
+pub const GROUP_ACTIVE_FG: &str = VISIBLE_FG;
+pub const GROUP_ACTIVE_BG: &str = "b9010202";
+
+// Group: Hidden
+pub const GROUP_HIDDEN_FG: &str = "55fdfefe";
+pub const GROUP_HIDDEN_BG: &str = HIDDEN_BG;
+
+// Group: Hidden + Focused
+pub const GROUP_HIDDEN_FOCUSED_FG: &str = FG;
+pub const GROUP_HIDDEN_FOCUSED_BG: &str = VISIBLE_BG;

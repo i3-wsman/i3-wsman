@@ -162,22 +162,35 @@ pub fn module_groups(mut args: Vec<String>) {
 			Some(secondary_click)
 		);
 
-		if active_groups.contains(&g) {
-			group_btn.set_colors(
-				"ff8080f0",
-				"b9010202"
-			);
-		} else {
-			let bg_color =if &g == &focused_group {
-				polybar::defaults::VISIBLE_BG
+		if showing_all {
+			if &g == &focused_group {
+				group_btn.set_colors(
+					polybar::defaults::GROUP_FOCUSED_FG,
+					polybar::defaults::GROUP_FOCUSED_BG
+				);
 			} else {
-				"82010202"
-			};
-
+				group_btn.set_colors(
+					polybar::defaults::GROUP_FG,
+					polybar::defaults::GROUP_BG
+				);
+			}
+		} else if active_groups.contains(&g) {
 			group_btn.set_colors(
-				polybar::defaults::VISIBLE_FG,
-				bg_color
+				polybar::defaults::GROUP_ACTIVE_FG,
+				polybar::defaults::GROUP_ACTIVE_BG
 			);
+		} else { // Hidden
+			if &g == &focused_group {
+				group_btn.set_colors(
+					polybar::defaults::GROUP_HIDDEN_FOCUSED_FG,
+					polybar::defaults::GROUP_HIDDEN_FOCUSED_BG
+				);
+			} else {
+				group_btn.set_colors(
+					polybar::defaults::GROUP_HIDDEN_FG,
+					polybar::defaults::GROUP_HIDDEN_BG
+				);
+			}
 		}
 
 		print!("{}", group_btn);
