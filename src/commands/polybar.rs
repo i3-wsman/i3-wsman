@@ -253,7 +253,13 @@ pub fn module_workspaces(_: Vec<String>) {
 		|w1, w2| w1.num.cmp(&w2.num)
 	);
 
+	let mut avail_constraints = Constraints::new();
+	avail_constraints.add(Constraint::Output);
+	avail_constraints.output = focused_output.clone();
+	let groups = groups::available(avail_constraints);
+
 	let active_groups = groups::active(focused_output.clone());
+	let showing_all = active_groups.len() == 0 || groups == active_groups;
 	for ws in workspaces {
 		let mut ws_label_btn = polybar::Label::new(
 			polybar::defaults::WS_LABEL, 2, 0
@@ -290,7 +296,7 @@ pub fn module_workspaces(_: Vec<String>) {
 				);
 			}
 
-			if ws_group == "" {
+			if ws_group == "" && !showing_all {
 				if ws.focused {
 					ws_label_btn.label = polybar::defaults::HIDDEN_FOCUSED_WS_LABEL.to_string();
 				} else if ws.urgent {
