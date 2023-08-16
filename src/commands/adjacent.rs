@@ -4,9 +4,11 @@ use i3_ipc::{Connect, I3};
 
 use crate::common::{
 	this_command,
+	groups,
 	polybar,
 	workspaces,
 	moves,
+	outputs,
 	name,
 };
 
@@ -37,8 +39,16 @@ pub fn help(_: Vec<String>) {
 
 pub fn exec(args: Vec<String>) {
 	let focused_ws = workspaces::focused();
-	let focused_ws_name = focused_ws.name.to_owned();
 	let focused_ws_num = focused_ws.num;
+	let focused_group = name::group(&focused_ws.name);
+
+	let active_groups = groups::active(outputs::focused());
+
+	let group_name = if active_groups.len() == 1 {
+		active_groups[0].to_owned()
+	} else {
+		focused_group
+	};
 
 	let new_ws_num = if args[0] == "left" {
 		moves::right(focused_ws);
@@ -53,7 +63,7 @@ pub fn exec(args: Vec<String>) {
 	};
 
 	let new_ws_name = name::change_prefix(
-		&focused_ws_name,
+		&group_name,
 		new_ws_num
 	);
 
