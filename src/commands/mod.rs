@@ -7,4 +7,5 @@ pub mod poke;
 pub mod polybar;
 pub mod polybar_watch;
 pub mod prev;
+pub mod reorder;
 

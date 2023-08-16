@@ -31,6 +31,7 @@ fn main() {
 	cmds.insert(commands::polybar::CMD.as_str(), commands::polybar::SUBCMDS.clone());
 	cmds.insert(commands::polybar_watch::CMD.as_str(), commands::polybar_watch::SUBCMDS.clone());
 	cmds.insert(commands::prev::CMD.as_str(), commands::prev::SUBCMDS.clone());
+	cmds.insert(commands::reorder::CMD.as_str(), commands::reorder::SUBCMDS.clone());
 	// @TODO: move-container-to
 	// @TODO: reorder-workspace
 
