@@ -44,10 +44,17 @@ pub fn exec(args: Vec<String>) {
 
 	let active_groups = groups::active(outputs::focused());
 
-	let group_name = if active_groups.len() == 1 {
-		active_groups[0].to_owned()
-	} else {
+	let name_base = if focused_group == "" {
 		focused_group
+	} else {
+		format!(
+			"x:{}",
+			if active_groups.len() == 1 {
+				active_groups[0].to_owned()
+			} else {
+				focused_group
+			}
+		)
 	};
 
 	let new_ws_num = if args[0] == "left" {
@@ -63,7 +70,7 @@ pub fn exec(args: Vec<String>) {
 	};
 
 	let new_ws_name = name::change_prefix(
-		&group_name,
+		&name_base,
 		new_ws_num
 	);
 

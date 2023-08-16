@@ -11,7 +11,8 @@ pub const FOCUSED_WS_LABEL: &str = "";
 // Urgent
 pub const URGENT_FG: &str = "ffc2bd60";
 pub const URGENT_BG: &str = BG;
-pub const URGENT_WS_LABEL: &str = "";
+// pub const URGENT_WS_LABEL: &str = "";
+pub const URGENT_WS_LABEL: &str = "";
 
 // Visible
 pub const VISIBLE_FG: &str = "ccfdfefe";

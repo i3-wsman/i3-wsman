@@ -289,6 +289,18 @@ pub fn module_workspaces(_: Vec<String>) {
 					polybar::defaults::BG
 				);
 			}
+
+			if ws_group == "" {
+				if ws.focused {
+					ws_label_btn.label = polybar::defaults::HIDDEN_FOCUSED_WS_LABEL.to_string();
+				} else if ws.urgent {
+					ws_label_btn.label = polybar::defaults::HIDDEN_URGENT_WS_LABEL.to_string();
+				} else if ws.visible {
+					ws_label_btn.label = polybar::defaults::HIDDEN_VISIBLE_WS_LABEL.to_string();
+				} else {
+					ws_label_btn.label = polybar::defaults::HIDDEN_WS_LABEL.to_string();
+				}
+			}
 		} else {
 			if ws.focused {
 				ws_label_btn.set_colors(
