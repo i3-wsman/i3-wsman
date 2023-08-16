@@ -54,6 +54,7 @@ pub fn exec(args: Vec<String>) {
 	constraints.output = outputs::focused();
 	constraints.add(Constraint::Group);
 	constraints.add(Constraint::NoGroup);
+	constraints.add(Constraint::AllowUrgent);
 
 	if let Some(neighbor_ws) = neighbor::get(focused_ws, constraints, dir) {
 		let neighbor_ws_num = neighbor_ws.num;

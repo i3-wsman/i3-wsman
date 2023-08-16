@@ -63,6 +63,7 @@ pub fn exec(mut args: Vec<String>) {
 	constraints.add(Constraint::Output);
 	constraints.add(Constraint::Group);
 	constraints.add(Constraint::NoGroup);
+	constraints.add(Constraint::AllowUrgent);
 	constraints.output = outputs::focused();
 
 	let workspaces = workspaces::get(constraints.clone(), false);

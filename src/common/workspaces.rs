@@ -28,6 +28,10 @@ pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
 	workspaces
 		.iter()
 		.filter(|ws| {
+			if constraints.contains(Constraint::AllowUrgent) && ws.urgent {
+				return true
+			}
+
 			if constraints.contains(Constraint::Visible) {
 				if !ws.visible { return false }
 			} else if constraints.contains(Constraint::Hidden) {

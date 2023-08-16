@@ -236,6 +236,7 @@ pub fn module_workspaces(_: Vec<String>) {
 	let mut show_constraints = Constraints::new();
 	show_constraints.add(Constraint::Output);
 	show_constraints.add(Constraint::NoGroup);
+	show_constraints.add(Constraint::AllowUrgent);
 
 	if !show_hidden {
 		show_constraints.add(Constraint::Group);
