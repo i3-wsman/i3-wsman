@@ -24,6 +24,12 @@ pub fn get(ws: Workspace, constraints: Constraints, direction: Direction) -> Opt
 	}
 }
 
+pub fn closest(ws: Workspace, direction: Direction) -> Option<Workspace> {
+	let constraints = Constraints::new();
+	get(ws, constraints, direction)
+}
+
+#[allow(dead_code)]
 pub fn immediate(ws: Workspace, direction: Direction) -> Option<Workspace> {
 	let constraints = Constraints::new();
 

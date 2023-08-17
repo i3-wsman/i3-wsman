@@ -87,5 +87,6 @@ pub fn exec(mut args: Vec<String>) {
 		}
 	}
 
+	workspaces::maintenance();
 	polybar::update();
 }

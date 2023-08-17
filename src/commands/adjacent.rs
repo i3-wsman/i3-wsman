@@ -3,6 +3,7 @@ extern crate i3_ipc;
 use i3_ipc::{Connect, I3};
 
 use crate::common::{
+	Direction,
 	this_command,
 	groups,
 	polybar,
@@ -10,6 +11,7 @@ use crate::common::{
 	moves,
 	outputs,
 	name,
+	neighbor,
 };
 
 use crate::{
@@ -38,12 +40,12 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(args: Vec<String>) {
+	let dir = if args[0] == "left" { Direction::Left } else { Direction::Right };
+
 	let focused_ws = workspaces::focused();
-	let focused_ws_num = focused_ws.num;
+
 	let focused_group = name::group(&focused_ws.name);
-
 	let active_groups = groups::active(outputs::focused());
-
 	let name_base = if focused_group == "" {
 		focused_group
 	} else {
@@ -57,25 +59,23 @@ pub fn exec(args: Vec<String>) {
 		)
 	};
 
-	let new_ws_num = if args[0] == "left" {
-		moves::right(focused_ws);
-		focused_ws_num
+	let focused_ws_num = focused_ws.num;
+
+	let ws_to_move = if dir == Direction::Left {
+		Some(focused_ws)
 	} else {
-		let nn = focused_ws_num + 1;
-		let ws_to_move = workspaces::by_num(nn);
-		if let Some(moveit) = ws_to_move {
-			moves::right(moveit);
-		}
-		nn
+		neighbor::closest(focused_ws, Direction::Right)
 	};
 
-	let new_ws_name = name::change_prefix(
-		&name_base,
-		new_ws_num
-	);
+	let new_pos = match ws_to_move {
+		Some(ws) => moves::scoot(ws).num - 1,
+		None => focused_ws_num + 1,
+	};
+
+	let new_name = name::change_prefix(&name_base, new_pos);
 
 	let mut i3 = I3::connect().unwrap();
-	let cmd = format!("workspace {}", new_ws_name);
+	let cmd = format!("workspace {}", new_name);
 	i3.run_command(cmd).ok();
 
 	polybar::update();

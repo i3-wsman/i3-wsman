@@ -1,11 +1,25 @@
 use i3_ipc::{Connect, I3, reply::Workspace};
 
-use super::{name, groups, outputs};
+use super::{name, groups, outputs, moves};
 use super::constraint::{ Constraints, Constraint };
 
 fn get_ws() -> Vec<Workspace> {
 	let mut i3 = I3::connect().unwrap();
 	i3.get_workspaces().unwrap()
+}
+
+pub fn maintenance() {
+	let mut workspaces = get_ws();
+
+	workspaces.sort_by(
+		|w1, w2| w1.num.cmp(&w2.num)
+	);
+
+	let mut i: i32 = 0;
+	for ws in workspaces {
+		i += 1;
+		moves::reorder(ws, i);
+	}
 }
 
 pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
