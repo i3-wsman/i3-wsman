@@ -33,10 +33,12 @@ lazy_static! {
 }
 
 pub fn help(_: Vec<String>) {
-	println!("{} {} adjacent <right|left>", this_command(), CMD.as_str());
+	println!("{} {} <right|left>", this_command(), CMD.as_str());
 	println!("    Creates a new workspace next to the current workspace\n\r");
-	println!("    {} adjacent right\t- Creates a workspace to the right", this_command());
-	println!("    {} adjacent left \t- Creates a workspace to the left", this_command());
+	println!("    {} {} right", this_command(), CMD.as_str());
+	println!("        Creates a workspace to the right\n\r");
+	println!("    {} {} left", this_command(), CMD.as_str());
+	println!("        Creates a workspace to the left\n\r");
 }
 
 pub fn exec(args: Vec<String>) {

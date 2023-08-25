@@ -32,10 +32,12 @@ lazy_static! {
 }
 
 pub fn help(_: Vec<String>) {
-	println!("{} {} reorder <right|left>", this_command(), CMD.as_str());
+	println!("{} {} <right|left>", this_command(), CMD.as_str());
 	println!("    Reorders the current workspaces to the left or right\n\r");
-	println!("    {} {} right\t- Adjusts the order of the workspace to the right", this_command(), CMD.as_str());
-	println!("    {} {} left \t- Adjusts the order of the workspace to the left", this_command(), CMD.as_str());
+	println!("    {} {} right", this_command(), CMD.as_str());
+	println!("        Adjusts the order of the workspace to the right\n\r");
+	println!("    {} {} left", this_command(), CMD.as_str());
+	println!("        Adjusts the order of the workspace to the left\n\r");
 }
 
 pub fn exec(args: Vec<String>) {

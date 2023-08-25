@@ -34,6 +34,19 @@ fn main() {
 	cmds.insert(commands::reorder::CMD.as_str(), commands::reorder::SUBCMDS.clone());
 	// @TODO: move-container-to
 
+	let help_order = vec![
+		commands::goto::CMD.as_str(),
+		commands::next::CMD.as_str(),
+		commands::prev::CMD.as_str(),
+		commands::adjacent::CMD.as_str(),
+		commands::reorder::CMD.as_str(),
+		commands::group::CMD.as_str(),
+		commands::polybar::CMD.as_str(),
+		commands::polybar_watch::CMD.as_str(),
+		commands::poke::CMD.as_str(),
+		commands::get_workspaces::CMD.as_str(),
+	];
+
 	let command = if args.len() > 1 { args[1].as_str() } else { DEFAULT_CMD };
 
 	match cmds.get(command) {
@@ -59,21 +72,31 @@ fn main() {
 
 			return;
 		}
+		None if command == "constraints" => {
+			println!("Usage: {} <command> <...args>", common::this_command());
+
+			help_constraints(vec![]);
+		}
 		None if command == "help" => {
 			println!("Usage: {} <command> <...args>", common::this_command());
-			println!("");
 
-			for cmd in cmds.values() {
-				if !cmd.contains_key(HELP_CMD) { continue; }
-				let help_fn = cmd.get("help").unwrap();
-				help_fn(vec![]);
-				println!("");
+			if args.len() < 3 || args[2].as_str() != "constraints" {
+				for cmd_str in help_order {
+					if !cmds.contains_key(cmd_str) { continue; }
+					let cmd = cmds.get(cmd_str).unwrap();
+					if !cmd.contains_key(HELP_CMD) { continue; }
+					let help_fn = cmd.get("help").unwrap();
+					help_fn(vec![]);
+					println!("");
+				}
 			}
+
+			help_constraints(vec![]);
 		}
 		_ => {
 			println!("Usage: {} <command> <...args>", common::this_command());
 
-			println!("\r\nFor detailed usage, run:");
+			println!("\n\rFor detailed usage, run:");
 			println!("    {} <command> help", common::this_command());
 			println!("\r\nAvailable commands:");
 			for &cmd in cmds.keys() {
@@ -82,5 +105,21 @@ fn main() {
 			println!("    {} help", common::this_command());
 		}
 	};
+}
+
+fn help_constraints(_: Vec<String>) {
+	println!("\n\rConstraints:");
+	println!("    focused\t\tFocused Workspace");
+	println!("    visible\t\tVisible Workspace");
+	println!("    hidden\t\tNon-visible Workspaces");
+	println!("    group\t\tWorkspace is part of an active group");
+	println!("    nogroup\t\tWorkspace has no group");
+	println!("    no-group\t\tWorkspace has no group");
+	println!("    allowurgent\t\tWorkspace is Urgent");
+	println!("    allow-urgent\tWorkspace is Urgent");
+	println!("    output\t\tWorkspace is on focused display");
+	println!("    output=xyz\t\tWorkspace is on display 'xyz'\n\r");
+	println!("    For instance, to get all hidden workspaces on the current monitor:");
+	println!("        {} get-workspaces hidden output\n\r", common::this_command());
 }
 

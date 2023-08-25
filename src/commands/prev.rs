@@ -38,11 +38,13 @@ lazy_static! {
 pub fn help(_: Vec<String>) {
 	println!("{} {} [{}|{}|{}] [...constraints]", this_command(), CMD.as_str(), ON_LAST_CREATE, ON_LAST_LOOP, ON_LAST_STOP);
 	println!("    Focuses on the previous workspace\n\r");
-	println!("    {} next {} [...constraints]\tOn first workspace, creates a new workspace", this_command(), ON_LAST_CREATE);
-	println!("    {} next {} [...constraints]  \tOn first workspace, loops back to the first", this_command(), ON_LAST_LOOP);
-	println!("    {} next {} [...constraints]  \tOn first workspace, stops", this_command(), ON_LAST_STOP);
-	println!("");
-	println!("    For constraints, run: {} get-workspaces help", this_command());
+	println!("    {} {} {} [...constraints]", this_command(), CMD.as_str(), ON_LAST_CREATE);
+	println!("        On first workspace, create a new workspace\n\r");
+	println!("    {} {} {} [...constraints]  \t", this_command(), CMD.as_str(), ON_LAST_LOOP);
+	println!("        On first workspace, loop back to the first workspace\n\r");
+	println!("    {} {} {} [...constraints]  \t", this_command(), CMD.as_str(), ON_LAST_STOP);
+	println!("        On first workspace, do nothing\n\r");
+	println!("    For constraints, run: {} help constraints\n\r", this_command());
 }
 
 pub fn exec(mut args: Vec<String>) {

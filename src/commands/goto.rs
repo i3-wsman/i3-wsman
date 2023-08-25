@@ -32,10 +32,12 @@ lazy_static! {
 }
 
 pub fn help(_: Vec<String>) {
-	println!("{} {} nth [{}|{}]", this_command(), CMD.as_str(), ON_LAST_CREATE, ON_LAST_NOOP);
-	println!("    Focuses on the next workspace\n\r");
-	println!("    {} next {} \tOn workspace doesn't exist, creates a new workspace", this_command(), ON_LAST_CREATE);
-	println!("    {} next {}  \tOn workspace doesn't exist, does nothing", this_command(), ON_LAST_NOOP);
+	println!("{} {} <nth> [{}|{}]", this_command(), CMD.as_str(), ON_LAST_CREATE, ON_LAST_NOOP);
+	println!("    Focuses on the <nth> workspace, where <nth> is the position of the workspace\n\r");
+	println!("    {} {} <nth> {}", this_command(), CMD.as_str(), ON_LAST_CREATE);
+	println!("        If workspace doesn't exist, creates a new workspace.\n\r");
+	println!("    {} {} <nth> {}", this_command(), CMD.as_str(), ON_LAST_NOOP);
+	println!("        If workspace doesn't exist, do nothing.\n\r");
 }
 
 pub fn exec(mut args: Vec<String>) {

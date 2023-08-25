@@ -22,10 +22,10 @@ lazy_static! {
 		let mut cmds = HashMap::new();
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);
 
-		cmds.insert("get", get as CommandFn);
-		cmds.insert("set", set as CommandFn);
+		cmds.insert("list", list as CommandFn);
+		cmds.insert("assign", assign as CommandFn);
 
-		cmds.insert("active", active as CommandFn);
+		cmds.insert("list-active", list_active as CommandFn);
 
 		cmds.insert("show", show as CommandFn);
 		cmds.insert("hide", hide as CommandFn);
@@ -40,8 +40,26 @@ lazy_static! {
 }
 
 pub fn help(_: Vec<String>) {
-	println!("{} {}", this_command(), CMD.as_str());
-	println!("    Pokes polybar to update");
+	println!("{} {} <command> [...args]", this_command(), CMD.as_str());
+	println!("    A set of commands for managing workspace groups\n\r");
+	println!("    Main commands:\n\r");
+	println!("      {} {} list", this_command(), CMD.as_str());
+	println!("          List all groups\n\r");
+	println!("      {} {} assign <workspace-name> <group-name>", this_command(), CMD.as_str());
+	println!("          Assign a workspace to the group\n\r");
+	println!("    Manage active groups:\n\r");
+	println!("      {} {} list-active", this_command(), CMD.as_str());
+	println!("          List all active groups\n\r");
+	println!("      {} {} show <group-name>", this_command(), CMD.as_str());
+	println!("          Add group to list of active groups\n\r");
+	println!("      {} {} hide <group-name>", this_command(), CMD.as_str());
+	println!("          Remove group to list of active groups\n\r");
+	println!("      {} {} toggle <group-name>", this_command(), CMD.as_str());
+	println!("          Toggle the group on and off the list of active groups\n\r");
+	println!("      {} {} only <group-name>", this_command(), CMD.as_str());
+	println!("          Set the group as the exclusive active group\n\r");
+	println!("      {} {} all <group-name>", this_command(), CMD.as_str());
+	println!("          Activate all groups\n\r");
 }
 
 pub fn exec(args: Vec<String>) {
@@ -57,7 +75,7 @@ pub fn exec(args: Vec<String>) {
 	println!("{}", output);
 }
 
-pub fn set(args: Vec<String>) {
+pub fn assign(args: Vec<String>) {
 	let group_name = if args.len() > 1 {
 		args[1].clone()
 	} else if args.len() == 1 {
@@ -80,7 +98,7 @@ pub fn set(args: Vec<String>) {
 	polybar::update();
 }
 
-pub fn get(args: Vec<String>) {
+pub fn list(args: Vec<String>) {
 	let mut constraints = constraint::parse(args.to_owned());
 
 	if args.len() == 0 {
@@ -93,7 +111,7 @@ pub fn get(args: Vec<String>) {
 	println!("{}", output);
 }
 
-pub fn active(args: Vec<String>) {
+pub fn list_active(args: Vec<String>) {
 	let output = if args.len() > 0 {
 		args[0].clone()
 	} else {

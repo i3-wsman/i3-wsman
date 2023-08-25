@@ -24,7 +24,7 @@ lazy_static! {
 
 pub fn help(_: Vec<String>) {
 	println!("{} {}", this_command(), CMD.as_str());
-	println!("  Listens for i3 events and updates polybar module.");
+	println!("    Listens for i3 events and updates polybar module.\n\r");
 }
 
 pub fn exec(_: Vec<String>) {
