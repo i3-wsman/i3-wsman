@@ -31,7 +31,7 @@ pub fn exec(mut args: Vec<String>) {
 
 	if !hide_all_button {
 		let mut all_button = polybar::Label::new(polybar::defaults::GROUP_ALL_LABEL, 1, 0);
-		let cmd = this_command_abs() + " polybar set-group all";
+		let cmd = this_command_abs() + " polybar group all";
 		all_button.set_action(polybar::LEFT_CLICK, &cmd);
 		all_button.font = Some(1);
 
@@ -54,8 +54,8 @@ pub fn exec(mut args: Vec<String>) {
 		let mut group_btn = polybar::Label::new(&g, 1, 0);
 		group_btn.font = Some(1);
 
-		let left_click = this_command_abs() + " polybar set-group only " + g.as_ref();
-		let secondary_click = this_command_abs() + " polybar set-group toggle " + g.as_ref();
+		let left_click = this_command_abs() + " polybar group only " + g.as_ref();
+		let secondary_click = this_command_abs() + " polybar group toggle " + g.as_ref();
 
 		group_btn.set_actions(
 			Some(left_click),
