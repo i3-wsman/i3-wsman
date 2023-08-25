@@ -33,7 +33,6 @@ fn main() {
 	cmds.insert(commands::prev::CMD.as_str(), commands::prev::SUBCMDS.clone());
 	cmds.insert(commands::reorder::CMD.as_str(), commands::reorder::SUBCMDS.clone());
 	// @TODO: move-container-to
-	// @TODO: reorder-workspace
 
 	let command = if args.len() > 1 { args[1].as_str() } else { DEFAULT_CMD };
 
