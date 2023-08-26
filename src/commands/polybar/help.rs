@@ -20,7 +20,8 @@ pub fn exec(_: Vec<String>) {
 	println!("{} {}", this_command(), CMD.as_str());
 	println!("    The i3 Workspace Manager Polybar module\n\r");
 	//println!("    {} {} start [bar-name]", this_command(), CMD.as_str());
-	//println!("        Starts polybar for all monitors and watches i3 for changes\n\r");
+	//println!("        Starts polybar for all monitors and watches i3 for changes. ");
+	//println!("        Note: Do not include a [bar-name] if you have configured them in your i3-wsman config\n\r");
 	println!("    {} {} watch", this_command(), CMD.as_str());
 	println!("        Watches i3 for changes (not needed when using `{} start`)\n\r", CMD.as_str());
 	println!("    To setup polybar, add the following to your polybar config:\n\r");

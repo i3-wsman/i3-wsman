@@ -26,7 +26,7 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(args: Vec<String>) {
-	let constraints = constraint::parse(args.to_owned());
+	let constraints = constraint::from_vec(args.to_owned());
 
 	let workspaces = workspaces::get(constraints, false);
 	let output = serde_json::to_string_pretty(&workspaces).unwrap();

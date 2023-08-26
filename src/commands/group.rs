@@ -63,7 +63,7 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(args: Vec<String>) {
-	let mut constraints = constraint::parse(args.to_owned());
+	let mut constraints = constraint::from_vec(args.to_owned());
 
 	if args.len() == 0 {
 		constraints.add(Constraint::Output);
@@ -99,7 +99,7 @@ pub fn assign(args: Vec<String>) {
 }
 
 pub fn list(args: Vec<String>) {
-	let mut constraints = constraint::parse(args.to_owned());
+	let mut constraints = constraint::from_vec(args.to_owned());
 
 	if args.len() == 0 {
 		constraints.add(Constraint::Output);

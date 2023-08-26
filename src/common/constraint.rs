@@ -1,6 +1,8 @@
+use std::str::FromStr;
+
 use super::outputs;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Constraint {
 	None = 0,
 	Focused = 1 << 0,
@@ -10,6 +12,33 @@ pub enum Constraint {
 	Group = 1 << 4,
 	NoGroup = 1 << 5,
 	AllowUrgent = 1 << 6,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct ParseConstraintError;
+
+impl FromStr for Constraint {
+	type Err = ParseConstraintError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let s = s.to_lowercase();
+		if s.contains(&"output=") {
+			return Ok(Constraint::Output);
+		}
+
+		match s.as_ref() {
+			"focused" => Ok(Constraint::Focused),
+			"visible" => Ok(Constraint::Visible),
+			"hidden" => Ok(Constraint::Hidden),
+			"group" => Ok(Constraint::Group),
+			"nogroup" => Ok(Constraint::NoGroup),
+			"no-group" => Ok(Constraint::NoGroup),
+			"allowurgent" => Ok(Constraint::AllowUrgent),
+			"allow-urgent" => Ok(Constraint::AllowUrgent),
+			"output" => Ok(Constraint::Output),
+			_ => Err(ParseConstraintError),
+		}
+	}
 }
 
 #[derive(Debug, Clone)]
@@ -40,38 +69,39 @@ impl Constraints {
 	}
 }
 
-pub fn parse(nouns: Vec<String>) -> Constraints {
+pub fn from_vec(nouns: Vec<String>) -> Constraints {
 	let mut constraints = Constraints::new();
 
-	for noun in &nouns {
-		if noun.contains(&"output=") {
-			constraints.add(Constraint::Output);
-			constraints.output = noun
-				.split("=")
-				.nth(1)
-				.unwrap_or("none")
-				.to_string();
-			continue;
-		}
-
-		match noun.as_ref() {
-			"focused" => constraints.add(Constraint::Focused),
-			"visible" => constraints.add(Constraint::Visible),
-			"hidden" => constraints.add(Constraint::Hidden),
-			"group" => constraints.add(Constraint::Group),
-			"nogroup" => constraints.add(Constraint::NoGroup),
-			"no-group" => constraints.add(Constraint::NoGroup),
-			"allowurgent" => constraints.add(Constraint::AllowUrgent),
-			"allow-urgent" => constraints.add(Constraint::AllowUrgent),
-			"output" => {
-				if !constraints.contains(Constraint::Output) {
-					constraints.add(Constraint::Output);
-					constraints.output = outputs::focused();
-				}
-			},
-			_ => {},
+	for noun in nouns {
+		if let Ok(c) = noun.parse::<Constraint>() {
+			if noun.contains(&"output=") {
+				constraints.output = noun
+					.split("=")
+					.nth(1)
+					.unwrap_or("none")
+					.to_string();
+			} else if c == Constraint::Output && !constraints.contains(c) {
+				constraints.output = outputs::focused();
+			}
+			constraints.add(c);
 		}
 	}
 
 	constraints
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct ParseConstraintsError;
+
+impl FromStr for Constraints {
+	type Err = ParseConstraintsError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let nouns = s
+			.split_whitespace()
+			.map(|s| s.to_owned())
+			.collect::<Vec<_>>();
+
+		Ok(from_vec(nouns))
+	}
 }

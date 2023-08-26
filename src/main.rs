@@ -22,26 +22,35 @@ fn main() {
 	}
 
 	let mut cmds: CommandMap = HashMap::new();
-	cmds.insert(commands::adjacent::CMD.as_str(), commands::adjacent::SUBCMDS.clone());
-	cmds.insert(commands::get_workspaces::CMD.as_str(), commands::get_workspaces::SUBCMDS.clone());
+
 	cmds.insert(commands::goto::CMD.as_str(), commands::goto::SUBCMDS.clone());
-	cmds.insert(commands::group::CMD.as_str(), commands::group::SUBCMDS.clone());
 	cmds.insert(commands::next::CMD.as_str(), commands::next::SUBCMDS.clone());
-	cmds.insert(commands::poke::CMD.as_str(), commands::poke::SUBCMDS.clone());
-	cmds.insert(commands::polybar::CMD.as_str(), commands::polybar::SUBCMDS.clone());
 	cmds.insert(commands::prev::CMD.as_str(), commands::prev::SUBCMDS.clone());
+
+	cmds.insert(commands::adjacent::CMD.as_str(), commands::adjacent::SUBCMDS.clone());
 	cmds.insert(commands::reorder::CMD.as_str(), commands::reorder::SUBCMDS.clone());
 	// @TODO: move-container-to
+
+	cmds.insert(commands::group::CMD.as_str(), commands::group::SUBCMDS.clone());
+
+	cmds.insert(commands::polybar::CMD.as_str(), commands::polybar::SUBCMDS.clone());
+	cmds.insert(commands::poke::CMD.as_str(), commands::poke::SUBCMDS.clone());
+
+	cmds.insert(commands::get_workspaces::CMD.as_str(), commands::get_workspaces::SUBCMDS.clone());
 
 	let help_order = vec![
 		commands::goto::CMD.as_str(),
 		commands::next::CMD.as_str(),
 		commands::prev::CMD.as_str(),
+
 		commands::adjacent::CMD.as_str(),
 		commands::reorder::CMD.as_str(),
+
 		commands::group::CMD.as_str(),
+
 		commands::polybar::CMD.as_str(),
 		commands::poke::CMD.as_str(),
+
 		commands::get_workspaces::CMD.as_str(),
 	];
 

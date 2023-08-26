@@ -55,7 +55,7 @@ pub fn exec(mut args: Vec<String>) {
 		_ => "".to_string(),
 	};
 
-	let mut constraints = constraint::parse(args.to_owned());
+	let mut constraints = constraint::from_vec(args.to_owned());
 
 	if args.len() == 0 {
 		constraints.add(Constraint::Output);
