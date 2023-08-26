@@ -5,6 +5,7 @@ mod module_toggle_hidden;
 mod module_workspaces;
 mod goto_workspace;
 mod group;
+mod watch;
 
 use crate::common::{
 	this_command,
@@ -30,9 +31,11 @@ lazy_static! {
 		cmds.insert("module-toggle-hidden", module_toggle_hidden::exec as CommandFn);
 		cmds.insert("module-workspaces", module_workspaces::exec as CommandFn);
 
-		cmds.insert("goto-workspace", goto_workspace::exec as CommandFn);
+		cmds.insert("goto", goto_workspace::exec as CommandFn);
 		cmds.insert("group", group::exec as CommandFn);
-		cmds.insert("toggle-show-hidden", toggle_hidden::exec as CommandFn);
+		cmds.insert("toggle", toggle_hidden::exec as CommandFn);
+
+		cmds.insert("watch", watch::exec as CommandFn);
 
 		cmds
 	};

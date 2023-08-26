@@ -48,7 +48,7 @@ pub fn exec(_: Vec<String>) {
 		);
 		ws_label_btn.font = Some(3);
 
-		let cmd = this_command_abs() + " polybar goto-workspace " + ws.num.to_string().as_ref();
+		let cmd = this_command_abs() + " polybar goto " + ws.num.to_string().as_ref();
 		ws_label_btn.set_action(polybar::LEFT_CLICK, &cmd);
 
 		let ws_group = name::group(ws.name.as_str());

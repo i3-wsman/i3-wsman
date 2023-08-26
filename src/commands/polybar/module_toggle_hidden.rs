@@ -32,7 +32,7 @@ pub fn exec(_: Vec<String>) {
 		toggle_hidden.fg_color = Some(polybar::defaults::TOGGLE_HIDDEN_OFF_FG.to_owned());
 	}
 
-	let cmd = this_command_abs() + " polybar toggle-show-hidden";
+	let cmd = this_command_abs() + " polybar toggle";
 	toggle_hidden.set_actions(Some(cmd), None, None);
 
 	print!("{}", toggle_hidden);

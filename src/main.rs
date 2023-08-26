@@ -29,7 +29,6 @@ fn main() {
 	cmds.insert(commands::next::CMD.as_str(), commands::next::SUBCMDS.clone());
 	cmds.insert(commands::poke::CMD.as_str(), commands::poke::SUBCMDS.clone());
 	cmds.insert(commands::polybar::CMD.as_str(), commands::polybar::SUBCMDS.clone());
-	cmds.insert(commands::polybar_watch::CMD.as_str(), commands::polybar_watch::SUBCMDS.clone());
 	cmds.insert(commands::prev::CMD.as_str(), commands::prev::SUBCMDS.clone());
 	cmds.insert(commands::reorder::CMD.as_str(), commands::reorder::SUBCMDS.clone());
 	// @TODO: move-container-to
@@ -42,7 +41,6 @@ fn main() {
 		commands::reorder::CMD.as_str(),
 		commands::group::CMD.as_str(),
 		commands::polybar::CMD.as_str(),
-		commands::polybar_watch::CMD.as_str(),
 		commands::poke::CMD.as_str(),
 		commands::get_workspaces::CMD.as_str(),
 	];
