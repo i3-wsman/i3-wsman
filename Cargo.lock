@@ -25,7 +25,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c6201b9ff9fd90a5a3bac2e56a830d0caa509576f0e503818ee82c181b3437a"
 
 [[package]]
-name = "i3-wsman-rs"
+name = "i3-wsman"
 version = "0.1.0"
 dependencies = [
  "fs2",

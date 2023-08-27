@@ -1,5 +1,5 @@
 [package]
-name = "i3-wsman-rs"
+name = "i3-wsman"
 version = "0.1.0"
 edition = "2021"
 
