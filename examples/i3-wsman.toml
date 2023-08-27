@@ -1,0 +1,93 @@
+#/===================================================================\
+#
+#  ██╗██████╗░░░░░░░░██╗░░░░░░░██╗░██████╗███╗░░░███╗░█████╗░███╗░░██╗
+#  ██║╚════██╗░░░░░░░██║░░██╗░░██║██╔════╝████╗░████║██╔══██╗████╗░██║
+#  ██║░█████╔╝█████╗░╚██╗████╗██╔╝╚█████╗░██╔████╔██║███████║██╔██╗██║
+#  ██║░╚═══██╗╚════╝░░████╔═████║░░╚═══██╗██║╚██╔╝██║██╔══██║██║╚████║
+#  ██║██████╔╝░░░░░░░░╚██╔╝░╚██╔╝░██████╔╝██║░╚═╝░██║██║░░██║██║░╚███║
+#  ╚═╝╚═════╝░░░░░░░░░░╚═╝░░░╚═╝░░╚═════╝░╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝
+#
+#  Create, reorder, group, and focus workspaces easily in i3.
+#  Fully configurable with enhanced polybar modules.
+#
+#   WHERE DOES THIS GO?
+#   Put this file here:
+#       ~/.config/i3/i3-wsman.toml
+#
+#   FOR POLYBAR CONFIGURATION, see:
+#       ~/.config/polybar/i3-wsman.ini
+#
+#   Repo and Issues: https://github.com/i3-wsman/i3-wsman
+#
+#\===================================================================/
+
+# Startup Configurations
+[startup]
+# COMING SOON: The initial workspace group to be active on i3 startup.
+#initial_workspace_group = "Home"
+
+# Workspace groups to automatically toggle on at startup.
+active_workspace_groups = ["Home"]
+# Display workspaces not in any active group on the bar.
+show_hidden_workspaces = false
+
+# Group Settings
+[groups]
+# Groups that will always be available.
+default_groups = ["Home", "Work"]
+# Groups that will always be active.
+always_visible = []
+# Sorting of workspace groups in the bar.
+# Options: Alphabetical, PreserveOrder
+sort_method = "PreserveOrder"
+# Whether to sort permanent groups before other groups in the bar.
+sort_default_first = true
+# Each output has its individual set of available and active groups.
+unique_groups_on_outputs = true
+
+# Focus Settings
+[focus]
+# Hide workspaces not part of any active group.
+hide_unassigned_workspaces = false
+# Auto-focus the nearest workspace within the active group.
+auto_focus_nearest_group = true
+
+## Workspace Creation Settings
+[create]
+# COMING SOON: New workspaces inherit the group of the currently focused workspace.
+#inherit_focused_group = true
+
+# COMING SOON: If focused workspace isn't part of an active group,
+# inherit the group of the nearest active group.
+#inherit_nearest_active_group = true
+
+# COMING SOON: Default group for new workspaces if 'inherit_focused_group' is false.
+#default_group = ""
+
+# Workspace Navigation Settings
+[navigation]
+# COMING SOON: Allow navigating to urgent workspaces even if they're outside any active groups
+#allow_urgent = true
+
+[navigation.next]
+# COMING SOON: What happens if no next workspace exists.
+# Options: Create, Loop, Stop
+#behavior = "Create"
+
+#[navigation.prev]
+# COMING SOON: What happens if no previous workspace exists.
+# Options: Create, Loop, Stop
+#behavior = "Create"
+
+# Goto Behavior
+[navigation.goto]
+# COMING SOON: Limit 'goto' navigation to the focused output.
+#restrict_to_output = true
+
+# COMING SOON: What happens if the Nth workspace doesn't exist.
+# Options: Create, Stop
+#behavior = "Stop"
+
+# COMING SOON: Whether to jump to the actual Nth workspace or within the active groups.
+#ignore_focus = false
+
