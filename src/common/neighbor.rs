@@ -24,6 +24,23 @@ pub fn get(ws: Workspace, constraints: Constraints, direction: Direction) -> Opt
 	}
 }
 
+pub fn closest_anywhere(ws: Workspace, constraints: Constraints) -> Option<Workspace> {
+	let workspaces = workspaces::get(constraints, false);
+
+	let mut closest_ws: Option<Workspace> = None;
+	let mut closest_distance: i32 = i32::MAX;
+
+	for workspace in workspaces.iter() {
+		let distance = (ws.num - workspace.num).abs();
+		if distance < closest_distance {
+			closest_distance = distance;
+			closest_ws = Some(workspace.clone());
+		}
+	}
+
+	closest_ws
+}
+
 pub fn closest(ws: Workspace, direction: Direction) -> Option<Workspace> {
 	let constraints = Constraints::new();
 	get(ws, constraints, direction)

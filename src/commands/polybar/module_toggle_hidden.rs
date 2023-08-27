@@ -3,7 +3,7 @@ use crate::common::{
 	groups,
 	outputs,
 	polybar,
-	constraint::{ Constraints, Constraint }
+	constraint::{ Constraints, Constraint },
 };
 
 pub fn exec(_: Vec<String>) {

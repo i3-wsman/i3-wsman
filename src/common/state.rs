@@ -6,10 +6,31 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use fs2::FileExt;
 
+use crate::CONFIG;
+use crate::common::outputs;
+
+type StateGroups = HashMap<String, Vec<String>>;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct State {
-	pub groups: HashMap<String, Vec<String>>,
+	pub groups: StateGroups,
+	pub global_groups: Vec<String>,
 	pub show_hidden: bool,
+}
+
+fn default() -> State {
+	let active_groups = CONFIG.startup.active_workspace_groups.to_owned();
+
+	let mut groups: StateGroups = HashMap::new();
+	for o in outputs::available() {
+		groups.insert(o.clone(), active_groups.clone());
+	}
+
+	State {
+		groups,
+		global_groups: active_groups,
+		show_hidden: CONFIG.startup.show_hidden_workspaces,
+	}
 }
 
 fn usid() -> String {
@@ -21,7 +42,7 @@ fn usid() -> String {
 }
 
 fn get_tmpf(filename: &str) -> PathBuf {
-	let usid = usid(); // Assuming usid function is implemented
+	let usid = usid();
 	let filename = format!("i3wsm__tmp_{}_{}", usid, filename);
 
 	let temp_dir = if PathBuf::from("/dev/shm").exists() {
@@ -32,13 +53,9 @@ fn get_tmpf(filename: &str) -> PathBuf {
 
 	let temp_file_path = temp_dir.join(filename);
 
-	// Create the file only if it doesn't exist
 	if !temp_file_path.exists() {
 		File::create(&temp_file_path).expect("Failed to create temporary file");
-		set(State {
-			groups: HashMap::new(),
-			show_hidden: false,
-		});
+		set(default());
 	}
 
 	temp_file_path
@@ -73,5 +90,13 @@ pub fn get() -> State {
 
 	file.unlock().expect("Failed to unlock file");
 
-	serde_json::from_str(&serialized_data).expect("Failed to deserialize state")
+	if serialized_data.trim().len() == 0 {
+		set(default());
+		return get()
+	}
+
+	serde_json::from_str(&serialized_data).unwrap_or_else(|_| {
+		set(default());
+		get()
+	})
 }

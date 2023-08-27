@@ -5,7 +5,7 @@ use crate::common::{
 	outputs,
 	polybar,
 	workspaces,
-	constraint::{ Constraints, Constraint }
+	constraint::{ Constraints, Constraint },
 };
 
 pub fn exec(_: Vec<String>) {

@@ -6,6 +6,12 @@ extern crate lazy_static;
 
 use std::collections::HashMap;
 
+use crate::common::config::{ Config, load::load_cfg };
+
+lazy_static! {
+	pub static ref CONFIG: Config = load_cfg();
+}
+
 pub type CommandFn = fn(Vec<String>);
 pub type Commands = HashMap<&'static str, CommandFn>;
 pub type CommandMap = HashMap<&'static str, Commands>;
@@ -37,6 +43,8 @@ fn main() {
 	cmds.insert(commands::poke::CMD.as_str(), commands::poke::SUBCMDS.clone());
 
 	cmds.insert(commands::get_workspaces::CMD.as_str(), commands::get_workspaces::SUBCMDS.clone());
+
+	cmds.insert(commands::config::CMD.as_str(), commands::config::SUBCMDS.clone());
 
 	let help_order = vec![
 		commands::goto::CMD.as_str(),

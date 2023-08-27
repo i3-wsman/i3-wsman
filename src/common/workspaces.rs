@@ -1,5 +1,7 @@
 use i3_ipc::{Connect, I3, reply::Workspace};
 
+use crate::CONFIG;
+
 use super::{name, groups, outputs, moves};
 use super::constraint::{ Constraints, Constraint };
 
@@ -63,7 +65,14 @@ pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
 
 			let ws_group = name::group(ws.name.as_ref());
 			if ws_group.len() == 0 && constraints.contains(Constraint::NoGroup) {
-				return true
+				let output = if constraints.output != "none" {
+					constraints.output.clone()
+				} else {
+					outputs::focused()
+				};
+				let active_groups = groups::active(output.to_owned());
+				let available_groups = groups::available_output(output);
+				return !CONFIG.focus.hide_unassigned_workspaces || active_groups == available_groups
 			}
 
 			if constraints.contains(Constraint::Group) {

@@ -1,7 +1,7 @@
 extern crate i3_ipc;
 extern crate serde_json;
 
-//pub mod config;
+pub mod config;
 pub mod constraint;
 pub mod groups;
 pub mod moves;

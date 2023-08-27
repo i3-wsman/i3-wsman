@@ -5,7 +5,7 @@ use crate::common::{
 	outputs,
 	polybar,
 	workspaces,
-	constraint::{ Constraints, Constraint }
+	constraint::{ Constraints, Constraint },
 };
 
 pub fn exec(mut args: Vec<String>) {
@@ -21,11 +21,7 @@ pub fn exec(mut args: Vec<String>) {
 	}
 	show_constraints.output = focused_output.clone();
 
-	let mut avail_constraints = Constraints::new();
-	avail_constraints.add(Constraint::Output);
-	avail_constraints.output = focused_output.clone();
-
-	let groups = groups::available(avail_constraints);
+	let groups = groups::available_output(focused_output.clone());
 	let mut active_groups = groups::active(focused_output.clone());
 	let showing_all = active_groups.len() == 0 || groups == active_groups;
 
