@@ -1,9 +1,9 @@
 use i3_ipc::reply::Workspace;
 
-use super::{constraint::Constraints, workspaces, Direction};
+use super::{constraint::Criteria, workspaces, Direction};
 
-pub fn get(ws: Workspace, constraints: Constraints, direction: Direction) -> Option<Workspace> {
-	let workspaces = workspaces::get(constraints, direction == Direction::Left);
+pub fn get(ws: Workspace, criteria: Criteria, direction: Direction) -> Option<Workspace> {
+	let workspaces = workspaces::get(criteria, direction == Direction::Left);
 
 	let neighbor = if direction == Direction::Right {
 		workspaces.iter().find(|nws| nws.num > ws.num)
@@ -17,8 +17,8 @@ pub fn get(ws: Workspace, constraints: Constraints, direction: Direction) -> Opt
 	}
 }
 
-pub fn closest_anywhere(ws: Workspace, constraints: Constraints) -> Option<Workspace> {
-	let workspaces = workspaces::get(constraints, false);
+pub fn closest_anywhere(ws: Workspace, criteria: Criteria) -> Option<Workspace> {
+	let workspaces = workspaces::get(criteria, false);
 
 	let mut closest_ws: Option<Workspace> = None;
 	let mut closest_distance: i32 = i32::MAX;
@@ -35,17 +35,17 @@ pub fn closest_anywhere(ws: Workspace, constraints: Constraints) -> Option<Works
 }
 
 pub fn closest(ws: Workspace, direction: Direction) -> Option<Workspace> {
-	let constraints = Constraints::new();
-	get(ws, constraints, direction)
+	let criteria = Criteria::new();
+	get(ws, criteria, direction)
 }
 
 #[allow(dead_code)]
 pub fn immediate(ws: Workspace, direction: Direction) -> Option<Workspace> {
-	let constraints = Constraints::new();
+	let criteria = Criteria::new();
 
 	let ws_num = ws.num;
 
-	let neighbor = get(ws, constraints, direction);
+	let neighbor = get(ws, criteria, direction);
 
 	if let Some(n) = neighbor {
 		match direction {

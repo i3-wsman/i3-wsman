@@ -2,9 +2,7 @@ extern crate i3_ipc;
 
 use i3_ipc::{Connect, I3};
 
-use crate::common::{
-	groups, moves, name, neighbor, outputs, polybar, this_command, workspaces, Direction,
-};
+use crate::common::{moves, name, neighbor, polybar, this_command, Direction};
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
 use std::collections::HashMap;

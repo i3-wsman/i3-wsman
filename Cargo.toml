@@ -7,6 +7,7 @@ license = "LGPL-3.0-only"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+configparser = "3.0.2"
 fs2 = "0.4.3"
 i3_ipc = "^0.16.0"
 lazy_static = "1.4.0"

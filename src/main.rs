@@ -1,15 +1,20 @@
-mod commands;
-mod common;
-
 #[macro_use]
 extern crate lazy_static;
 
+use i3_ipc::{Connect, I3Stream, I3 as I3_api};
 use std::collections::HashMap;
 
-use crate::common::config::{load::load_cfg, Config};
+mod commands;
+mod common;
+mod config;
+mod groups;
+mod i3;
+mod state;
 
 lazy_static! {
-	pub static ref CONFIG: Config = load_cfg();
+	pub static ref CONFIG: config::global::Config = config::global::load_cfg();
+	pub static ref POLYBAR_CFG: config::polybar::Config = config::polybar::load_cfg();
+	pub static ref I3: I3Stream = I3_api::connect().unwrap();
 }
 
 pub type CommandFn = fn(Vec<String>);
@@ -22,10 +27,6 @@ pub static WILD_CMD: &str = "*";
 
 fn main() {
 	let args: Vec<String> = std::env::args().collect();
-	if args.len() < 1 {
-		println!("Please provide a command.");
-		return;
-	}
 
 	let mut cmds: CommandMap = HashMap::new();
 
