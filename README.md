@@ -1,3 +1,7 @@
+<p align="right">
+  <a href="https://www.buymeacoffee.com/dalrymple" target="_blank"><img src="https://img.buymeacoffee.com/button-api/?text=Buy Me A Coffee &emoji=&slug=dalrymple&button_colour=6565BD&font_colour=ffffff&font_family=Lato&outline_colour=ffffff&coffee_colour=FFDD00" height="30" width="147" /></a>
+</p>
+
 <p align="center">
   <img src="docs/images/banner-light.png#gh-light-mode-only" alt="i3-wsman" />
   <img src="docs/images/banner-dark.png#gh-dark-mode-only" alt="i3-wsman" />
@@ -5,10 +9,6 @@
 
 <p align="center">
   Create, reorder, group, and focus workspaces fast and easily in i3.
-</p>
-
-<p align="center">
-  <a href="https://www.buymeacoffee.com/dalrymple" target="_blank"><img src="https://img.buymeacoffee.com/button-api/?text=Support This Project&emoji=&slug=dalrymple&button_colour=BD5FFF&font_colour=ffffff&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00" /></a>
 </p>
 
 ## Features
