@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use super::outputs;
+use crate::i3::{get_current_output, outputs::Output};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Constraint {
@@ -42,16 +42,16 @@ impl FromStr for Constraint {
 }
 
 #[derive(Debug, Clone)]
-pub struct Constraints {
+pub struct Criteria {
 	bit: u32,
-	pub output: String,
+	pub output: Option<Output>,
 }
 
-impl Constraints {
+impl Criteria {
 	pub fn new() -> Self {
-		Constraints {
+		Criteria {
 			bit: 0,
-			output: "none".to_string(),
+			output: None,
 		}
 	}
 
@@ -69,15 +69,18 @@ impl Constraints {
 	}
 }
 
-pub fn from_vec(nouns: Vec<String>) -> Constraints {
-	let mut constraints = Constraints::new();
+pub fn from_vec(nouns: Vec<String>) -> Criteria {
+	let mut constraints = Criteria::new();
 
 	for noun in nouns {
 		if let Ok(c) = noun.parse::<Constraint>() {
 			if noun.contains(&"output=") {
-				constraints.output = noun.split("=").nth(1).unwrap_or("none").to_string();
+				constraints.output = match noun.split("=").nth(1) {
+					Some(output_name) => Output::by_name(output_name),
+					None => None,
+				};
 			} else if c == Constraint::Output && !constraints.contains(c) {
-				constraints.output = outputs::focused();
+				constraints.output = Some(get_current_output());
 			}
 			constraints.add(c);
 		}
@@ -87,10 +90,10 @@ pub fn from_vec(nouns: Vec<String>) -> Constraints {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct ParseConstraintsError;
+pub struct ParseCriteriaError;
 
-impl FromStr for Constraints {
-	type Err = ParseConstraintsError;
+impl FromStr for Criteria {
+	type Err = ParseCriteriaError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		let nouns = s

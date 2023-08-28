@@ -1,24 +1,46 @@
-extern crate i3_ipc;
-extern crate serde_json;
+use std::collections::HashSet;
+use std::env;
+use std::path::PathBuf;
+use std::str::FromStr;
 
-pub mod config;
 pub mod constraint;
-pub mod groups;
 pub mod moves;
 pub mod name;
 pub mod neighbor;
-pub mod outputs;
 pub mod polybar;
-pub mod state;
-pub mod workspaces;
-
-use std::env;
-use std::path::PathBuf;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Direction {
 	Right,
 	Left,
+}
+
+impl FromStr for Direction {
+	type Err = ();
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s.to_lowercase().as_ref() {
+			"left" => Ok(Direction::Left),
+			"right" => Ok(Direction::Right),
+			_ => {
+				eprintln!(
+					"Warning: Invalid value '{}' for 'groups.sort_method'. Falling back to 'Left'.",
+					s
+				);
+				Ok(Direction::Left)
+			}
+		}
+	}
+}
+
+impl Direction {
+	#[allow(dead_code)]
+	pub fn to_string(&self) -> String {
+		match self {
+			Direction::Left => "left".to_string(),
+			Direction::Right => "right".to_string(),
+		}
+	}
 }
 
 pub fn this_command_abs() -> String {
@@ -28,4 +50,9 @@ pub fn this_command_abs() -> String {
 pub fn this_command() -> String {
 	let path: PathBuf = env::current_exe().unwrap();
 	path.file_name().unwrap().to_str().unwrap().to_string()
+}
+
+pub fn dedup_vec<T: std::hash::Hash + std::cmp::Eq + Clone>(vec: &mut Vec<T>) {
+	let mut seen = HashSet::new();
+	vec.retain(|e| seen.insert(e.clone()));
 }

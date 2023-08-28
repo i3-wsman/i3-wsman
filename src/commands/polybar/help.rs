@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 use xdg;
 
+use crate::POLYBAR_CFG;
+
 use super::{this_command, this_command_abs, CMD};
 
 fn get_polybar_cfg() -> PathBuf {
@@ -70,4 +72,6 @@ pub fn exec(_: Vec<String>) {
 		"        {}\n\r",
 		cfg_path.into_os_string().into_string().unwrap()
 	);
+
+	println!("{:?}", *POLYBAR_CFG);
 }

@@ -6,7 +6,7 @@ use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
-use crate::common::outputs;
+use crate::i3::outputs;
 use crate::CONFIG;
 
 type StateGroups = HashMap<String, Vec<String>>;
@@ -14,7 +14,6 @@ type StateGroups = HashMap<String, Vec<String>>;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct State {
 	pub groups: StateGroups,
-	pub global_groups: Vec<String>,
 	pub show_hidden: bool,
 }
 
@@ -23,12 +22,12 @@ fn default() -> State {
 
 	let mut groups: StateGroups = HashMap::new();
 	for o in outputs::available() {
-		groups.insert(o.clone(), active_groups.clone());
+		groups.insert(o.name.clone(), active_groups.clone());
 	}
+	groups.insert(outputs::XROOT.to_string(), active_groups);
 
 	State {
 		groups,
-		global_groups: active_groups,
 		show_hidden: CONFIG.startup.show_hidden_workspaces,
 	}
 }

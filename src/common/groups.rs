@@ -2,11 +2,11 @@ use crate::CONFIG;
 
 use i3_ipc::{Connect, I3};
 
-use crate::common::config::GroupSortMethod;
 use crate::common::state::State;
+use crate::config::global::GroupSortMethod;
 
 use super::{
-	constraint::{Constraint, Constraints},
+	constraint::{Constraint, Criteria},
 	name, neighbor, state, workspaces,
 };
 
@@ -17,8 +17,8 @@ fn dedup_vec<T: std::hash::Hash + std::cmp::Eq + Clone>(vec: &mut Vec<T>) {
 	vec.retain(|e| seen.insert(e.clone()));
 }
 
-pub fn available(constraints: Constraints) -> Vec<String> {
-	let workspaces = workspaces::get(constraints, false);
+pub fn available(criteria: Criteria) -> Vec<String> {
+	let workspaces = workspaces::get(criteria, false);
 
 	let mut groups: Vec<String> = vec![];
 	for ws in workspaces {
@@ -54,14 +54,14 @@ pub fn available(constraints: Constraints) -> Vec<String> {
 }
 
 pub fn available_output(output: String) -> Vec<String> {
-	let mut constraints = Constraints::new();
+	let mut criteria = Criteria::new();
 
 	if CONFIG.groups.unique_groups_on_outputs == true {
-		constraints.add(Constraint::Output);
-		constraints.output = output;
+		criteria.add(Constraint::Output);
+		criteria.output = output;
 	}
 
-	available(constraints)
+	available(criteria)
 }
 
 pub fn show_hidden_enabled() -> bool {
@@ -120,11 +120,11 @@ fn update_groups(mut state: State, output: String, groups: Vec<String>) -> Vec<S
 			|| (CONFIG.focus.hide_unassigned_workspaces == true
 				&& groups != available_output(output.to_owned()))
 		{
-			let mut constraints = Constraints::new();
-			constraints.add(Constraint::Output);
-			constraints.add(Constraint::Group);
-			constraints.output = output;
-			if let Some(closest) = neighbor::closest_anywhere(focused, constraints) {
+			let mut criteria = Criteria::new();
+			criteria.add(Constraint::Output);
+			criteria.add(Constraint::Group);
+			criteria.output = output;
+			if let Some(closest) = neighbor::closest_anywhere(focused, criteria) {
 				let mut i3 = I3::connect().unwrap();
 				i3.run_command(format!("workspace {}", closest.name)).ok();
 			}
