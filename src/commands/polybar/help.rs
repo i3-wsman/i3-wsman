@@ -1,7 +1,7 @@
-use xdg;
 use std::path::PathBuf;
+use xdg;
 
-use super::{ this_command, this_command_abs, CMD };
+use super::{this_command, this_command_abs, CMD};
 
 fn get_polybar_cfg() -> PathBuf {
 	let xdg_dirs = xdg::BaseDirectories::with_prefix("polybar").unwrap();
@@ -12,7 +12,7 @@ fn get_polybar_cfg() -> PathBuf {
 			path.push("config.ini");
 			path.set_extension("ini");
 			path
-		})
+		}),
 	)
 }
 
@@ -23,7 +23,10 @@ pub fn exec(_: Vec<String>) {
 	//println!("        Starts polybar for all monitors and watches i3 for changes. ");
 	//println!("        Note: Do not include a [bar-name] if you have configured them in your i3-wsman config\n\r");
 	println!("    {} {} watch", this_command(), CMD.as_str());
-	println!("        Watches i3 for changes (not needed when using `{} start`)\n\r", CMD.as_str());
+	println!(
+		"        Watches i3 for changes (not needed when using `{} start`)\n\r",
+		CMD.as_str()
+	);
 	println!("    To setup polybar, add the following to your polybar config:\n\r");
 	println!("      [module/i3wsm]");
 	println!("      type = custom/ipc");
@@ -32,24 +35,39 @@ pub fn exec(_: Vec<String>) {
 	println!("    Or, use modules individually:\n\r");
 	println!("      [module/i3wsm-groups]");
 	println!("      type = custom/ipc");
-	println!("      hook-0 = {} {} module-groups", this_command_abs(), CMD.as_str());
+	println!(
+		"      hook-0 = {} {} module-groups",
+		this_command_abs(),
+		CMD.as_str()
+	);
 	println!("      initial = 1");
 	println!("      format = <label>");
 	println!("      format-font = 3\n\r");
 	println!("      [module/i3wsm-toggle-hidden]");
 	println!("      type = custom/ipc");
-	println!("      hook-0 = {} {} module-toggle-hidden", this_command_abs(), CMD.as_str());
+	println!(
+		"      hook-0 = {} {} module-toggle-hidden",
+		this_command_abs(),
+		CMD.as_str()
+	);
 	println!("      initial = 1");
 	println!("      format = <label>");
 	println!("      format-font = 3\n\r");
 	println!("      [module/i3wsm-workspaces]");
 	println!("      type = custom/ipc");
-	println!("      hook-0 = {} {} module-workspaces", this_command_abs(), CMD.as_str());
+	println!(
+		"      hook-0 = {} {} module-workspaces",
+		this_command_abs(),
+		CMD.as_str()
+	);
 	println!("      initial = 1");
 	println!("      format = <label>");
 	println!("      format-font = 3\n\r");
 
 	let cfg_path = get_polybar_cfg();
 	println!("    Your polybar config file should be:");
-	println!("        {}\n\r", cfg_path.into_os_string().into_string().unwrap());
+	println!(
+		"        {}\n\r",
+		cfg_path.into_os_string().into_string().unwrap()
+	);
 }

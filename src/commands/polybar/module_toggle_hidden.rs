@@ -1,9 +1,6 @@
 use crate::common::{
-	this_command_abs,
-	groups,
-	outputs,
-	polybar,
-	constraint::{ Constraints, Constraint },
+	constraint::{Constraint, Constraints},
+	groups, outputs, polybar, this_command_abs,
 };
 
 pub fn exec(_: Vec<String>) {
@@ -18,11 +15,7 @@ pub fn exec(_: Vec<String>) {
 	let show_hidden = groups::show_hidden_enabled();
 	let showing_all = active_groups.len() == 0 || groups == active_groups;
 
-	let mut toggle_hidden = polybar::Label::new(
-		polybar::defaults::TOGGLE_HIDDEN_LABEL,
-		1,
-		0
-	);
+	let mut toggle_hidden = polybar::Label::new(polybar::defaults::TOGGLE_HIDDEN_LABEL, 1, 0);
 
 	if showing_all {
 		toggle_hidden.fg_color = Some(polybar::defaults::TOGGLE_HIDDEN_ALL_FG.to_owned());

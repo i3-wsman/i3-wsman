@@ -3,17 +3,11 @@ extern crate i3_ipc;
 use i3_ipc::{Connect, I3};
 
 use crate::common::{
-	this_command,
-	polybar,
-	workspaces,
-	outputs,
 	constraint::{Constraint, Constraints},
+	outputs, polybar, this_command, workspaces,
 };
 
-use crate::{
-	DEFAULT_CMD, HELP_CMD, WILD_CMD,
-	Commands, CommandFn
-};
+use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
 use std::collections::HashMap;
 
 const ON_LAST_CREATE: &str = "create";
@@ -21,7 +15,6 @@ const ON_LAST_NOOP: &str = "noop";
 
 lazy_static! {
 	pub static ref CMD: String = "goto".to_string();
-
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
 		cmds.insert(WILD_CMD, exec as CommandFn);
@@ -32,11 +25,29 @@ lazy_static! {
 }
 
 pub fn help(_: Vec<String>) {
-	println!("{} {} <nth> [{}|{}]", this_command(), CMD.as_str(), ON_LAST_CREATE, ON_LAST_NOOP);
-	println!("    Focuses on the <nth> workspace, where <nth> is the position of the workspace\n\r");
-	println!("    {} {} <nth> {}", this_command(), CMD.as_str(), ON_LAST_CREATE);
+	println!(
+		"{} {} <nth> [{}|{}]",
+		this_command(),
+		CMD.as_str(),
+		ON_LAST_CREATE,
+		ON_LAST_NOOP
+	);
+	println!(
+		"    Focuses on the <nth> workspace, where <nth> is the position of the workspace\n\r"
+	);
+	println!(
+		"    {} {} <nth> {}",
+		this_command(),
+		CMD.as_str(),
+		ON_LAST_CREATE
+	);
 	println!("        If workspace doesn't exist, creates a new workspace.\n\r");
-	println!("    {} {} <nth> {}", this_command(), CMD.as_str(), ON_LAST_NOOP);
+	println!(
+		"    {} {} <nth> {}",
+		this_command(),
+		CMD.as_str(),
+		ON_LAST_NOOP
+	);
 	println!("        If workspace doesn't exist, do nothing.\n\r");
 }
 
@@ -53,7 +64,9 @@ pub fn exec(mut args: Vec<String>) {
 		return;
 	}
 
-	let last_action: String = if args.len() == 0 { "".to_string() } else {
+	let last_action: String = if args.len() == 0 {
+		"".to_string()
+	} else {
 		match args[0].as_str() {
 			ON_LAST_CREATE => args.remove(0),
 			ON_LAST_NOOP => args.remove(0),
@@ -83,7 +96,7 @@ pub fn exec(mut args: Vec<String>) {
 			_ => {}
 		};
 	} else {
-		let target_ws = workspaces.get(nth-1).unwrap();
+		let target_ws = workspaces.get(nth - 1).unwrap();
 		let mut i3 = I3::connect().unwrap();
 		let cmd = format!("workspace {}", target_ws.name);
 		i3.run_command(cmd).ok();

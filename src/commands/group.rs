@@ -1,23 +1,12 @@
 use crate::common::{
-	constraint,
-	constraint::Constraint,
-	groups,
-	moves,
-	outputs,
-	polybar,
-	this_command,
-	workspaces,
+	constraint, constraint::Constraint, groups, moves, outputs, polybar, this_command, workspaces,
 };
 
-use crate::{
-	DEFAULT_CMD, HELP_CMD, WILD_CMD,
-	Commands, CommandFn
-};
+use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
 use std::collections::HashMap;
 
 lazy_static! {
 	pub static ref CMD: String = "group".to_string();
-
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);
@@ -45,18 +34,38 @@ pub fn help(_: Vec<String>) {
 	println!("    Main commands:\n\r");
 	println!("      {} {} list", this_command(), CMD.as_str());
 	println!("          List all groups\n\r");
-	println!("      {} {} assign <workspace-name> <group-name>", this_command(), CMD.as_str());
+	println!(
+		"      {} {} assign <workspace-name> <group-name>",
+		this_command(),
+		CMD.as_str()
+	);
 	println!("          Assign a workspace to the group\n\r");
 	println!("    Manage active groups:\n\r");
 	println!("      {} {} list-active", this_command(), CMD.as_str());
 	println!("          List all active groups\n\r");
-	println!("      {} {} show <group-name>", this_command(), CMD.as_str());
+	println!(
+		"      {} {} show <group-name>",
+		this_command(),
+		CMD.as_str()
+	);
 	println!("          Add group to list of active groups\n\r");
-	println!("      {} {} hide <group-name>", this_command(), CMD.as_str());
+	println!(
+		"      {} {} hide <group-name>",
+		this_command(),
+		CMD.as_str()
+	);
 	println!("          Remove group to list of active groups\n\r");
-	println!("      {} {} toggle <group-name>", this_command(), CMD.as_str());
+	println!(
+		"      {} {} toggle <group-name>",
+		this_command(),
+		CMD.as_str()
+	);
 	println!("          Toggle the group on and off the list of active groups\n\r");
-	println!("      {} {} only <group-name>", this_command(), CMD.as_str());
+	println!(
+		"      {} {} only <group-name>",
+		this_command(),
+		CMD.as_str()
+	);
 	println!("          Set the group as the exclusive active group\n\r");
 	println!("      {} {} all <group-name>", this_command(), CMD.as_str());
 	println!("          Activate all groups\n\r");
@@ -80,7 +89,9 @@ pub fn assign(args: Vec<String>) {
 		args[1].clone()
 	} else if args.len() == 1 {
 		args[0].clone()
-	} else { "".to_owned() };
+	} else {
+		"".to_owned()
+	};
 
 	let possible_ws = if args.len() > 1 {
 		let ws_name = args[0].clone();

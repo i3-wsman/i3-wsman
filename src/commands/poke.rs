@@ -1,14 +1,10 @@
-use crate::common::{
-	this_command,
-	polybar,
-};
+use crate::common::{polybar, this_command};
 
-use crate::{DEFAULT_CMD, HELP_CMD, Commands, CommandFn};
+use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD};
 use std::collections::HashMap;
 
 lazy_static! {
 	pub static ref CMD: String = "poke-poly".to_string();
-
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);

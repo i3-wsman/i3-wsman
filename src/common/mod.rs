@@ -18,7 +18,7 @@ use std::path::PathBuf;
 #[derive(PartialEq, Copy, Clone)]
 pub enum Direction {
 	Right,
-	Left
+	Left,
 }
 
 pub fn this_command_abs() -> String {
@@ -29,4 +29,3 @@ pub fn this_command() -> String {
 	let path: PathBuf = env::current_exe().unwrap();
 	path.file_name().unwrap().to_str().unwrap().to_string()
 }
-

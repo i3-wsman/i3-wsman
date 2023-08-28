@@ -4,24 +4,14 @@ use i3_ipc::{Connect, I3};
 
 use crate::common::{
 	constraint::{Constraint, Constraints},
-	this_command,
-	Direction,
-	polybar,
-	neighbor,
-	workspaces,
-	outputs,
-	name,
+	name, neighbor, outputs, polybar, this_command, workspaces, Direction,
 };
 
-use crate::{
-	DEFAULT_CMD, HELP_CMD, WILD_CMD,
-	Commands, CommandFn
-};
+use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
 use std::collections::HashMap;
 
 lazy_static! {
 	pub static ref CMD: String = "reorder".to_string();
-
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);
@@ -67,9 +57,21 @@ pub fn exec(args: Vec<String>) {
 		let new_fs_name = name::change_prefix(&focused_ws_name, neighbor_ws_num);
 		let new_nr_name = name::change_prefix(&neighbor_ws_name, focused_ws_num);
 
-		i3.run_command(format!("rename workspace {} to reorderinprogress:{}", focused_ws_name, focused_ws_name)).ok();
-		i3.run_command(format!("rename workspace {} to {}", neighbor_ws_name, new_nr_name)).ok();
-		i3.run_command(format!("rename workspace reorderinprogress:{} to {}", focused_ws_name, new_fs_name)).ok();
+		i3.run_command(format!(
+			"rename workspace {} to reorderinprogress:{}",
+			focused_ws_name, focused_ws_name
+		))
+		.ok();
+		i3.run_command(format!(
+			"rename workspace {} to {}",
+			neighbor_ws_name, new_nr_name
+		))
+		.ok();
+		i3.run_command(format!(
+			"rename workspace reorderinprogress:{} to {}",
+			focused_ws_name, new_fs_name
+		))
+		.ok();
 	}
 
 	polybar::update();

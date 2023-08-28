@@ -1,9 +1,9 @@
-use i3_ipc::{Connect, I3, reply::Workspace};
+use i3_ipc::{reply::Workspace, Connect, I3};
 
 use crate::CONFIG;
 
-use super::{name, groups, outputs, moves};
-use super::constraint::{ Constraints, Constraint };
+use super::constraint::{Constraint, Constraints};
+use super::{groups, moves, name, outputs};
 
 fn get_ws() -> Vec<Workspace> {
 	let mut i3 = I3::connect().unwrap();
@@ -13,9 +13,7 @@ fn get_ws() -> Vec<Workspace> {
 pub fn maintenance() {
 	let mut workspaces = get_ws();
 
-	workspaces.sort_by(
-		|w1, w2| w1.num.cmp(&w2.num)
-	);
+	workspaces.sort_by(|w1, w2| w1.num.cmp(&w2.num));
 
 	let mut i: i32 = 0;
 	for ws in workspaces {
@@ -28,39 +26,45 @@ pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
 	let mut workspaces = get_ws();
 
 	if reverse {
-		workspaces.sort_by(
-			|w1, w2| w2.num.cmp(&w1.num)
-		);
+		workspaces.sort_by(|w1, w2| w2.num.cmp(&w1.num));
 	} else {
-		workspaces.sort_by(
-			|w1, w2| w1.num.cmp(&w2.num)
-		);
+		workspaces.sort_by(|w1, w2| w1.num.cmp(&w2.num));
 	}
 
 	if constraints.contains(Constraint::None) {
-		return workspaces
+		return workspaces;
 	}
 
 	workspaces
 		.iter()
 		.filter(|ws| {
 			if constraints.contains(Constraint::Output) && constraints.output != "none" {
-				if constraints.output != ws.output { return false }
+				if constraints.output != ws.output {
+					return false;
+				}
 			}
 
 			if constraints.contains(Constraint::AllowUrgent) && ws.urgent {
-				return true
+				return true;
 			}
 
 			if constraints.contains(Constraint::Focused) {
-				if !ws.focused { return false }
+				if !ws.focused {
+					return false;
+				}
 			}
 
 			if constraints.contains(Constraint::Visible) {
-				if !ws.visible { return false }
+				if !ws.visible {
+					return false;
+				}
 			} else if constraints.contains(Constraint::Hidden) {
-				if ws.visible { return false }
-				if ws.focused { return false }
+				if ws.visible {
+					return false;
+				}
+				if ws.focused {
+					return false;
+				}
 			}
 
 			let ws_group = name::group(ws.name.as_ref());
@@ -72,7 +76,8 @@ pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
 				};
 				let active_groups = groups::active(output.to_owned());
 				let available_groups = groups::available_output(output);
-				return !CONFIG.focus.hide_unassigned_workspaces || active_groups == available_groups
+				return !CONFIG.focus.hide_unassigned_workspaces
+					|| active_groups == available_groups;
 			}
 
 			if constraints.contains(Constraint::Group) {
@@ -87,7 +92,7 @@ pub fn get(constraints: Constraints, reverse: bool) -> Vec<Workspace> {
 				}
 			}
 
-			return true
+			return true;
 		})
 		.cloned()
 		.collect::<Vec<Workspace>>()
@@ -124,19 +129,13 @@ pub fn visible() -> Vec<Workspace> {
 pub fn focused() -> Workspace {
 	let workspaces = get_ws();
 
-	workspaces
-		.iter()
-		.find(|ws| ws.focused)
-		.unwrap()
-		.to_owned()
+	workspaces.iter().find(|ws| ws.focused).unwrap().to_owned()
 }
 
 pub fn by_name(name: String) -> Option<Workspace> {
 	let workspaces = get_ws();
 
-	let ws = workspaces
-		.iter()
-		.find(|ws| ws.name == name);
+	let ws = workspaces.iter().find(|ws| ws.name == name);
 
 	match ws {
 		Some(w) => Some(w.to_owned()),
@@ -147,9 +146,7 @@ pub fn by_name(name: String) -> Option<Workspace> {
 pub fn by_num(n: i32) -> Option<Workspace> {
 	let workspaces = get_ws();
 
-	let ws = workspaces
-		.iter()
-		.find(|ws| ws.num == n);
+	let ws = workspaces.iter().find(|ws| ws.num == n);
 
 	match ws {
 		Some(w) => Some(w.to_owned()),

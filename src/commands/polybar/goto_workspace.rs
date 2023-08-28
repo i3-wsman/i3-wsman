@@ -1,6 +1,6 @@
 use i3_ipc::{Connect, I3};
 
-use crate::common::{ polybar, workspaces };
+use crate::common::{polybar, workspaces};
 
 pub fn exec(args: Vec<String>) {
 	let wsarg = args[0].parse::<i32>();

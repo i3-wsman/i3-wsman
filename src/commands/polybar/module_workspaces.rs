@@ -1,11 +1,6 @@
 use crate::common::{
-	this_command_abs,
-	groups,
-	name,
-	outputs,
-	polybar,
-	workspaces,
-	constraint::{ Constraints, Constraint },
+	constraint::{Constraint, Constraints},
+	groups, name, outputs, polybar, this_command_abs, workspaces,
 };
 
 pub fn exec(_: Vec<String>) {
@@ -31,9 +26,7 @@ pub fn exec(_: Vec<String>) {
 		}
 	}
 
-	workspaces.sort_by(
-		|w1, w2| w1.num.cmp(&w2.num)
-	);
+	workspaces.sort_by(|w1, w2| w1.num.cmp(&w2.num));
 
 	let mut avail_constraints = Constraints::new();
 	avail_constraints.add(Constraint::Output);
@@ -43,9 +36,7 @@ pub fn exec(_: Vec<String>) {
 	let active_groups = groups::active(focused_output.clone());
 	let showing_all = active_groups.len() == 0 || groups == active_groups;
 	for ws in workspaces {
-		let mut ws_label_btn = polybar::Label::new(
-			polybar::defaults::WS_LABEL, 2, 0
-		);
+		let mut ws_label_btn = polybar::Label::new(polybar::defaults::WS_LABEL, 2, 0);
 		ws_label_btn.font = Some(3);
 
 		let cmd = this_command_abs() + " polybar goto " + ws.num.to_string().as_ref();
@@ -54,28 +45,18 @@ pub fn exec(_: Vec<String>) {
 		let ws_group = name::group(ws.name.as_str());
 		if ws_group == "" || active_groups.len() == 0 || active_groups.contains(&ws_group) {
 			if ws.focused {
-				ws_label_btn.set_colors(
-					polybar::defaults::FOCUSED_FG,
-					polybar::defaults::FOCUSED_BG
-				);
+				ws_label_btn
+					.set_colors(polybar::defaults::FOCUSED_FG, polybar::defaults::FOCUSED_BG);
 				ws_label_btn.label = polybar::defaults::FOCUSED_WS_LABEL.to_string();
 			} else if ws.urgent {
-				ws_label_btn.set_colors(
-					polybar::defaults::URGENT_FG,
-					polybar::defaults::URGENT_BG
-				);
+				ws_label_btn.set_colors(polybar::defaults::URGENT_FG, polybar::defaults::URGENT_BG);
 				ws_label_btn.label = polybar::defaults::URGENT_WS_LABEL.to_string();
 			} else if ws.visible {
-				ws_label_btn.set_colors(
-					polybar::defaults::VISIBLE_FG,
-					polybar::defaults::VISIBLE_BG
-				);
+				ws_label_btn
+					.set_colors(polybar::defaults::VISIBLE_FG, polybar::defaults::VISIBLE_BG);
 				ws_label_btn.label = polybar::defaults::VISIBLE_WS_LABEL.to_string();
 			} else {
-				ws_label_btn.set_colors(
-					polybar::defaults::FG,
-					polybar::defaults::BG
-				);
+				ws_label_btn.set_colors(polybar::defaults::FG, polybar::defaults::BG);
 			}
 
 			if ws_group == "" && !showing_all {
@@ -93,26 +74,23 @@ pub fn exec(_: Vec<String>) {
 			if ws.focused {
 				ws_label_btn.set_colors(
 					polybar::defaults::HIDDEN_FOCUSED_FG,
-					polybar::defaults::HIDDEN_FOCUSED_BG
+					polybar::defaults::HIDDEN_FOCUSED_BG,
 				);
 				ws_label_btn.label = polybar::defaults::HIDDEN_FOCUSED_WS_LABEL.to_string();
 			} else if ws.urgent {
 				ws_label_btn.set_colors(
 					polybar::defaults::HIDDEN_URGENT_FG,
-					polybar::defaults::HIDDEN_URGENT_BG
+					polybar::defaults::HIDDEN_URGENT_BG,
 				);
 				ws_label_btn.label = polybar::defaults::HIDDEN_URGENT_WS_LABEL.to_string();
 			} else if ws.visible {
 				ws_label_btn.set_colors(
 					polybar::defaults::HIDDEN_VISIBLE_FG,
-					polybar::defaults::HIDDEN_VISIBLE_BG
+					polybar::defaults::HIDDEN_VISIBLE_BG,
 				);
 				ws_label_btn.label = polybar::defaults::HIDDEN_VISIBLE_WS_LABEL.to_string();
 			} else {
-				ws_label_btn.set_colors(
-					polybar::defaults::HIDDEN_FG,
-					polybar::defaults::HIDDEN_BG
-				);
+				ws_label_btn.set_colors(polybar::defaults::HIDDEN_FG, polybar::defaults::HIDDEN_BG);
 				ws_label_btn.label = polybar::defaults::HIDDEN_WS_LABEL.to_string();
 			}
 		}

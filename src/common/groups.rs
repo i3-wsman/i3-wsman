@@ -1,16 +1,13 @@
 use crate::CONFIG;
 
-use i3_ipc::{ Connect, I3 };
+use i3_ipc::{Connect, I3};
 
 use crate::common::config::GroupSortMethod;
 use crate::common::state::State;
 
 use super::{
-	constraint::{Constraints, Constraint},
-	name,
-	state,
-	neighbor,
-	workspaces,
+	constraint::{Constraint, Constraints},
+	name, neighbor, state, workspaces,
 };
 
 use std::collections::HashSet;
@@ -37,7 +34,9 @@ pub fn available(constraints: Constraints) -> Vec<String> {
 
 	let mut final_groups = vec![];
 
-	if CONFIG.groups.sort_method == GroupSortMethod::PreserveOrder && CONFIG.groups.sort_default_first != true {
+	if CONFIG.groups.sort_method == GroupSortMethod::PreserveOrder
+		&& CONFIG.groups.sort_default_first != true
+	{
 		final_groups.extend(groups);
 		final_groups.extend(CONFIG.groups.default_groups.to_owned());
 	} else {
@@ -117,12 +116,10 @@ fn update_groups(mut state: State, output: String, groups: Vec<String>) -> Vec<S
 	if CONFIG.focus.auto_focus_nearest_group == true {
 		let focused = workspaces::visible_or_focused(&output);
 		let group = name::group(&focused.name);
-		if (
-			!groups.contains(&group) && group.len() > 0
-		) || (
-			CONFIG.focus.hide_unassigned_workspaces == true &&
-			groups != available_output(output.to_owned())
-		) {
+		if (!groups.contains(&group) && group.len() > 0)
+			|| (CONFIG.focus.hide_unassigned_workspaces == true
+				&& groups != available_output(output.to_owned()))
+		{
 			let mut constraints = Constraints::new();
 			constraints.add(Constraint::Output);
 			constraints.add(Constraint::Group);

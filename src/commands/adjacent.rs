@@ -3,26 +3,14 @@ extern crate i3_ipc;
 use i3_ipc::{Connect, I3};
 
 use crate::common::{
-	Direction,
-	this_command,
-	groups,
-	polybar,
-	workspaces,
-	moves,
-	outputs,
-	name,
-	neighbor,
+	groups, moves, name, neighbor, outputs, polybar, this_command, workspaces, Direction,
 };
 
-use crate::{
-	DEFAULT_CMD, HELP_CMD, WILD_CMD,
-	Commands, CommandFn
-};
+use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
 use std::collections::HashMap;
 
 lazy_static! {
 	pub static ref CMD: String = "adjacent".to_string();
-
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);
@@ -42,7 +30,11 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(args: Vec<String>) {
-	let dir = if args[0] == "left" { Direction::Left } else { Direction::Right };
+	let dir = if args[0] == "left" {
+		Direction::Left
+	} else {
+		Direction::Right
+	};
 
 	let focused_ws = workspaces::focused();
 

@@ -75,11 +75,7 @@ pub fn from_vec(nouns: Vec<String>) -> Constraints {
 	for noun in nouns {
 		if let Ok(c) = noun.parse::<Constraint>() {
 			if noun.contains(&"output=") {
-				constraints.output = noun
-					.split("=")
-					.nth(1)
-					.unwrap_or("none")
-					.to_string();
+				constraints.output = noun.split("=").nth(1).unwrap_or("none").to_string();
 			} else if c == Constraint::Output && !constraints.contains(c) {
 				constraints.output = outputs::focused();
 			}

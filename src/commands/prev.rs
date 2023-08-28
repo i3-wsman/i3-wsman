@@ -3,20 +3,11 @@ extern crate i3_ipc;
 use i3_ipc::{Connect, I3};
 
 use crate::common::{
+	constraint, constraint::Constraint, neighbor, outputs, polybar, this_command, workspaces,
 	Direction,
-	this_command,
-	polybar,
-	workspaces,
-	outputs,
-	neighbor,
-	constraint,
-	constraint::Constraint,
 };
 
-use crate::{
-	DEFAULT_CMD, HELP_CMD, WILD_CMD,
-	Commands, CommandFn
-};
+use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
 use std::collections::HashMap;
 
 const ON_LAST_CREATE: &str = "create";
@@ -25,7 +16,6 @@ const ON_LAST_STOP: &str = "stop";
 
 lazy_static! {
 	pub static ref CMD: String = "prev".to_string();
-
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);
@@ -36,15 +26,40 @@ lazy_static! {
 }
 
 pub fn help(_: Vec<String>) {
-	println!("{} {} [{}|{}|{}] [...constraints]", this_command(), CMD.as_str(), ON_LAST_CREATE, ON_LAST_LOOP, ON_LAST_STOP);
+	println!(
+		"{} {} [{}|{}|{}] [...constraints]",
+		this_command(),
+		CMD.as_str(),
+		ON_LAST_CREATE,
+		ON_LAST_LOOP,
+		ON_LAST_STOP
+	);
 	println!("    Focuses on the previous workspace\n\r");
-	println!("    {} {} {} [...constraints]", this_command(), CMD.as_str(), ON_LAST_CREATE);
+	println!(
+		"    {} {} {} [...constraints]",
+		this_command(),
+		CMD.as_str(),
+		ON_LAST_CREATE
+	);
 	println!("        On first workspace, create a new workspace\n\r");
-	println!("    {} {} {} [...constraints]  \t", this_command(), CMD.as_str(), ON_LAST_LOOP);
+	println!(
+		"    {} {} {} [...constraints]  \t",
+		this_command(),
+		CMD.as_str(),
+		ON_LAST_LOOP
+	);
 	println!("        On first workspace, loop back to the first workspace\n\r");
-	println!("    {} {} {} [...constraints]  \t", this_command(), CMD.as_str(), ON_LAST_STOP);
+	println!(
+		"    {} {} {} [...constraints]  \t",
+		this_command(),
+		CMD.as_str(),
+		ON_LAST_STOP
+	);
 	println!("        On first workspace, do nothing\n\r");
-	println!("    For constraints, run: {} help constraints\n\r", this_command());
+	println!(
+		"    For constraints, run: {} help constraints\n\r",
+		this_command()
+	);
 }
 
 pub fn exec(mut args: Vec<String>) {

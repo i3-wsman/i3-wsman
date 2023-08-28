@@ -1,11 +1,6 @@
 use crate::common::{
-	this_command_abs,
-	groups,
-	name,
-	outputs,
-	polybar,
-	workspaces,
-	constraint::{ Constraints, Constraint },
+	constraint::{Constraint, Constraints},
+	groups, name, outputs, polybar, this_command_abs, workspaces,
 };
 
 pub fn exec(mut args: Vec<String>) {
@@ -56,36 +51,34 @@ pub fn exec(mut args: Vec<String>) {
 		group_btn.set_actions(
 			Some(left_click),
 			Some(secondary_click.clone()),
-			Some(secondary_click)
+			Some(secondary_click),
 		);
 
 		if showing_all {
 			if &g == &focused_group {
 				group_btn.set_colors(
 					polybar::defaults::GROUP_FOCUSED_FG,
-					polybar::defaults::GROUP_FOCUSED_BG
+					polybar::defaults::GROUP_FOCUSED_BG,
 				);
 			} else {
-				group_btn.set_colors(
-					polybar::defaults::GROUP_FG,
-					polybar::defaults::GROUP_BG
-				);
+				group_btn.set_colors(polybar::defaults::GROUP_FG, polybar::defaults::GROUP_BG);
 			}
 		} else if active_groups.contains(&g) {
 			group_btn.set_colors(
 				polybar::defaults::GROUP_ACTIVE_FG,
-				polybar::defaults::GROUP_ACTIVE_BG
+				polybar::defaults::GROUP_ACTIVE_BG,
 			);
-		} else { // Hidden
+		} else {
+			// Hidden
 			if &g == &focused_group {
 				group_btn.set_colors(
 					polybar::defaults::GROUP_HIDDEN_FOCUSED_FG,
-					polybar::defaults::GROUP_HIDDEN_FOCUSED_BG
+					polybar::defaults::GROUP_HIDDEN_FOCUSED_BG,
 				);
 			} else {
 				group_btn.set_colors(
 					polybar::defaults::GROUP_HIDDEN_FG,
-					polybar::defaults::GROUP_HIDDEN_BG
+					polybar::defaults::GROUP_HIDDEN_BG,
 				);
 			}
 		}

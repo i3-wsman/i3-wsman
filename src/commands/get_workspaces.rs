@@ -1,15 +1,10 @@
-use crate::common::{
-	this_command,
-	constraint,
-	workspaces,
-};
+use crate::common::{constraint, this_command, workspaces};
 
-use crate::{DEFAULT_CMD, HELP_CMD, WILD_CMD, Commands, CommandFn};
+use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
 use std::collections::HashMap;
 
 lazy_static! {
 	pub static ref CMD: String = "get-workspaces".to_string();
-
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);
@@ -22,7 +17,10 @@ lazy_static! {
 pub fn help(_: Vec<String>) {
 	println!("{} {} [...constraints]", this_command(), CMD.as_str());
 	println!("    Returns workspaces matching the constraints.\n\r");
-	println!("    For constraints, run: {} help constraints", this_command());
+	println!(
+		"    For constraints, run: {} help constraints",
+		this_command()
+	);
 }
 
 pub fn exec(args: Vec<String>) {

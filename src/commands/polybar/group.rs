@@ -1,4 +1,4 @@
-use crate::common::{ groups, outputs, polybar };
+use crate::common::{groups, outputs, polybar};
 
 pub fn exec(args: Vec<String>) {
 	let group_action = args[0].clone();
@@ -9,8 +9,9 @@ pub fn exec(args: Vec<String>) {
 	} else if group_action == "only" {
 		let group_name = args[1].clone();
 		groups::only_toggle(group_name, outputs::focused())
-	} else { // "all"
-		groups::all( outputs::focused())
+	} else {
+		// "all"
+		groups::all(outputs::focused())
 	};
 
 	let output = serde_json::to_string_pretty(&groups).unwrap();

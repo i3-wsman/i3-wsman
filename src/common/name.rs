@@ -41,4 +41,3 @@ pub fn set_group(name: &str, group: &str) -> String {
 		format!("{}:{}:{}", parts[0], group, parts[2..].join(":"))
 	}
 }
-

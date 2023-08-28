@@ -2,12 +2,11 @@ use crate::CONFIG;
 // use serde_json;
 use toml;
 
-use crate::{DEFAULT_CMD, WILD_CMD, HELP_CMD, Commands, CommandFn};
+use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
 use std::collections::HashMap;
 
 lazy_static! {
 	pub static ref CMD: String = "config".to_string();
-
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);
@@ -17,7 +16,7 @@ lazy_static! {
 	};
 }
 
-pub fn help(_: Vec<String>) { }
+pub fn help(_: Vec<String>) {}
 
 pub fn exec(_: Vec<String>) {
 	println!("{}", toml::to_string_pretty(&CONFIG.clone()).unwrap());

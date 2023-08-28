@@ -1,8 +1,8 @@
-use xdg;
-use toml;
-use std::path::PathBuf;
 use std::fs::File;
 use std::io::Read;
+use std::path::PathBuf;
+use toml;
+use xdg;
 
 use super::Config;
 
@@ -15,7 +15,7 @@ fn config_file() -> PathBuf {
 			path.push("i3-wsman");
 			path.set_extension("toml");
 			path
-		})
+		}),
 	)
 }
 

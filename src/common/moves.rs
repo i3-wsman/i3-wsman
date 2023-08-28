@@ -1,6 +1,6 @@
-use i3_ipc::{Connect, I3, reply::Workspace};
+use i3_ipc::{reply::Workspace, Connect, I3};
 
-use super::{Direction, name, neighbor, workspaces};
+use super::{name, neighbor, workspaces, Direction};
 
 pub fn scoot(ws: Workspace) -> Workspace {
 	let prev_neighbor = neighbor::closest(ws.clone(), Direction::Left);
@@ -39,7 +39,8 @@ pub fn reorder(ws: Workspace, new_pos: i32) -> String {
 	};
 
 	let mut i3 = I3::connect().unwrap();
-	i3.run_command(format!("rename workspace {} to {}", ws_name, new_name)).ok();
+	i3.run_command(format!("rename workspace {} to {}", ws_name, new_name))
+		.ok();
 
 	new_name
 }
@@ -51,8 +52,11 @@ pub fn rename(ws: Workspace, new_name: String) -> String {
 	let new_name = format!("{}:{}", ws_num, new_name);
 
 	let mut i3 = I3::connect().unwrap();
-	i3.run_command(format!("rename workspace \"{}\" to \"{}\"", ws_name, new_name)).ok();
+	i3.run_command(format!(
+		"rename workspace \"{}\" to \"{}\"",
+		ws_name, new_name
+	))
+	.ok();
 
 	new_name
 }
-

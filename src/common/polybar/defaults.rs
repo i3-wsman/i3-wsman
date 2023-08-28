@@ -46,8 +46,6 @@ pub const TOGGLE_HIDDEN_ALL_FG: &str = "00000000";
 pub const TOGGLE_HIDDEN_ON_FG: &str = VISIBLE_FG;
 pub const TOGGLE_HIDDEN_OFF_FG: &str = "33fdfefe";
 
-
-
 // Group
 pub const GROUP_FG: &str = "ccfdfefe";
 pub const GROUP_BG: &str = "82010202";

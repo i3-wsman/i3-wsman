@@ -1,12 +1,12 @@
-mod common;
 mod commands;
+mod common;
 
 #[macro_use]
 extern crate lazy_static;
 
 use std::collections::HashMap;
 
-use crate::common::config::{ Config, load::load_cfg };
+use crate::common::config::{load::load_cfg, Config};
 
 lazy_static! {
 	pub static ref CONFIG: Config = load_cfg();
@@ -29,44 +29,78 @@ fn main() {
 
 	let mut cmds: CommandMap = HashMap::new();
 
-	cmds.insert(commands::goto::CMD.as_str(), commands::goto::SUBCMDS.clone());
-	cmds.insert(commands::next::CMD.as_str(), commands::next::SUBCMDS.clone());
-	cmds.insert(commands::prev::CMD.as_str(), commands::prev::SUBCMDS.clone());
+	cmds.insert(
+		commands::goto::CMD.as_str(),
+		commands::goto::SUBCMDS.clone(),
+	);
+	cmds.insert(
+		commands::next::CMD.as_str(),
+		commands::next::SUBCMDS.clone(),
+	);
+	cmds.insert(
+		commands::prev::CMD.as_str(),
+		commands::prev::SUBCMDS.clone(),
+	);
 
-	cmds.insert(commands::adjacent::CMD.as_str(), commands::adjacent::SUBCMDS.clone());
-	cmds.insert(commands::reorder::CMD.as_str(), commands::reorder::SUBCMDS.clone());
+	cmds.insert(
+		commands::adjacent::CMD.as_str(),
+		commands::adjacent::SUBCMDS.clone(),
+	);
+	cmds.insert(
+		commands::reorder::CMD.as_str(),
+		commands::reorder::SUBCMDS.clone(),
+	);
 	// @TODO: move-container-to
 
-	cmds.insert(commands::group::CMD.as_str(), commands::group::SUBCMDS.clone());
+	cmds.insert(
+		commands::group::CMD.as_str(),
+		commands::group::SUBCMDS.clone(),
+	);
 
-	cmds.insert(commands::polybar::CMD.as_str(), commands::polybar::SUBCMDS.clone());
-	cmds.insert(commands::poke::CMD.as_str(), commands::poke::SUBCMDS.clone());
+	cmds.insert(
+		commands::polybar::CMD.as_str(),
+		commands::polybar::SUBCMDS.clone(),
+	);
+	cmds.insert(
+		commands::poke::CMD.as_str(),
+		commands::poke::SUBCMDS.clone(),
+	);
 
-	cmds.insert(commands::get_workspaces::CMD.as_str(), commands::get_workspaces::SUBCMDS.clone());
+	cmds.insert(
+		commands::get_workspaces::CMD.as_str(),
+		commands::get_workspaces::SUBCMDS.clone(),
+	);
 
-	cmds.insert(commands::config::CMD.as_str(), commands::config::SUBCMDS.clone());
+	cmds.insert(
+		commands::config::CMD.as_str(),
+		commands::config::SUBCMDS.clone(),
+	);
 
 	let help_order = vec![
 		commands::goto::CMD.as_str(),
 		commands::next::CMD.as_str(),
 		commands::prev::CMD.as_str(),
-
 		commands::adjacent::CMD.as_str(),
 		commands::reorder::CMD.as_str(),
-
 		commands::group::CMD.as_str(),
-
 		commands::polybar::CMD.as_str(),
 		commands::poke::CMD.as_str(),
-
 		commands::get_workspaces::CMD.as_str(),
 	];
 
-	let command = if args.len() > 1 { args[1].as_str() } else { DEFAULT_CMD };
+	let command = if args.len() > 1 {
+		args[1].as_str()
+	} else {
+		DEFAULT_CMD
+	};
 
 	match cmds.get(command) {
 		Some(cmd_map) => {
-			let subcmd = if args.len() > 2 { args[2].as_str() } else { DEFAULT_CMD };
+			let subcmd = if args.len() > 2 {
+				args[2].as_str()
+			} else {
+				DEFAULT_CMD
+			};
 			match cmd_map.get(subcmd) {
 				Some(func) if subcmd == DEFAULT_CMD => {
 					func(args[2..].to_vec());
@@ -97,9 +131,13 @@ fn main() {
 
 			if args.len() < 3 || args[2].as_str() != "constraints" {
 				for cmd_str in help_order {
-					if !cmds.contains_key(cmd_str) { continue; }
+					if !cmds.contains_key(cmd_str) {
+						continue;
+					}
 					let cmd = cmds.get(cmd_str).unwrap();
-					if !cmd.contains_key(HELP_CMD) { continue; }
+					if !cmd.contains_key(HELP_CMD) {
+						continue;
+					}
 					let help_fn = cmd.get("help").unwrap();
 					help_fn(vec![]);
 					println!("");
@@ -135,6 +173,8 @@ fn help_constraints(_: Vec<String>) {
 	println!("    output\t\tWorkspace is on focused display");
 	println!("    output=xyz\t\tWorkspace is on display 'xyz'\n\r");
 	println!("    For instance, to get all hidden workspaces on the current monitor:");
-	println!("        {} get-workspaces hidden output\n\r", common::this_command());
+	println!(
+		"        {} get-workspaces hidden output\n\r",
+		common::this_command()
+	);
 }
-

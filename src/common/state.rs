@@ -1,13 +1,13 @@
-use std::env;
+use fs2::FileExt;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::env;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
-use fs2::FileExt;
 
-use crate::CONFIG;
 use crate::common::outputs;
+use crate::CONFIG;
 
 type StateGroups = HashMap<String, Vec<String>>;
 
@@ -92,7 +92,7 @@ pub fn get() -> State {
 
 	if serialized_data.trim().len() == 0 {
 		set(default());
-		return get()
+		return get();
 	}
 
 	serde_json::from_str(&serialized_data).unwrap_or_else(|_| {

@@ -4,10 +4,26 @@ use std::fmt;
 use std::process::Command;
 
 pub fn update() {
-	Command::new("polybar-msg").arg("action").arg("#i3wsm.hook.0").output().ok();
-	Command::new("polybar-msg").arg("action").arg("#i3wsm-groups.hook.0").output().ok();
-	Command::new("polybar-msg").arg("action").arg("#i3wsm-workspaces.hook.0").output().ok();
-	Command::new("polybar-msg").arg("action").arg("#i3wsm-toggle-hidden.hook.0").output().ok();
+	Command::new("polybar-msg")
+		.arg("action")
+		.arg("#i3wsm.hook.0")
+		.output()
+		.ok();
+	Command::new("polybar-msg")
+		.arg("action")
+		.arg("#i3wsm-groups.hook.0")
+		.output()
+		.ok();
+	Command::new("polybar-msg")
+		.arg("action")
+		.arg("#i3wsm-workspaces.hook.0")
+		.output()
+		.ok();
+	Command::new("polybar-msg")
+		.arg("action")
+		.arg("#i3wsm-toggle-hidden.hook.0")
+		.output()
+		.ok();
 }
 
 pub const LEFT_CLICK: &str = "left_click";
@@ -53,7 +69,9 @@ impl Label {
 	pub fn set_action(&mut self, click_type: &str, cmd: &str) {
 		let cur_actions = self.actions.clone();
 
-		let mut actions = if let Some(a) = cur_actions { a } else {
+		let mut actions = if let Some(a) = cur_actions {
+			a
+		} else {
 			Actions {
 				left_click: None,
 				middle_click: None,
@@ -62,16 +80,21 @@ impl Label {
 		};
 
 		match click_type {
-			LEFT_CLICK => { actions.left_click = Some(cmd.to_owned()) },
-			MIDDLE_CLICK => { actions.middle_click = Some(cmd.to_owned()) },
-			RIGHT_CLICK => { actions.right_click = Some(cmd.to_owned()) },
+			LEFT_CLICK => actions.left_click = Some(cmd.to_owned()),
+			MIDDLE_CLICK => actions.middle_click = Some(cmd.to_owned()),
+			RIGHT_CLICK => actions.right_click = Some(cmd.to_owned()),
 			_ => {}
 		};
 
 		self.actions = Some(actions);
 	}
 
-	pub fn set_actions(&mut self, l_action: Option<String>, r_action: Option<String>, m_action: Option<String>) {
+	pub fn set_actions(
+		&mut self,
+		l_action: Option<String>,
+		r_action: Option<String>,
+		m_action: Option<String>,
+	) {
 		self.actions = Some(Actions {
 			left_click: l_action,
 			middle_click: m_action,
