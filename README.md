@@ -148,6 +148,8 @@ exec --no-startup-id "i3-wsman polybar watch"
 
 ```ini
 [bar/my-bar]
+; Must enable ipc!
+enable-ipc = true
 ; ...
 modules-left = i3wsm-groups i3wsm-workspaces i3wsm-toggle-hidden
 
