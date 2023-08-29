@@ -1,10 +1,4 @@
-pub mod adjacent;
-pub mod config;
-pub mod get_workspaces;
-pub mod goto;
+pub mod actions;
+pub mod cli;
 // pub mod group;
-pub mod next;
-// pub mod poke;
 // pub mod polybar;
-pub mod prev;
-pub mod reorder;
