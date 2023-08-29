@@ -176,11 +176,9 @@ impl FromStr for NavigationBehavior {
 	type Err = ();
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s.to_lowercase().as_ref() {
-			"create" => Ok(NavigationBehavior::Create),
-			"loop" => Ok(NavigationBehavior::Loop),
-			"stop" => Ok(NavigationBehavior::Stop),
-			_ => {
+		match Self::from_arg(s) {
+			Ok(b) => Ok(b),
+			Err(_) => {
 				eprintln!("Warning: Invalid value '{}' for 'navigation.*.behavior' or 'navigation.prev_behavior'. Falling back to 'Create'.", s);
 				Ok(NavigationBehavior::Create)
 			}
@@ -189,6 +187,25 @@ impl FromStr for NavigationBehavior {
 }
 
 impl NavigationBehavior {
+	pub fn from_arg(arg: &str) -> Result<Self, ()> {
+		match arg.to_lowercase().as_ref() {
+			"create" => Ok(NavigationBehavior::Create),
+			"loop" => Ok(NavigationBehavior::Loop),
+			"stop" => Ok(NavigationBehavior::Stop),
+			_ => Err(()),
+		}
+	}
+
+	pub fn from_argv(argv: &mut Vec<String>) -> Result<Self, ()> {
+		match Self::from_arg(argv.get(0).unwrap_or(&"".to_string())) {
+			Ok(b) => {
+				argv.remove(0);
+				Ok(b)
+			}
+			Err(_) => Ok(Self::Create),
+		}
+	}
+
 	#[allow(dead_code)]
 	pub fn to_string(&self) -> String {
 		match self {

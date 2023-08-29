@@ -49,18 +49,22 @@ pub fn get_matching_workspaces(criteria: Criteria) -> Vec<Workspace> {
 		.collect()
 }
 
-pub fn get_filtered_workspaces() -> Vec<Workspace> {
+pub fn get_filtered_criteria(/*force_output*/ _: bool) -> Criteria {
 	let mut criteria = Criteria::new();
 	criteria.add(Constraint::Group);
 	criteria.add(Constraint::NoGroup);
 	criteria.add(Constraint::AllowUrgent);
 
-	// pin-workspaces == true {
+	// force_output || pin-workspaces == true {
 	criteria.add(Constraint::Output);
 	criteria.output = Some(get_current_output());
 	// }
 
-	get_matching_workspaces(criteria)
+	criteria
+}
+
+pub fn get_filtered_workspaces(force_output: bool) -> Vec<Workspace> {
+	get_matching_workspaces(get_filtered_criteria(force_output))
 }
 
 // Outputs
