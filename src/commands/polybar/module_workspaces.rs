@@ -16,7 +16,7 @@ pub fn exec(_: Vec<String>) {
 	if !show_hidden {
 		show_constraints.add(Constraint::Group);
 	}
-	if POLYBAR_CFG.i3_wsman.pin_workspaces == true {
+	if POLYBAR_CFG.pin_workspaces() {
 		show_constraints.add(Constraint::Output);
 		show_constraints.output = focused_output.clone();
 	}
@@ -33,7 +33,7 @@ pub fn exec(_: Vec<String>) {
 	workspaces.sort_by(|w1, w2| w1.num.cmp(&w2.num));
 
 	let mut avail_constraints = Constraints::new();
-	if POLYBAR_CFG.i3_wsman.pin_workspaces == true {
+	if POLYBAR_CFG.pin_workspaces() {
 		avail_constraints.add(Constraint::Output);
 		avail_constraints.output = focused_output.clone();
 	}

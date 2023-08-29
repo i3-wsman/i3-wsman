@@ -1,11 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	common::{
-		constraint::{Constraint, Criteria},
-		dedup_vec,
-	},
-	i3::{self, Output},
+	common::{constraint::Constraint, dedup_vec},
+	i3::{self, get_current_output, get_filtered_criteria, get_outputs, Output},
 	state, CONFIG,
 };
 
@@ -15,10 +12,26 @@ pub enum GroupSortMethod {
 	PreserveOrder,
 }
 
+pub fn show_hidden_enabled() -> bool {
+	let state = state::get();
+	state.show_hidden
+}
+
+pub fn toggle_show_hidden() -> bool {
+	let mut state = state::get();
+
+	let new_state = !state.show_hidden;
+	state.show_hidden = new_state;
+
+	state::set(state);
+
+	new_state
+}
+
 fn get_output(output: Option<Output>) -> Output {
 	match output {
 		Some(o) => o,
-		None => i3::get_current_output(),
+		None => get_current_output(),
 	}
 }
 
@@ -55,7 +68,11 @@ pub fn list_for_output(output: Option<Output>) -> Vec<String> {
 pub fn active_for_output(output: Option<Output>) -> Vec<String> {
 	let output = get_output(output);
 
-	let mut groups = output.groups();
+	let mut groups = output.active_groups();
+	if groups.len() == 0 {
+		groups = list_for_output(Some(output));
+	}
+
 	groups.extend(CONFIG.groups.always_visible.to_owned());
 	groups.sort();
 	groups.dedup();
@@ -85,13 +102,24 @@ fn update_groups(output: Output, mut groups: Vec<String>) -> Vec<String> {
 	state::set(state);
 
 	if CONFIG.focus.auto_focus_nearest_group {
-		let mut criteria = Criteria::new();
-		criteria.add(Constraint::Output);
-		criteria.output = Some(output);
+		let cur_output = get_current_output();
 
-		let next = i3::get_focused_workspace().get_closest_neighbor(Some(criteria), None);
-		if let Some(ws) = next {
-			i3::run_command(format!("workspace {}", ws.full_name()));
+		let outputs = if CONFIG.groups.unique_groups_on_outputs {
+			vec![cur_output]
+		} else {
+			let mut outputs = get_outputs();
+			outputs.retain(|o| o.name() != cur_output.name());
+			outputs.push(cur_output);
+			outputs
+		};
+
+		for o in outputs {
+			let mut criteria = get_filtered_criteria(true);
+			criteria.output = Some(o);
+			let next = i3::get_focused_workspace().get_closest_neighbor(Some(criteria), None);
+			if let Some(ws) = next {
+				i3::run_command(format!("workspace {}", ws.full_name()));
+			}
 		}
 	}
 

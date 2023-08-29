@@ -9,11 +9,12 @@ mod common;
 mod config;
 mod groups;
 mod i3;
+mod polybar;
 mod state;
 
 lazy_static! {
 	pub static ref CONFIG: config::global::Config = config::global::load_cfg();
-	pub static ref POLYBAR_CFG: config::polybar::Config = config::polybar::load_cfg();
+	pub static ref POLYBAR_CFG: config::polybar::Config = Default::default();
 	pub static ref I3: I3Stream = I3_api::connect().unwrap();
 }
 
@@ -58,10 +59,10 @@ fn main() {
 	// 	commands::group::SUBCMDS.clone(),
 	// );
 
-	// cmds.insert(
-	// 	commands::polybar::CMD.as_str(),
-	// 	commands::polybar::SUBCMDS.clone(),
-	// );
+	cmds.insert(
+		commands::polybar::CMD.as_str(),
+		commands::polybar::SUBCMDS.clone(),
+	);
 
 	cmds.insert(
 		commands::cli::get_workspaces::CMD.as_str(),
@@ -80,7 +81,7 @@ fn main() {
 		commands::actions::adjacent::CMD.as_str(),
 		commands::actions::reorder::CMD.as_str(),
 		// commands::group::CMD.as_str(),
-		// commands::polybar::CMD.as_str(),
+		commands::polybar::CMD.as_str(),
 		commands::cli::get_workspaces::CMD.as_str(),
 	];
 

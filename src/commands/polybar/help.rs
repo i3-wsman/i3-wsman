@@ -73,5 +73,5 @@ pub fn exec(_: Vec<String>) {
 		cfg_path.into_os_string().into_string().unwrap()
 	);
 
-	println!("{:?}", *POLYBAR_CFG);
+	println!("{}", *POLYBAR_CFG);
 }
