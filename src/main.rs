@@ -30,10 +30,10 @@ fn main() {
 
 	let mut cmds: CommandMap = HashMap::new();
 
-	// cmds.insert(
-	// 	commands::goto::CMD.as_str(),
-	// 	commands::goto::SUBCMDS.clone(),
-	// );
+	cmds.insert(
+		commands::goto::CMD.as_str(),
+		commands::goto::SUBCMDS.clone(),
+	);
 	// cmds.insert(
 	// 	commands::next::CMD.as_str(),
 	// 	commands::next::SUBCMDS.clone(),
@@ -78,7 +78,7 @@ fn main() {
 	);
 
 	let help_order: Vec<&str> = vec![
-		// commands::goto::CMD.as_str(),
+		commands::goto::CMD.as_str(),
 		// commands::next::CMD.as_str(),
 		// commands::prev::CMD.as_str(),
 		commands::adjacent::CMD.as_str(),

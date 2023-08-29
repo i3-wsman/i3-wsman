@@ -125,8 +125,12 @@ impl Workspace {
 		}
 
 		if criteria.contains(Constraint::Output) {
-			match criteria.output {
-				Some(output) => return output.name() == self.output(),
+			match criteria.output.clone() {
+				Some(output) => {
+					if output.name() != self.output() {
+						return false;
+					}
+				}
 				None => {}
 			}
 		}
@@ -162,7 +166,7 @@ impl Workspace {
 		}
 
 		if criteria.contains(Constraint::Group) {
-			let output = match criteria.output {
+			let output = match criteria.output.clone() {
 				Some(o) => o,
 				None => get_current_output(),
 			};

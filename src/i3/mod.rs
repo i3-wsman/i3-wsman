@@ -49,6 +49,20 @@ pub fn get_matching_workspaces(criteria: Criteria) -> Vec<Workspace> {
 		.collect()
 }
 
+pub fn get_filtered_workspaces() -> Vec<Workspace> {
+	let mut criteria = Criteria::new();
+	criteria.add(Constraint::Group);
+	criteria.add(Constraint::NoGroup);
+	criteria.add(Constraint::AllowUrgent);
+
+	// pin-workspaces == true {
+	criteria.add(Constraint::Output);
+	criteria.output = Some(get_current_output());
+	// }
+
+	get_matching_workspaces(criteria)
+}
+
 // Outputs
 fn get_outputs_from_i3() -> Vec<reply::Output> {
 	let mut i3 = I3::connect().unwrap();
