@@ -47,10 +47,10 @@ fn main() {
 		commands::adjacent::CMD.as_str(),
 		commands::adjacent::SUBCMDS.clone(),
 	);
-	// cmds.insert(
-	// 	commands::reorder::CMD.as_str(),
-	// 	commands::reorder::SUBCMDS.clone(),
-	// );
+	cmds.insert(
+		commands::reorder::CMD.as_str(),
+		commands::reorder::SUBCMDS.clone(),
+	);
 	// // @TODO: move-container-to
 
 	// cmds.insert(
@@ -82,7 +82,7 @@ fn main() {
 		commands::next::CMD.as_str(),
 		commands::prev::CMD.as_str(),
 		commands::adjacent::CMD.as_str(),
-		// commands::reorder::CMD.as_str(),
+		commands::reorder::CMD.as_str(),
 		// commands::group::CMD.as_str(),
 		// commands::polybar::CMD.as_str(),
 		// commands::poke::CMD.as_str(),
