@@ -1,5 +1,5 @@
 use i3_ipc::reply;
-use serde::Serialize;
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 
 use crate::{
 	common::{
@@ -11,7 +11,7 @@ use crate::{
 
 use super::{get_current_output, get_matching_workspaces, get_workspaces, get_workspaces_from_i3};
 
-#[derive(Serialize, Clone)]
+#[derive(Debug, Clone)]
 pub struct Workspace {
 	root: reply::Workspace,
 }
@@ -120,6 +120,10 @@ impl Workspace {
 	}
 
 	pub fn matches(&self, criteria: Criteria) -> bool {
+		if criteria.contains(Constraint::Focused) {
+			return self.focused();
+		}
+
 		if criteria.contains(Constraint::Output) {
 			match criteria.output {
 				Some(output) => return output.name() == self.output(),
@@ -129,12 +133,6 @@ impl Workspace {
 
 		if criteria.contains(Constraint::AllowUrgent) && self.urgent() {
 			return true;
-		}
-
-		if criteria.contains(Constraint::Focused) {
-			if !self.focused() {
-				return false;
-			}
 		}
 
 		if criteria.contains(Constraint::Visible) {
@@ -233,28 +231,18 @@ impl Workspace {
 	pub fn reorder(&mut self, new_pos: i32) {
 		let cur_name = self.full_name();
 		let new_name = assemble_name(new_pos, self.group(), self.name());
-		eprintln!(
-			"Workspace[{}]::reorder({}) becomes {}",
-			cur_name, new_pos, new_name
-		);
 		i3::run_command(format!("rename workspace {} to {}", cur_name, new_name));
 		self.root = get_workspace_from_i3_by_name(new_name.as_str()).unwrap();
 	}
 
 	pub fn scoot(&mut self) {
-		eprintln!("Workspace[{}]::scoot()", self.full_name());
 		let prev_neighbor = self.get_neighbor(None, Some(Direction::Left));
 		let next_neighbor = self.get_closest_neighbor(None, Some(Direction::Right));
 
-		eprintln!(
-			"Workspace[{}]::scoot(): Determining new position",
-			self.full_name()
-		);
 		let new_pos = match prev_neighbor {
 			Some(prev) => prev.num() + 2,
 			None => 2,
 		};
-		eprintln!("\t\t{}'s new_pos: {}", self.full_name(), new_pos);
 
 		match next_neighbor {
 			Some(mut next) => {
@@ -268,5 +256,26 @@ impl Workspace {
 			}
 			None => self.reorder(new_pos),
 		};
+	}
+}
+
+impl Serialize for Workspace {
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		S: Serializer,
+	{
+		// 3 is the number of fields in the struct.
+		let mut state = serializer.serialize_struct("Workspace", 10)?;
+		state.serialize_field("id", &self.id())?;
+		state.serialize_field("num", &self.num())?;
+		state.serialize_field("full_name", &self.full_name())?;
+		state.serialize_field("name", &self.name())?;
+		state.serialize_field("group", &self.group())?;
+		state.serialize_field("visible", &self.visible())?;
+		state.serialize_field("focused", &self.focused())?;
+		state.serialize_field("urgent", &self.urgent())?;
+		state.serialize_field("rect", &self.rect())?;
+		state.serialize_field("output", &self.output())?;
+		state.end()
 	}
 }

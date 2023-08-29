@@ -16,7 +16,6 @@ pub fn run_command(payload: String) {
 
 // Workspaces
 fn get_workspaces_from_i3() -> Vec<reply::Workspace> {
-	eprintln!("get_workspaces_from_i3()");
 	let mut i3 = I3::connect().unwrap();
 	let mut workspaces = i3.get_workspaces().unwrap();
 	workspaces.sort_by(|w1, w2| w1.num.cmp(&w2.num));
@@ -24,7 +23,6 @@ fn get_workspaces_from_i3() -> Vec<reply::Workspace> {
 }
 
 pub fn get_workspaces() -> Vec<Workspace> {
-	eprintln!("get_workspaces()");
 	get_workspaces_from_i3()
 		.iter()
 		.map(|ws| Workspace::from_ws(ws))
@@ -40,16 +38,14 @@ pub fn get_focused_workspace() -> Workspace {
 }
 
 pub fn get_matching_workspaces(criteria: Criteria) -> Vec<Workspace> {
-	eprintln!("get_matching_workspaces()");
 	if criteria.contains(Constraint::None) {
-		eprintln!("get_matching_workspaces(): Empty Criteria");
 		return get_workspaces();
 	}
 
 	get_workspaces_from_i3()
 		.iter()
 		.map(|ws| Workspace::from_ws(ws))
-		.filter(|ws| !ws.matches(criteria.clone()))
+		.filter(|ws| ws.matches(criteria.clone()))
 		.collect()
 }
 
@@ -75,7 +71,6 @@ pub fn get_outputs() -> Vec<Output> {
 }
 
 pub fn get_current_output() -> Output {
-	eprintln!("get_current_output(): DEFINE output_name");
 	let output_name = match env::var("MONITOR") {
 		Ok(val) => val as String,
 		Err(_) => get_focused_workspace().output(),
