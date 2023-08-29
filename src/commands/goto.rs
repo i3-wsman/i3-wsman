@@ -1,17 +1,16 @@
-extern crate i3_ipc;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::str::FromStr;
 
-use i3_ipc::{Connect, I3};
-
-use crate::common::{
-	constraint::{Constraint, Constraints},
-	outputs, polybar, this_command, workspaces,
+use crate::{
+	common::{
+		constraint::{Constraint, Criteria},
+		polybar, this_command,
+	},
+	i3::{self, get_current_output, get_filtered_workspaces},
 };
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
-use std::collections::HashMap;
-
-const ON_LAST_CREATE: &str = "create";
-const ON_LAST_NOOP: &str = "noop";
 
 lazy_static! {
 	pub static ref CMD: String = "goto".to_string();
@@ -24,13 +23,48 @@ lazy_static! {
 	};
 }
 
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
+pub enum GotoBehavior {
+	Create,
+	Stop,
+}
+
+impl FromStr for GotoBehavior {
+	type Err = ();
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		if s.len() == 0 {
+			return Ok(GotoBehavior::Stop);
+		}
+
+		match s.to_lowercase().as_ref() {
+			"create" => Ok(GotoBehavior::Create),
+			"stop" => Ok(GotoBehavior::Stop),
+			_ => {
+				eprintln!("Warning: Invalid value '{}' for 'navigation.goto.behavior'. Falling back to 'Stop'.", s);
+				Ok(GotoBehavior::Stop)
+			}
+		}
+	}
+}
+
+impl GotoBehavior {
+	#[allow(dead_code)]
+	pub fn to_string(&self) -> String {
+		match self {
+			GotoBehavior::Create => "create".to_string(),
+			GotoBehavior::Stop => "stop".to_string(),
+		}
+	}
+}
+
 pub fn help(_: Vec<String>) {
 	println!(
 		"{} {} <nth> [{}|{}]",
 		this_command(),
 		CMD.as_str(),
-		ON_LAST_CREATE,
-		ON_LAST_NOOP
+		GotoBehavior::Create.to_string(),
+		GotoBehavior::Stop.to_string(),
 	);
 	println!(
 		"    Focuses on the <nth> workspace, where <nth> is the position of the workspace\n\r"
@@ -39,14 +73,14 @@ pub fn help(_: Vec<String>) {
 		"    {} {} <nth> {}",
 		this_command(),
 		CMD.as_str(),
-		ON_LAST_CREATE
+		GotoBehavior::Create.to_string(),
 	);
 	println!("        If workspace doesn't exist, creates a new workspace.\n\r");
 	println!(
 		"    {} {} <nth> {}",
 		this_command(),
 		CMD.as_str(),
-		ON_LAST_NOOP
+		GotoBehavior::Stop.to_string(),
 	);
 	println!("        If workspace doesn't exist, do nothing.\n\r");
 }
@@ -58,48 +92,36 @@ pub fn exec(mut args: Vec<String>) {
 		return;
 	}
 
+	let behavior: GotoBehavior = args
+		.get(0)
+		.unwrap_or(&"".to_string())
+		.parse()
+		.unwrap_or(GotoBehavior::Stop);
+
+	let workspaces = get_filtered_workspaces();
+
 	let nth = nth_try.unwrap();
 	if nth < 1 {
-		help(vec![]);
+		if behavior == GotoBehavior::Create {
+			let last_ws = workspaces.first().unwrap();
+			i3::run_command(format!("workspace {}", last_ws.full_name()));
+			crate::commands::adjacent::exec(vec!["left".to_owned()]);
+		}
 		return;
 	}
 
-	let last_action: String = if args.len() == 0 {
-		"".to_string()
-	} else {
-		match args[0].as_str() {
-			ON_LAST_CREATE => args.remove(0),
-			ON_LAST_NOOP => args.remove(0),
-			_ => "".to_string(),
-		}
-	};
-
-	let mut constraints = Constraints::new();
-	constraints.add(Constraint::Output);
-	constraints.add(Constraint::Group);
-	constraints.add(Constraint::NoGroup);
-	constraints.add(Constraint::AllowUrgent);
-	constraints.output = outputs::focused();
-
-	let workspaces = workspaces::get(constraints.clone(), false);
-
 	if workspaces.len() < nth {
-		match last_action.as_str() {
-			ON_LAST_CREATE => {
-				let last_ws = workspaces::last(constraints);
-				let mut i3 = I3::connect().unwrap();
-				let cmd = format!("workspace {}", last_ws.name);
-				i3.run_command(cmd).ok();
+		match behavior {
+			GotoBehavior::Create => {
+				let last_ws = workspaces.last().unwrap();
+				i3::run_command(format!("workspace {}", last_ws.full_name()));
 				crate::commands::adjacent::exec(vec!["right".to_owned()]);
 			}
-			ON_LAST_NOOP => {}
-			_ => {}
+			GotoBehavior::Stop => {}
 		};
 	} else {
 		let target_ws = workspaces.get(nth - 1).unwrap();
-		let mut i3 = I3::connect().unwrap();
-		let cmd = format!("workspace {}", target_ws.name);
-		i3.run_command(cmd).ok();
+		i3::run_command(format!("workspace {}", target_ws.full_name()));
 	}
 
 	polybar::update();

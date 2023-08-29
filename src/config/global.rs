@@ -5,6 +5,7 @@ use std::str::FromStr;
 use toml;
 
 use super::get_path;
+use crate::commands::goto::GotoBehavior;
 use crate::groups::GroupSortMethod;
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone)]
@@ -212,37 +213,6 @@ impl Default for Goto {
 			behavior: GotoBehavior::Stop,
 			ignore_focus: false,
 			restrict_to_output: true,
-		}
-	}
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub enum GotoBehavior {
-	Create,
-	Stop,
-}
-
-impl FromStr for GotoBehavior {
-	type Err = ();
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s.to_lowercase().as_ref() {
-			"create" => Ok(GotoBehavior::Create),
-			"stop" => Ok(GotoBehavior::Stop),
-			_ => {
-				eprintln!("Warning: Invalid value '{}' for 'navigation.goto.behavior'. Falling back to 'Stop'.", s);
-				Ok(GotoBehavior::Stop)
-			}
-		}
-	}
-}
-
-impl GotoBehavior {
-	#[allow(dead_code)]
-	pub fn to_string(&self) -> String {
-		match self {
-			GotoBehavior::Create => "create".to_string(),
-			GotoBehavior::Stop => "stop".to_string(),
 		}
 	}
 }
