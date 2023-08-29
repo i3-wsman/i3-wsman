@@ -9,7 +9,7 @@ use crate::{
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
 
 lazy_static! {
-	pub static ref CMD: String = "next".to_string();
+	pub static ref CMD: String = "prev".to_string();
 	pub static ref SUBCMDS: Commands = {
 		let mut cmds = HashMap::new();
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);
@@ -28,7 +28,7 @@ pub fn help(_: Vec<String>) {
 		NavigationBehavior::Loop.to_string(),
 		NavigationBehavior::Stop.to_string(),
 	);
-	println!("    Focuses on the next workspace\n\r");
+	println!("    Focuses on the prev workspace\n\r");
 	println!(
 		"    {} {} {} [...constraints]",
 		this_command(),
@@ -67,18 +67,18 @@ pub fn exec(mut args: Vec<String>) {
 
 	let focused = get_focused_workspace();
 
-	let neighbor = focused.get_closest_neighbor(Some(criteria.clone()), Some(Direction::Right));
+	let neighbor = focused.get_closest_neighbor(Some(criteria.clone()), Some(Direction::Left));
 
-	if let Some(next) = neighbor {
-		i3::run_command(format!("workspace {}", next.full_name()));
+	if let Some(prev) = neighbor {
+		i3::run_command(format!("workspace {}", prev.full_name()));
 	} else {
 		match behavior {
 			NavigationBehavior::Create => {
-				crate::commands::adjacent::exec(vec![Direction::Right.to_string()]);
+				crate::commands::actions::adjacent::exec(vec![Direction::Left.to_string()]);
 			}
 			NavigationBehavior::Loop => {
 				let workspaces = get_matching_workspaces(criteria);
-				let first_ws = workspaces.first().unwrap();
+				let first_ws = workspaces.last().unwrap();
 				i3::run_command(format!("workspace {}", first_ws.full_name()));
 			}
 			NavigationBehavior::Stop => {}

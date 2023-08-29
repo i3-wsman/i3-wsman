@@ -31,25 +31,25 @@ fn main() {
 	let mut cmds: CommandMap = HashMap::new();
 
 	cmds.insert(
-		commands::goto::CMD.as_str(),
-		commands::goto::SUBCMDS.clone(),
+		commands::actions::goto::CMD.as_str(),
+		commands::actions::goto::SUBCMDS.clone(),
 	);
 	cmds.insert(
-		commands::next::CMD.as_str(),
-		commands::next::SUBCMDS.clone(),
+		commands::actions::next::CMD.as_str(),
+		commands::actions::next::SUBCMDS.clone(),
 	);
 	cmds.insert(
-		commands::prev::CMD.as_str(),
-		commands::prev::SUBCMDS.clone(),
+		commands::actions::prev::CMD.as_str(),
+		commands::actions::prev::SUBCMDS.clone(),
 	);
 
 	cmds.insert(
-		commands::adjacent::CMD.as_str(),
-		commands::adjacent::SUBCMDS.clone(),
+		commands::actions::adjacent::CMD.as_str(),
+		commands::actions::adjacent::SUBCMDS.clone(),
 	);
 	cmds.insert(
-		commands::reorder::CMD.as_str(),
-		commands::reorder::SUBCMDS.clone(),
+		commands::actions::reorder::CMD.as_str(),
+		commands::actions::reorder::SUBCMDS.clone(),
 	);
 	// // @TODO: move-container-to
 
@@ -62,31 +62,26 @@ fn main() {
 	// 	commands::polybar::CMD.as_str(),
 	// 	commands::polybar::SUBCMDS.clone(),
 	// );
-	// cmds.insert(
-	// 	commands::poke::CMD.as_str(),
-	// 	commands::poke::SUBCMDS.clone(),
-	// );
 
 	cmds.insert(
-		commands::get_workspaces::CMD.as_str(),
-		commands::get_workspaces::SUBCMDS.clone(),
+		commands::cli::get_workspaces::CMD.as_str(),
+		commands::cli::get_workspaces::SUBCMDS.clone(),
 	);
 
 	cmds.insert(
-		commands::config::CMD.as_str(),
-		commands::config::SUBCMDS.clone(),
+		commands::cli::config::CMD.as_str(),
+		commands::cli::config::SUBCMDS.clone(),
 	);
 
 	let help_order: Vec<&str> = vec![
-		commands::goto::CMD.as_str(),
-		commands::next::CMD.as_str(),
-		commands::prev::CMD.as_str(),
-		commands::adjacent::CMD.as_str(),
-		commands::reorder::CMD.as_str(),
+		commands::actions::goto::CMD.as_str(),
+		commands::actions::next::CMD.as_str(),
+		commands::actions::prev::CMD.as_str(),
+		commands::actions::adjacent::CMD.as_str(),
+		commands::actions::reorder::CMD.as_str(),
 		// commands::group::CMD.as_str(),
 		// commands::polybar::CMD.as_str(),
-		// commands::poke::CMD.as_str(),
-		commands::get_workspaces::CMD.as_str(),
+		commands::cli::get_workspaces::CMD.as_str(),
 	];
 
 	let command = if args.len() > 1 {

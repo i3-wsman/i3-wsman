@@ -4,6 +4,7 @@ mod help;
 mod module_groups;
 mod module_toggle_hidden;
 mod module_workspaces;
+mod poke;
 mod toggle_hidden;
 mod watch;
 
@@ -32,6 +33,8 @@ lazy_static! {
 		cmds.insert("toggle", toggle_hidden::exec as CommandFn);
 
 		cmds.insert("watch", watch::exec as CommandFn);
+
+		cmds.insert("poke", poke::exec as CommandFn);
 
 		cmds
 	};
