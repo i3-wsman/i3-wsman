@@ -65,28 +65,29 @@ impl Criteria {
 	}
 
 	pub fn contains(&self, constraint: Constraint) -> bool {
-		self.bit != Constraint::None as u32 && (self.bit & constraint as u32) != 0
+		constraint == Constraint::None && self.bit == Constraint::None as u32
+			|| (self.bit & constraint as u32) != 0
 	}
 }
 
 pub fn from_vec(nouns: Vec<String>) -> Criteria {
-	let mut constraints = Criteria::new();
+	let mut criteria = Criteria::new();
 
 	for noun in nouns {
 		if let Ok(c) = noun.parse::<Constraint>() {
 			if noun.contains(&"output=") {
-				constraints.output = match noun.split("=").nth(1) {
+				criteria.output = match noun.split("=").nth(1) {
 					Some(output_name) => Output::by_name(output_name),
 					None => None,
 				};
-			} else if c == Constraint::Output && !constraints.contains(c) {
-				constraints.output = Some(get_current_output());
+			} else if c == Constraint::Output && !criteria.contains(c) {
+				criteria.output = Some(get_current_output());
 			}
-			constraints.add(c);
+			criteria.add(c);
 		}
 	}
 
-	constraints
+	criteria
 }
 
 #[derive(Debug, PartialEq, Eq)]

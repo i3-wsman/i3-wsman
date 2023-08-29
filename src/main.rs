@@ -67,10 +67,10 @@ fn main() {
 	// 	commands::poke::SUBCMDS.clone(),
 	// );
 
-	// cmds.insert(
-	// 	commands::get_workspaces::CMD.as_str(),
-	// 	commands::get_workspaces::SUBCMDS.clone(),
-	// );
+	cmds.insert(
+		commands::get_workspaces::CMD.as_str(),
+		commands::get_workspaces::SUBCMDS.clone(),
+	);
 
 	cmds.insert(
 		commands::config::CMD.as_str(),
@@ -86,7 +86,7 @@ fn main() {
 		// commands::group::CMD.as_str(),
 		// commands::polybar::CMD.as_str(),
 		// commands::poke::CMD.as_str(),
-		// commands::get_workspaces::CMD.as_str(),
+		commands::get_workspaces::CMD.as_str(),
 	];
 
 	let command = if args.len() > 1 {

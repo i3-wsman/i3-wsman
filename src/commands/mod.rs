@@ -1,6 +1,6 @@
 pub mod adjacent;
 pub mod config;
-// pub mod get_workspaces;
+pub mod get_workspaces;
 // pub mod goto;
 // pub mod group;
 // pub mod next;

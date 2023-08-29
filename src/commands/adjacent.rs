@@ -29,19 +29,12 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(args: Vec<String>) {
-	eprintln!("adjacent::exec(): Getting current output");
 	let output = get_current_output();
-	eprintln!("adjacent::exec(): Getting focused workspace");
 	let focused = get_focused_workspace();
 
-	eprintln!("adjacent::exec(): Getting active groups");
 	let active_groups = output.active_groups();
-	eprintln!("\t\tactive_groups: {:?}", active_groups);
-	eprintln!("adjacent::exec(): Getting group");
 	let focused_group = focused.group();
-	eprintln!("\t\tfocused_group: {}", focused_group);
 
-	eprintln!("adjacent::exec(): Determining new_group");
 	let new_group = if focused_group == "" {
 		focused_group
 	} else if active_groups.len() == 1 {
@@ -49,34 +42,23 @@ pub fn exec(args: Vec<String>) {
 	} else {
 		focused_group
 	};
-	eprintln!("\t\tnew_group: {:?}", new_group);
 
-	eprintln!("adjacent::exec(): Parsing direction");
 	let dir = args[0].parse::<Direction>().unwrap();
-	eprintln!("\t\tdir: {:?}", dir);
 
-	eprintln!("adjacent::exec(): Determining which workspace to move");
 	let ws_to_move = match dir {
 		Direction::Left => Some(focused.clone()),
 		Direction::Right => focused.get_closest_neighbor(None, Some(Direction::Right)),
 	};
 
-	eprintln!("adjacent::exec(): Scooting, if necessary");
 	if let Some(mut ws) = ws_to_move {
-		eprintln!("adjacent::exec(): Scooting, as it turns out, is necessary");
-		eprintln!("\t\tws_to_move: {:?}", ws.full_name());
 		ws.scoot();
 	}
 
-	eprintln!("adjacent::exec(): Determining our new position");
 	let new_pos = match dir {
 		Direction::Left => focused.num(),
 		Direction::Right => focused.num() + 1,
 	};
-	eprintln!("\t\tnew_pos: {:?}", new_pos);
 
-	eprintln!("adjacent::exec(): Creating new workspace");
-	eprintln!("\t\ti3-msg workspace {}:{}", new_pos, new_group);
 	i3::run_command(format!("workspace {}:{}", new_pos, new_group));
 
 	polybar::update();

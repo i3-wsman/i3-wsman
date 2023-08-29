@@ -25,6 +25,7 @@ pub fn exec(args: Vec<String>) {
 	let criteria = constraint::from_vec(args.to_owned());
 
 	let workspaces = get_matching_workspaces(criteria);
+	eprintln!("workspaces: {:?}", workspaces);
 	let output = serde_json::to_string_pretty(&workspaces).unwrap();
 	println!("{}", output);
 }
