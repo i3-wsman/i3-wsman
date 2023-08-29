@@ -1,8 +1,7 @@
-use i3_ipc::reply;
+use i3_ipc::{reply, Connect, I3};
 use std::env;
 
 use crate::common::constraint::{Constraint, Criteria};
-use crate::I3;
 
 pub mod outputs;
 pub mod workspace;
@@ -10,16 +9,22 @@ pub mod workspace;
 pub use outputs::Output;
 pub use workspace::Workspace;
 
-lazy_static! {
-	static ref CURRENT_OUTPUT: Output = init_current_output();
+pub fn run_command(payload: String) {
+	let mut i3 = I3::connect().unwrap();
+	i3.run_command(payload).ok();
 }
 
 // Workspaces
 fn get_workspaces_from_i3() -> Vec<reply::Workspace> {
-	I3.get_workspaces().unwrap()
+	eprintln!("get_workspaces_from_i3()");
+	let mut i3 = I3::connect().unwrap();
+	let mut workspaces = i3.get_workspaces().unwrap();
+	workspaces.sort_by(|w1, w2| w1.num.cmp(&w2.num));
+	workspaces
 }
 
 pub fn get_workspaces() -> Vec<Workspace> {
+	eprintln!("get_workspaces()");
 	get_workspaces_from_i3()
 		.iter()
 		.map(|ws| Workspace::from_ws(ws))
@@ -27,13 +32,17 @@ pub fn get_workspaces() -> Vec<Workspace> {
 }
 
 pub fn get_focused_workspace() -> Workspace {
-	let mut constraint = Criteria::new();
-	constraint.add(Constraint::Focused);
-	*get_matching_workspaces(constraint).first().unwrap()
+	get_workspaces_from_i3()
+		.iter()
+		.find(|ws| ws.focused)
+		.map(|ws| Workspace::from_ws(ws))
+		.unwrap()
 }
 
 pub fn get_matching_workspaces(criteria: Criteria) -> Vec<Workspace> {
+	eprintln!("get_matching_workspaces()");
 	if criteria.contains(Constraint::None) {
+		eprintln!("get_matching_workspaces(): Empty Criteria");
 		return get_workspaces();
 	}
 
@@ -46,7 +55,8 @@ pub fn get_matching_workspaces(criteria: Criteria) -> Vec<Workspace> {
 
 // Outputs
 fn get_outputs_from_i3() -> Vec<reply::Output> {
-	I3.get_outputs()
+	let mut i3 = I3::connect().unwrap();
+	i3.get_outputs()
 		.unwrap()
 		.iter()
 		.filter(|o| o.current_workspace.is_some())
@@ -54,19 +64,9 @@ fn get_outputs_from_i3() -> Vec<reply::Output> {
 		.collect()
 }
 
-fn init_current_output() -> Output {
-	let output_name = match env::var("MONITOR") {
-		Ok(val) => val as String,
-		Err(_) => get_focused_workspace().output(),
-	};
-	Output::by_name(&output_name).expect(&format!(
-		"Invalid value for MONITOR env var. Output not found: {}",
-		output_name
-	))
-}
-
 pub fn get_outputs() -> Vec<Output> {
-	I3.get_outputs()
+	let mut i3 = I3::connect().unwrap();
+	i3.get_outputs()
 		.unwrap()
 		.iter()
 		.filter(|o| o.current_workspace.is_some())
@@ -75,5 +75,13 @@ pub fn get_outputs() -> Vec<Output> {
 }
 
 pub fn get_current_output() -> Output {
-	CURRENT_OUTPUT.clone()
+	eprintln!("get_current_output(): DEFINE output_name");
+	let output_name = match env::var("MONITOR") {
+		Ok(val) => val as String,
+		Err(_) => get_focused_workspace().output(),
+	};
+	Output::by_name(&output_name).expect(&format!(
+		"Invalid value for MONITOR env var. Output not found: {}",
+		output_name
+	))
 }

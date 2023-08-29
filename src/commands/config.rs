@@ -1,5 +1,4 @@
 use crate::CONFIG;
-// use serde_json;
 use toml;
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
@@ -20,5 +19,4 @@ pub fn help(_: Vec<String>) {}
 
 pub fn exec(_: Vec<String>) {
 	println!("{}", toml::to_string_pretty(&CONFIG.clone()).unwrap());
-	// println!("{}", serde_json::to_string_pretty(&CONFIG.clone()).unwrap());
 }

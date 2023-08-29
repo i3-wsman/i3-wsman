@@ -1,17 +1,55 @@
 use i3_ipc::reply;
+use serde::Serialize;
 
 use crate::{
 	common::{
 		constraint::{Constraint, Criteria},
 		Direction,
 	},
-	CONFIG,
+	i3, CONFIG,
 };
 
-use super::{get_current_output, get_matching_workspaces, get_workspaces_from_i3};
+use super::{get_current_output, get_matching_workspaces, get_workspaces, get_workspaces_from_i3};
 
+#[derive(Serialize, Clone)]
 pub struct Workspace {
 	root: reply::Workspace,
+}
+
+pub fn parse_name(name: String) -> (String, String, String) {
+	let parts: Vec<&str> = name.split(':').collect();
+	(
+		parts.get(0).unwrap_or(&"").to_string(),
+		parts.get(1).unwrap_or(&"").to_string(),
+		parts.get(2).unwrap_or(&"").to_string(),
+	)
+}
+
+pub fn assemble_name(num: i32, group: String, name: String) -> String {
+	let (group, name) = match (group.as_str(), name.as_str()) {
+		("", "") => ("".to_string(), "".to_string()),
+		(g, "") => (":".to_string() + g, "".to_string()),
+		("", n) => (":".to_string(), ":".to_string() + n),
+		(g, n) => (":".to_string() + g, ":".to_string() + n),
+	};
+
+	format!("{}{}{}", num, group, name)
+}
+
+fn get_workspace_from_i3_by_num(num: i32) -> Option<reply::Workspace> {
+	let workspaces = get_workspaces_from_i3();
+	match workspaces.iter().find(|ws| ws.num == num) {
+		Some(ws) => Some(ws.to_owned()),
+		None => None,
+	}
+}
+
+fn get_workspace_from_i3_by_name(name: &str) -> Option<reply::Workspace> {
+	let workspaces = get_workspaces_from_i3();
+	match workspaces.iter().find(|ws| ws.name == name) {
+		Some(ws) => Some(ws.to_owned()),
+		None => None,
+	}
 }
 
 impl Workspace {
@@ -21,9 +59,8 @@ impl Workspace {
 		}
 	}
 
-	pub fn by_num(n: i32) -> Option<Self> {
-		let workspaces = get_workspaces_from_i3();
-		match workspaces.iter().find(|ws| ws.num == n) {
+	pub fn by_num(num: i32) -> Option<Self> {
+		match get_workspace_from_i3_by_num(num) {
 			Some(ws) => Some(Self {
 				root: ws.to_owned(),
 			}),
@@ -32,8 +69,7 @@ impl Workspace {
 	}
 
 	pub fn by_name(name: &str) -> Option<Self> {
-		let workspaces = get_workspaces_from_i3();
-		match workspaces.iter().find(|ws| ws.name == name) {
+		match get_workspace_from_i3_by_name(name) {
 			Some(ws) => Some(Self {
 				root: ws.to_owned(),
 			}),
@@ -50,25 +86,17 @@ impl Workspace {
 	}
 
 	pub fn full_name(&self) -> String {
-		self.root.name
+		self.root.name.clone()
 	}
 
 	pub fn name(&self) -> String {
-		let parts: Vec<&str> = self.root.name.split(':').collect();
-		if parts.len() > 2 {
-			parts[2].to_owned()
-		} else {
-			"".to_owned()
-		}
+		let (_, _, name) = parse_name(self.root.name.clone());
+		name
 	}
 
 	pub fn group(&self) -> String {
-		let parts: Vec<&str> = self.root.name.split(':').collect();
-		if parts.len() > 1 {
-			parts[1].to_owned()
-		} else {
-			"".to_owned()
-		}
+		let (_, group, _) = parse_name(self.root.name.clone());
+		group
 	}
 
 	pub fn visible(&self) -> bool {
@@ -84,11 +112,11 @@ impl Workspace {
 	}
 
 	pub fn rect(&self) -> reply::Rect {
-		self.root.rect
+		self.root.rect.clone()
 	}
 
 	pub fn output(&self) -> String {
-		self.root.output
+		self.root.output.clone()
 	}
 
 	pub fn matches(&self, criteria: Criteria) -> bool {
@@ -119,7 +147,7 @@ impl Workspace {
 			}
 		}
 
-		let output = match criteria.output {
+		let output = match criteria.output.clone() {
 			Some(o) => o,
 			None => get_current_output(),
 		};
@@ -148,7 +176,7 @@ impl Workspace {
 
 	pub fn get_neighbor(
 		&self,
-		criteria: Criteria,
+		criteria: Option<Criteria>,
 		direction: Option<Direction>,
 	) -> Option<Workspace> {
 		let neighbor = self.get_closest_neighbor(criteria, direction);
@@ -166,23 +194,23 @@ impl Workspace {
 
 	pub fn get_closest_neighbor(
 		&self,
-		criteria: Criteria,
+		criteria: Option<Criteria>,
 		direction: Option<Direction>,
 	) -> Option<Workspace> {
-		let mut workspaces = get_matching_workspaces(criteria);
+		let mut workspaces = match criteria {
+			Some(c) => get_matching_workspaces(c),
+			None => get_workspaces(),
+		};
 
 		match direction {
 			Some(d) => match d {
-				Direction::Right => workspaces
-					.iter()
-					.find(|ws| ws.num() > self.num())
-					.map(|ws| *ws.to_owned()),
+				Direction::Right => {
+					workspaces.sort_by(|w1, w2| w1.num().cmp(&w2.num()));
+					workspaces.iter().find(|ws| ws.num() > self.num()).cloned()
+				}
 				Direction::Left => {
 					workspaces.sort_by(|w1, w2| w2.num().cmp(&w1.num()));
-					workspaces
-						.iter()
-						.find(|ws| ws.num() < self.num())
-						.map(|ws| *ws.to_owned())
+					workspaces.iter().find(|ws| ws.num() < self.num()).cloned()
 				}
 			},
 			None => {
@@ -193,12 +221,52 @@ impl Workspace {
 					let distance = (self.num() - workspace.num()).abs();
 					if distance < closest_distance {
 						closest_distance = distance;
-						closest_ws = Some(*workspace.clone());
+						closest_ws = Some(workspace.clone());
 					}
 				}
 
 				closest_ws
 			}
 		}
+	}
+
+	pub fn reorder(&mut self, new_pos: i32) {
+		let cur_name = self.full_name();
+		let new_name = assemble_name(new_pos, self.group(), self.name());
+		eprintln!(
+			"Workspace[{}]::reorder({}) becomes {}",
+			cur_name, new_pos, new_name
+		);
+		i3::run_command(format!("rename workspace {} to {}", cur_name, new_name));
+		self.root = get_workspace_from_i3_by_name(new_name.as_str()).unwrap();
+	}
+
+	pub fn scoot(&mut self) {
+		eprintln!("Workspace[{}]::scoot()", self.full_name());
+		let prev_neighbor = self.get_neighbor(None, Some(Direction::Left));
+		let next_neighbor = self.get_closest_neighbor(None, Some(Direction::Right));
+
+		eprintln!(
+			"Workspace[{}]::scoot(): Determining new position",
+			self.full_name()
+		);
+		let new_pos = match prev_neighbor {
+			Some(prev) => prev.num() + 2,
+			None => 2,
+		};
+		eprintln!("\t\t{}'s new_pos: {}", self.full_name(), new_pos);
+
+		match next_neighbor {
+			Some(mut next) => {
+				if next.num() == new_pos {
+					next.scoot();
+					self.reorder(new_pos);
+				} else {
+					self.reorder(new_pos);
+					next.scoot();
+				}
+			}
+			None => self.reorder(new_pos),
+		};
 	}
 }

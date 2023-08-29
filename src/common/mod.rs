@@ -4,12 +4,12 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 pub mod constraint;
-pub mod moves;
-pub mod name;
-pub mod neighbor;
+// pub mod moves;
+// pub mod name;
+// pub mod neighbor;
 pub mod polybar;
 
-#[derive(PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Direction {
 	Right,
 	Left,
@@ -24,10 +24,10 @@ impl FromStr for Direction {
 			"right" => Ok(Direction::Right),
 			_ => {
 				eprintln!(
-					"Warning: Invalid value '{}' for 'groups.sort_method'. Falling back to 'Left'.",
+					"Warning: Invalid direction '{}'. Falling back to 'Right'.",
 					s
 				);
-				Ok(Direction::Left)
+				Ok(Direction::Right)
 			}
 		}
 	}

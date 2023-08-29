@@ -6,7 +6,7 @@ use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
-use crate::i3::outputs;
+use crate::i3;
 use crate::CONFIG;
 
 type StateGroups = HashMap<String, Vec<String>>;
@@ -21,10 +21,10 @@ fn default() -> State {
 	let active_groups = CONFIG.startup.active_workspace_groups.to_owned();
 
 	let mut groups: StateGroups = HashMap::new();
-	for o in outputs::available() {
-		groups.insert(o.name.clone(), active_groups.clone());
+	for o in i3::get_outputs() {
+		groups.insert(o.name(), active_groups.clone());
 	}
-	groups.insert(outputs::XROOT.to_string(), active_groups);
+	groups.insert(i3::outputs::XROOT.to_string(), active_groups);
 
 	State {
 		groups,

@@ -5,8 +5,8 @@ use crate::{
 		constraint::{Constraint, Criteria},
 		dedup_vec,
 	},
-	i3::{get_current_output, get_focused_workspace, Output},
-	state, CONFIG, I3,
+	i3::{self, Output},
+	state, CONFIG,
 };
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Clone)]
@@ -18,7 +18,7 @@ pub enum GroupSortMethod {
 fn get_output(output: Option<Output>) -> Output {
 	match output {
 		Some(o) => o,
-		None => get_current_output(),
+		None => i3::get_current_output(),
 	}
 }
 
@@ -66,17 +66,17 @@ pub fn active_for_output(output: Option<Output>) -> Vec<String> {
 fn get_groups_from_state(output: Output) -> Vec<String> {
 	let output_name = output.get_state_name();
 
-	let mut state = state::get();
+	let state = state::get();
 
 	match state.groups.get(&output_name) {
-		Some(groups) => *groups,
+		Some(groups) => groups.to_owned(),
 		None => vec![],
 	}
 }
 
 fn update_groups(output: Output, mut groups: Vec<String>) -> Vec<String> {
 	let mut state = state::get();
-	let output_name = output.get_state_name();
+	let output_name = output.clone().get_state_name();
 
 	groups.sort();
 	groups.dedup();
@@ -89,9 +89,9 @@ fn update_groups(output: Output, mut groups: Vec<String>) -> Vec<String> {
 		criteria.add(Constraint::Output);
 		criteria.output = Some(output);
 
-		let next = get_focused_workspace().get_closest_neighbor(criteria, None);
+		let next = i3::get_focused_workspace().get_closest_neighbor(Some(criteria), None);
 		if let Some(ws) = next {
-			I3.run_command(format!("workspace {}", ws.full_name())).ok();
+			i3::run_command(format!("workspace {}", ws.full_name()));
 		}
 	}
 
@@ -108,7 +108,7 @@ pub fn show_only(group_name: String, output: Option<Output>) -> Vec<String> {
 
 pub fn toggle_only(group_name: String, output: Option<Output>) -> Vec<String> {
 	let output = get_output(output);
-	let groups = get_groups_from_state(output);
+	let groups = get_groups_from_state(output.clone());
 
 	let groups = if groups.len() == 1 && groups.contains(&group_name) {
 		vec![]
@@ -121,21 +121,21 @@ pub fn toggle_only(group_name: String, output: Option<Output>) -> Vec<String> {
 
 pub fn show(group_name: String, output: Option<Output>) -> Vec<String> {
 	let output = get_output(output);
-	let mut groups = get_groups_from_state(output);
+	let mut groups = get_groups_from_state(output.clone());
 	groups.push(group_name);
 	update_groups(output, groups)
 }
 
 pub fn hide(group_name: String, output: Option<Output>) -> Vec<String> {
 	let output = get_output(output);
-	let mut groups = get_groups_from_state(output);
+	let mut groups = get_groups_from_state(output.clone());
 	groups.retain(|g| g != &group_name);
 	update_groups(output, groups)
 }
 
 pub fn toggle(group_name: String, output: Option<Output>) -> Vec<String> {
 	let output = get_output(output);
-	let mut groups = get_groups_from_state(output);
+	let mut groups = get_groups_from_state(output.clone());
 	if groups.contains(&group_name) {
 		groups.retain(|g| g != &group_name);
 	} else {
