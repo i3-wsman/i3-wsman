@@ -1,32 +1,29 @@
-use crate::common::{
-	constraint::{Constraint, Constraints},
-	groups, outputs, polybar, this_command_abs,
+use crate::{
+	common::this_command_abs, groups, i3::get_current_output, polybar::Actions, POLYBAR_CFG,
 };
 
 pub fn exec(_: Vec<String>) {
-	let focused_output = outputs::focused();
-	let active_groups = groups::active(focused_output.clone());
-
-	let mut avail_constraints = Constraints::new();
-	avail_constraints.add(Constraint::Output);
-	avail_constraints.output = focused_output.clone();
-	let groups = groups::available(avail_constraints);
-
+	let output = get_current_output();
 	let show_hidden = groups::show_hidden_enabled();
-	let showing_all = active_groups.len() == 0 || groups == active_groups;
+	let showing_all = output.showing_all();
 
-	let mut toggle_hidden = polybar::Label::new(polybar::defaults::TOGGLE_HIDDEN_LABEL, 1, 0);
-
-	if showing_all {
-		toggle_hidden.fg_color = Some(polybar::defaults::TOGGLE_HIDDEN_ALL_FG.to_owned());
+	let key_state = if showing_all {
+		"disabled"
 	} else if show_hidden {
-		toggle_hidden.fg_color = Some(polybar::defaults::TOGGLE_HIDDEN_ON_FG.to_owned());
+		"on"
 	} else {
-		toggle_hidden.fg_color = Some(polybar::defaults::TOGGLE_HIDDEN_OFF_FG.to_owned());
-	}
+		"off"
+	};
 
-	let cmd = this_command_abs() + " polybar toggle";
-	toggle_hidden.set_actions(Some(cmd), None, None);
+	let actions = Actions {
+		left_click: Some(this_command_abs() + " polybar toggle"),
+		middle_click: None,
+		right_click: None,
+	};
 
-	print!("{}", toggle_hidden);
+	let label = POLYBAR_CFG.get_label("show-hidden-toggle", Some(key_state));
+	let mut format = POLYBAR_CFG.get_format("show-hidden-toggle", Some(key_state), label);
+	format.actions = Some(actions);
+
+	print!("{}", format);
 }

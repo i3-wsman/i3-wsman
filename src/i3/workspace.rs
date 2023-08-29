@@ -68,6 +68,7 @@ impl Workspace {
 		}
 	}
 
+	#[allow(dead_code)]
 	pub fn by_name(name: &str) -> Option<Self> {
 		match get_workspace_from_i3_by_name(name) {
 			Some(ws) => Some(Self {

@@ -1,6 +1,6 @@
-use crate::common::{groups, polybar};
+use crate::{common::polybar, groups};
 
 pub fn exec(_: Vec<String>) {
-	groups::toggle_hidden();
+	groups::toggle_show_hidden();
 	polybar::update();
 }

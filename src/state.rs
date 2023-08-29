@@ -11,9 +11,11 @@ use crate::CONFIG;
 
 type StateGroups = HashMap<String, Vec<String>>;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct State {
 	pub groups: StateGroups,
+	#[deprecated]
+	pub global_groups: Vec<String>,
 	pub show_hidden: bool,
 }
 
@@ -28,6 +30,7 @@ fn default() -> State {
 
 	State {
 		groups,
+		global_groups: vec![],
 		show_hidden: CONFIG.startup.show_hidden_workspaces,
 	}
 }
@@ -61,6 +64,13 @@ fn get_tmpf(filename: &str) -> PathBuf {
 }
 
 pub fn set(state: State) {
+	let mut state = state.clone();
+	state.global_groups = state
+		.groups
+		.get(&i3::outputs::XROOT.to_string())
+		.unwrap()
+		.clone();
+
 	let serialized_data = serde_json::to_string(&state).expect("Failed to serialize state");
 
 	let temp_file_path = get_tmpf("state");
