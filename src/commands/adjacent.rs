@@ -1,8 +1,9 @@
 extern crate i3_ipc;
 
-use i3_ipc::{Connect, I3};
-
-use crate::common::{moves, name, neighbor, polybar, this_command, Direction};
+use crate::{
+	common::{polybar, this_command, Direction},
+	i3::{self, get_current_output, get_focused_workspace},
+};
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
 use std::collections::HashMap;
@@ -28,47 +29,55 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(args: Vec<String>) {
-	let dir = if args[0] == "left" {
-		Direction::Left
-	} else {
-		Direction::Right
-	};
+	eprintln!("adjacent::exec(): Getting current output");
+	let output = get_current_output();
+	eprintln!("adjacent::exec(): Getting focused workspace");
+	let focused = get_focused_workspace();
 
-	let focused_ws = workspaces::focused();
+	eprintln!("adjacent::exec(): Getting active groups");
+	let active_groups = output.active_groups();
+	eprintln!("\t\tactive_groups: {:?}", active_groups);
+	eprintln!("adjacent::exec(): Getting group");
+	let focused_group = focused.group();
+	eprintln!("\t\tfocused_group: {}", focused_group);
 
-	let focused_group = name::group(&focused_ws.name);
-	let active_groups = groups::active(outputs::focused());
-	let name_base = if focused_group == "" {
+	eprintln!("adjacent::exec(): Determining new_group");
+	let new_group = if focused_group == "" {
 		focused_group
+	} else if active_groups.len() == 1 {
+		active_groups[0].to_owned()
 	} else {
-		format!(
-			"x:{}",
-			if active_groups.len() == 1 {
-				active_groups[0].to_owned()
-			} else {
-				focused_group
-			}
-		)
+		focused_group
+	};
+	eprintln!("\t\tnew_group: {:?}", new_group);
+
+	eprintln!("adjacent::exec(): Parsing direction");
+	let dir = args[0].parse::<Direction>().unwrap();
+	eprintln!("\t\tdir: {:?}", dir);
+
+	eprintln!("adjacent::exec(): Determining which workspace to move");
+	let ws_to_move = match dir {
+		Direction::Left => Some(focused.clone()),
+		Direction::Right => focused.get_closest_neighbor(None, Some(Direction::Right)),
 	};
 
-	let focused_ws_num = focused_ws.num;
+	eprintln!("adjacent::exec(): Scooting, if necessary");
+	if let Some(mut ws) = ws_to_move {
+		eprintln!("adjacent::exec(): Scooting, as it turns out, is necessary");
+		eprintln!("\t\tws_to_move: {:?}", ws.full_name());
+		ws.scoot();
+	}
 
-	let ws_to_move = if dir == Direction::Left {
-		Some(focused_ws)
-	} else {
-		neighbor::closest(focused_ws, Direction::Right)
+	eprintln!("adjacent::exec(): Determining our new position");
+	let new_pos = match dir {
+		Direction::Left => focused.num(),
+		Direction::Right => focused.num() + 1,
 	};
+	eprintln!("\t\tnew_pos: {:?}", new_pos);
 
-	let new_pos = match ws_to_move {
-		Some(ws) => moves::scoot(ws).num - 1,
-		None => focused_ws_num + 1,
-	};
-
-	let new_name = name::change_prefix(&name_base, new_pos);
-
-	let mut i3 = I3::connect().unwrap();
-	let cmd = format!("workspace {}", new_name);
-	i3.run_command(cmd).ok();
+	eprintln!("adjacent::exec(): Creating new workspace");
+	eprintln!("\t\ti3-msg workspace {}:{}", new_pos, new_group);
+	i3::run_command(format!("workspace {}:{}", new_pos, new_group));
 
 	polybar::update();
 }
