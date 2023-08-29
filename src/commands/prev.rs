@@ -1,18 +1,12 @@
-extern crate i3_ipc;
+use std::collections::HashMap;
 
-use i3_ipc::{Connect, I3};
-
-use crate::common::{
-	constraint, constraint::Constraint, neighbor, outputs, polybar, this_command, workspaces,
-	Direction,
+use crate::{
+	common::{constraint, polybar, this_command, Direction},
+	config::global::NavigationBehavior,
+	i3::{self, get_filtered_criteria, get_focused_workspace, get_matching_workspaces},
 };
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
-use std::collections::HashMap;
-
-const ON_LAST_CREATE: &str = "create";
-const ON_LAST_LOOP: &str = "loop";
-const ON_LAST_STOP: &str = "stop";
 
 lazy_static! {
 	pub static ref CMD: String = "prev".to_string();
@@ -30,32 +24,32 @@ pub fn help(_: Vec<String>) {
 		"{} {} [{}|{}|{}] [...constraints]",
 		this_command(),
 		CMD.as_str(),
-		ON_LAST_CREATE,
-		ON_LAST_LOOP,
-		ON_LAST_STOP
+		NavigationBehavior::Create.to_string(),
+		NavigationBehavior::Loop.to_string(),
+		NavigationBehavior::Stop.to_string(),
 	);
-	println!("    Focuses on the previous workspace\n\r");
+	println!("    Focuses on the prev workspace\n\r");
 	println!(
 		"    {} {} {} [...constraints]",
 		this_command(),
 		CMD.as_str(),
-		ON_LAST_CREATE
+		NavigationBehavior::Create.to_string(),
 	);
-	println!("        On first workspace, create a new workspace\n\r");
+	println!("        On last workspace, create a new workspace\n\r");
 	println!(
 		"    {} {} {} [...constraints]  \t",
 		this_command(),
 		CMD.as_str(),
-		ON_LAST_LOOP
+		NavigationBehavior::Loop.to_string(),
 	);
-	println!("        On first workspace, loop back to the first workspace\n\r");
+	println!("        On last workspace, loop back to the first workspace\n\r");
 	println!(
 		"    {} {} {} [...constraints]  \t",
 		this_command(),
 		CMD.as_str(),
-		ON_LAST_STOP
+		NavigationBehavior::Stop.to_string(),
 	);
-	println!("        On first workspace, do nothing\n\r");
+	println!("        On last workspace, do nothing\n\r");
 	println!(
 		"    For constraints, run: {} help constraints\n\r",
 		this_command()
@@ -63,47 +57,34 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(mut args: Vec<String>) {
-	let last_action: String = match args[0].as_str() {
-		ON_LAST_CREATE => args.remove(0),
-		ON_LAST_LOOP => args.remove(0),
-		ON_LAST_STOP => args.remove(0),
-		_ => "".to_string(),
+	let behavior = NavigationBehavior::from_argv(&mut args).unwrap();
+
+	let criteria = if args.len() > 0 {
+		constraint::from_vec(args.to_owned())
+	} else {
+		get_filtered_criteria(true)
 	};
 
-	let mut constraints = constraint::from_vec(args.to_owned());
+	let focused = get_focused_workspace();
 
-	if args.len() == 0 {
-		constraints.add(Constraint::Output);
-		constraints.output = outputs::focused();
-		constraints.add(Constraint::Group);
-		constraints.add(Constraint::NoGroup);
-		constraints.add(Constraint::AllowUrgent);
-	}
+	let neighbor = focused.get_closest_neighbor(Some(criteria.clone()), Some(Direction::Left));
 
-	let focused_ws = workspaces::focused();
-
-	let neighbor = neighbor::get(focused_ws, constraints.clone(), Direction::Left);
-
-	if let Some(next) = neighbor {
-		let mut i3 = I3::connect().unwrap();
-		let cmd = format!("workspace {}", next.name);
-		i3.run_command(cmd).ok();
+	if let Some(prev) = neighbor {
+		i3::run_command(format!("workspace {}", prev.full_name()));
 	} else {
-		match last_action.as_str() {
-			ON_LAST_CREATE => {
-				crate::commands::adjacent::exec(vec!["left".to_owned()]);
+		match behavior {
+			NavigationBehavior::Create => {
+				crate::commands::adjacent::exec(vec![Direction::Left.to_string()]);
 			}
-			ON_LAST_LOOP => {
-				let first_ws = workspaces::last(constraints);
-				let mut i3 = I3::connect().unwrap();
-				let cmd = format!("workspace {}", first_ws.name);
-				i3.run_command(cmd).ok();
+			NavigationBehavior::Loop => {
+				let workspaces = get_matching_workspaces(criteria);
+				let first_ws = workspaces.last().unwrap();
+				i3::run_command(format!("workspace {}", first_ws.full_name()));
 			}
-			ON_LAST_STOP => {}
-			_ => {}
+			NavigationBehavior::Stop => {}
 		}
 	}
 
-	workspaces::maintenance();
+	// workspaces::maintenance();
 	polybar::update();
 }

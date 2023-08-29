@@ -98,7 +98,7 @@ pub fn exec(mut args: Vec<String>) {
 		.parse()
 		.unwrap_or(GotoBehavior::Stop);
 
-	let workspaces = get_filtered_workspaces();
+	let workspaces = get_filtered_workspaces(false);
 
 	let nth = nth_try.unwrap();
 	if nth < 1 {
