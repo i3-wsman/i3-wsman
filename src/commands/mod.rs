@@ -7,4 +7,4 @@ pub mod next;
 // pub mod poke;
 // pub mod polybar;
 pub mod prev;
-// pub mod reorder;
+pub mod reorder;

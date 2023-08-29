@@ -14,6 +14,21 @@ pub fn run_command(payload: String) {
 	i3.run_command(payload).ok();
 }
 
+// Criteria
+pub fn get_filtered_criteria(/*force_output*/ _: bool) -> Criteria {
+	let mut criteria = Criteria::new();
+	criteria.add(Constraint::Group);
+	criteria.add(Constraint::NoGroup);
+	criteria.add(Constraint::AllowUrgent);
+
+	// force_output || pin-workspaces == true {
+	criteria.add(Constraint::Output);
+	criteria.output = Some(get_current_output());
+	// }
+
+	criteria
+}
+
 // Workspaces
 fn get_workspaces_from_i3() -> Vec<reply::Workspace> {
 	let mut i3 = I3::connect().unwrap();
@@ -47,20 +62,6 @@ pub fn get_matching_workspaces(criteria: Criteria) -> Vec<Workspace> {
 		.map(|ws| Workspace::from_ws(ws))
 		.filter(|ws| ws.matches(criteria.clone()))
 		.collect()
-}
-
-pub fn get_filtered_criteria(/*force_output*/ _: bool) -> Criteria {
-	let mut criteria = Criteria::new();
-	criteria.add(Constraint::Group);
-	criteria.add(Constraint::NoGroup);
-	criteria.add(Constraint::AllowUrgent);
-
-	// force_output || pin-workspaces == true {
-	criteria.add(Constraint::Output);
-	criteria.output = Some(get_current_output());
-	// }
-
-	criteria
 }
 
 pub fn get_filtered_workspaces(force_output: bool) -> Vec<Workspace> {
