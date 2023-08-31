@@ -6,7 +6,7 @@ use crate::{
 		constraint::{Constraint, Criteria},
 		Direction,
 	},
-	i3, CONFIG,
+	groups, i3, CONFIG,
 };
 
 use super::{get_current_output, get_matching_workspaces, get_workspaces, get_workspaces_from_i3};
@@ -155,7 +155,7 @@ impl Workspace {
 			None => get_current_output(),
 		};
 
-		if output.showing_all() {
+		if output.showing_all() == true || groups::show_hidden_enabled() {
 			return true;
 		}
 

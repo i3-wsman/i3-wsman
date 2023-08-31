@@ -133,15 +133,16 @@ impl Config {
 		&self,
 		section: &str,
 		key_state: Option<String>,
-		format_container: bool,
+		key_type: Option<String>,
 	) -> Label {
-		let key_type = match format_container {
-			true => "format",
-			false => "label",
+		let key_type = match key_type {
+			Some(key_type) => key_type,
+			None => "label".to_string(),
 		};
+
 		let styles = match key_state {
-			Some(key_state) => self.get_sub_styles(section, key_type, key_state.as_str()),
-			None => self.get_styles(section, key_type),
+			Some(key_state) => self.get_sub_styles(section, key_type.as_str(), key_state.as_str()),
+			None => self.get_styles(section, key_type.as_str()),
 		};
 
 		Label {
@@ -158,7 +159,7 @@ impl Config {
 	}
 
 	pub fn get_format(&self, section: &str, key_state: Option<String>) -> Format {
-		let container = self.get_label(section, key_state, true);
+		let container = self.get_label(section, key_state, Some("format".to_string()));
 		// let fix_state = |key_state: Option<String>, fix: &str| match key_state {
 		// 	Some(s) => Some(s.to_owned() + "-" + fix),
 		// 	None => Some(fix.to_owned()),

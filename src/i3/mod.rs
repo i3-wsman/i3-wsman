@@ -1,7 +1,10 @@
 use i3_ipc::{reply, Connect, I3};
 use std::env;
 
-use crate::common::constraint::{Constraint, Criteria};
+use crate::{
+	common::constraint::{Constraint, Criteria},
+	POLYBAR_CFG,
+};
 
 pub mod outputs;
 pub mod workspace;
@@ -15,16 +18,16 @@ pub fn run_command(payload: String) {
 }
 
 // Criteria
-pub fn get_filtered_criteria(/*force_output*/ _: bool) -> Criteria {
+pub fn get_filtered_criteria(force_output: bool) -> Criteria {
 	let mut criteria = Criteria::new();
 	criteria.add(Constraint::Group);
 	criteria.add(Constraint::NoGroup);
 	criteria.add(Constraint::AllowUrgent);
 
-	// force_output || pin-workspaces == true {
-	criteria.add(Constraint::Output);
-	criteria.output = Some(get_current_output());
-	// }
+	if force_output || POLYBAR_CFG.pin_workspaces() == true {
+		criteria.add(Constraint::Output);
+		criteria.output = Some(get_current_output());
+	}
 
 	criteria
 }
@@ -48,6 +51,15 @@ pub fn get_focused_workspace() -> Workspace {
 	get_workspaces_from_i3()
 		.iter()
 		.find(|ws| ws.focused)
+		.map(|ws| Workspace::from_ws(ws))
+		.unwrap()
+}
+
+pub fn get_current_workspace() -> Workspace {
+	let current_output = get_current_output();
+	get_workspaces_from_i3()
+		.iter()
+		.find(|ws| ws.visible && ws.output == current_output.name())
 		.map(|ws| Workspace::from_ws(ws))
 		.unwrap()
 }
