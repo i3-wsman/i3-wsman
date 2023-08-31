@@ -1,14 +1,19 @@
 use std::fmt;
 
+use super::Actions;
+
 //pub enum Alignment {
 //	Left,
 //	Center,
 //	Right
 //}
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Label {
 	pub label: String,
+
+	pub font: Option<u64>,
+	pub actions: Option<Actions>,
 
 	pub foreground: Option<String>,
 	pub background: Option<String>,
@@ -16,6 +21,9 @@ pub struct Label {
 	pub overline: Option<String>,
 	pub padding: Option<String>,
 	pub margin: Option<String>,
+	//
+	// @TODO: Implement max/min len, ellipsis, alignment
+	//pub is_format_container: bool, <= If true, ignore the below
 	//pub maxlen: Option<u8>,
 	//pub minlen: Option<u8>,
 	//pub alignment: Option<Alignment>,
@@ -27,9 +35,29 @@ impl fmt::Display for Label {
 		let mut prefix = "".to_owned();
 		let mut suffix = "".to_owned();
 
-		if let Some(margin) = self.margin.clone() {
-			prefix = prefix + format!("%{{O{}}}", margin).as_ref();
-			suffix = format!("%{{O{}}}", margin) + suffix.as_ref();
+		if let Some(font) = self.font {
+			prefix = prefix + format!("%{{T{}}}", font).as_ref();
+			suffix = "%{T-}".to_string() + suffix.as_ref();
+		}
+
+		if let Some(padding) = self.padding.clone() {
+			prefix = prefix + format!("%{{O{}}}", padding).as_ref();
+			suffix = format!("%{{O{}}}", padding) + suffix.as_ref();
+		}
+
+		if let Some(actions) = self.actions.clone() {
+			if let Some(cmd) = actions.left_click {
+				prefix = prefix + format!("%{{A1:{}:}}", cmd).as_ref();
+				suffix = "%{A}".to_string() + suffix.as_ref();
+			}
+			if let Some(cmd) = actions.middle_click {
+				prefix = prefix + format!("%{{A2:{}:}}", cmd).as_ref();
+				suffix = "%{A}".to_string() + suffix.as_ref();
+			}
+			if let Some(cmd) = actions.right_click {
+				prefix = prefix + format!("%{{A3:{}:}}", cmd).as_ref();
+				suffix = "%{A}".to_string() + suffix.as_ref();
+			}
 		}
 
 		if let Some(underline) = self.underline.clone() {
@@ -52,9 +80,9 @@ impl fmt::Display for Label {
 			suffix = "%{B-}".to_string() + suffix.as_ref();
 		}
 
-		if let Some(padding) = self.padding.clone() {
-			prefix = prefix + format!("%{{O{}}}", padding).as_ref();
-			suffix = format!("%{{O{}}}", padding) + suffix.as_ref();
+		if let Some(margin) = self.margin.clone() {
+			prefix = prefix + format!("%{{O{}}}", margin).as_ref();
+			suffix = format!("%{{O{}}}", margin) + suffix.as_ref();
 		}
 
 		write!(f, "{}{}{}", prefix, self.label, suffix)

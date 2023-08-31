@@ -43,8 +43,7 @@ impl Default for Config {
 
 #[derive(Debug)]
 struct Styles {
-	pub format: String,
-	pub label: String,
+	pub body: String,
 	pub font: Option<u64>,
 	pub foreground: Option<String>,
 	pub background: Option<String>,
@@ -52,6 +51,10 @@ struct Styles {
 	pub overline: Option<String>,
 	pub padding: Option<String>,
 	pub margin: Option<String>,
+}
+
+lazy_static! {
+	static ref QUOTES: [char; 2] = ['"', '\''];
 }
 
 impl Config {
@@ -77,7 +80,7 @@ impl Config {
 
 	fn get_optional(&self, section: &str, key: &str, fallback: Option<&str>) -> Option<String> {
 		match (&self.root).get(section, key) {
-			Some(v) => Some(v),
+			Some(v) => Some(v.trim_matches(&QUOTES[..]).to_owned()),
 			None => match fallback {
 				Some(v) => self.get_optional(section, v, None),
 				None => None,
@@ -87,7 +90,7 @@ impl Config {
 
 	fn get_key(&self, section: &str, key: &str, fallback: Option<&str>) -> String {
 		match (&self.root).get(section, key) {
-			Some(v) => v,
+			Some(v) => v.trim_matches(&QUOTES[..]).to_owned(),
 			None => match fallback {
 				Some(v) => self.get_key(section, v, None),
 				None => "".to_string(),
@@ -97,39 +100,10 @@ impl Config {
 
 	fn get_sub_styles(&self, section: &str, key_type: &str, key_state: &str) -> Styles {
 		let target = |subkey: &str| format!("{}-{}-{}", key_type, key_state, subkey);
-		let fallback = |subkey: &str| format!("{}-{}", key_type, subkey);
+		let target_body = format!("{}-{}", key_type, key_state);
 
 		Styles {
-			label: self.get_key(section, &target("label"), Some(&"label")),
-			format: self.get_key(section, &target("format"), Some(&"format")),
-			font: self.get_optional_int(section, &target("font"), Some(&fallback("font"))),
-			foreground: self.get_optional(
-				section,
-				&target("foreground"),
-				Some(&fallback("foreground")),
-			),
-			background: self.get_optional(
-				section,
-				&target("background"),
-				Some(&fallback("background")),
-			),
-			underline: self.get_optional(
-				section,
-				&target("underline"),
-				Some(&fallback("underline")),
-			),
-			overline: self.get_optional(section, &target("overline"), Some(&fallback("overline"))),
-			padding: self.get_optional(section, &target("padding"), Some(&fallback("padding"))),
-			margin: self.get_optional(section, &target("margin"), Some(&fallback("margin"))),
-		}
-	}
-
-	fn get_styles(&self, section: &str, key_type: &str) -> Styles {
-		let target = |subkey: &str| format!("{}-{}", key_type, subkey);
-
-		Styles {
-			label: self.get_key(section, "label", None),
-			format: self.get_key(section, "format", None),
+			body: self.get_key(section, &target_body, Some(key_type)),
 			font: self.get_optional_int(section, &target("font"), None),
 			foreground: self.get_optional(section, &target("foreground"), None),
 			background: self.get_optional(section, &target("background"), None),
@@ -140,14 +114,40 @@ impl Config {
 		}
 	}
 
-	pub fn get_label(&self, section: &str, key_state: Option<&str>) -> Label {
+	fn get_styles(&self, section: &str, key_type: &str) -> Styles {
+		let target = |subkey: &str| format!("{}-{}", key_type, subkey);
+
+		Styles {
+			body: self.get_key(section, key_type, None),
+			font: self.get_optional_int(section, &target("font"), None),
+			foreground: self.get_optional(section, &target("foreground"), None),
+			background: self.get_optional(section, &target("background"), None),
+			underline: self.get_optional(section, &target("underline"), None),
+			overline: self.get_optional(section, &target("overline"), None),
+			padding: self.get_optional(section, &target("padding"), None),
+			margin: self.get_optional(section, &target("margin"), None),
+		}
+	}
+
+	pub fn get_label(
+		&self,
+		section: &str,
+		key_state: Option<String>,
+		format_container: bool,
+	) -> Label {
+		let key_type = match format_container {
+			true => "format",
+			false => "label",
+		};
 		let styles = match key_state {
-			Some(ks) => self.get_sub_styles(section, "label", ks),
-			None => self.get_styles(section, "label"),
+			Some(key_state) => self.get_sub_styles(section, key_type, key_state.as_str()),
+			None => self.get_styles(section, key_type),
 		};
 
 		Label {
-			label: styles.label,
+			label: styles.body,
+			actions: None,
+			font: styles.font,
 			foreground: styles.foreground,
 			background: styles.background,
 			underline: styles.underline,
@@ -157,27 +157,21 @@ impl Config {
 		}
 	}
 
-	pub fn get_format(&self, section: &str, key_state: Option<&str>, label: Label) -> Format {
-		let styles = match key_state {
-			Some(ks) => self.get_sub_styles(section, "format", ks),
-			None => self.get_styles(section, "format"),
-		};
+	pub fn get_format(&self, section: &str, key_state: Option<String>) -> Format {
+		let container = self.get_label(section, key_state, true);
+		// let fix_state = |key_state: Option<String>, fix: &str| match key_state {
+		// 	Some(s) => Some(s.to_owned() + "-" + fix),
+		// 	None => Some(fix.to_owned()),
+		// };
+		// @TODO: Implement "optional" labels
+		// let prefix = self.get_label(section, fix_state(key_state, "prefix"), true);
+		// let suffix = self.get_label(section, fix_state(key_state, "suffix"), true);
 
 		Format {
-			label,
-
-			prefix: None,
-			suffix: None,
-			actions: None,
-
-			format: styles.format,
-			font: styles.font,
-			foreground: styles.foreground,
-			background: styles.background,
-			underline: styles.underline,
-			overline: styles.overline,
-			padding: styles.padding,
-			margin: styles.margin,
+			container,
+			labels: Default::default(),
+			prefix: None, // Some(prefix),
+			suffix: None, // Some(suffix),
 		}
 	}
 

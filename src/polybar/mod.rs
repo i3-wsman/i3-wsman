@@ -7,7 +7,7 @@ mod label;
 pub use format::Format;
 pub use label::Label;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct Actions {
 	pub left_click: Option<String>,
 	pub middle_click: Option<String>,
