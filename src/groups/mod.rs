@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	common::{constraint::Constraint, dedup_vec},
+	common::dedup_vec,
 	i3::{self, get_current_output, get_filtered_criteria, get_outputs, Output},
 	state, CONFIG,
 };

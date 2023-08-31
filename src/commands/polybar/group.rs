@@ -1,4 +1,4 @@
-use crate::{common::polybar, groups};
+use crate::{groups, polybar};
 
 pub fn exec(args: Vec<String>) {
 	let group_action = args[0].clone();

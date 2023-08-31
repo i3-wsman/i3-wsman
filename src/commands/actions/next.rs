@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
 use crate::{
-	common::{constraint, polybar, this_command, Direction},
+	common::{constraint, this_command, Direction},
 	config::global::NavigationBehavior,
 	i3::{self, get_filtered_criteria, get_focused_workspace, get_matching_workspaces},
+	polybar,
 };
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};

@@ -1,8 +1,9 @@
 extern crate i3_ipc;
 
 use crate::{
-	common::{polybar, this_command, Direction},
+	common::{this_command, Direction},
 	i3::{self, get_current_output, get_focused_workspace},
+	polybar,
 };
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};

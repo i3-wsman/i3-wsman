@@ -1,88 +1,87 @@
-use crate::common::{
-	constraint::{Constraint, Constraints},
-	groups, name, outputs, polybar, this_command_abs, workspaces,
+use crate::{
+	common::{
+		constraint::{Constraint, Criteria},
+		this_command_abs,
+	},
+	groups, i3,
+	polybar::Actions,
+	POLYBAR_CFG,
 };
 
 pub fn exec(mut args: Vec<String>) {
 	let hide_all_button = args.len() > 0 && args.remove(0) == "no-all";
 
 	let show_hidden = groups::show_hidden_enabled();
-	let focused_output = outputs::focused();
+	let focused_output = i3::get_current_output();
 
-	let mut show_constraints = Constraints::new();
-	show_constraints.add(Constraint::Output);
+	let mut show_criteria = Criteria::new();
 	if !show_hidden {
-		show_constraints.add(Constraint::Group);
+		show_criteria.add(Constraint::Group);
 	}
-	show_constraints.output = focused_output.clone();
+	show_criteria.add(Constraint::Output);
+	show_criteria.output = Some(focused_output.clone());
 
-	let groups = groups::available_output(focused_output.clone());
-	let mut active_groups = groups::active(focused_output.clone());
-	let showing_all = active_groups.len() == 0 || groups == active_groups;
+	let groups = groups::list_for_output(Some(focused_output.clone()));
+	let active_groups = groups::active_for_output(Some(focused_output.clone()));
+	let showing_all = focused_output.showing_all();
+
+	let mut format = POLYBAR_CFG.get_format("groups", None);
 
 	if !hide_all_button {
-		let mut all_button = polybar::Label::new(polybar::defaults::GROUP_ALL_LABEL, 1, 0);
-		let cmd = this_command_abs() + " polybar group all";
-		all_button.set_action(polybar::LEFT_CLICK, &cmd);
-		all_button.font = Some(1);
+		let all_state = match showing_all {
+			true => "all-activated".to_string(),
+			false => "all".to_string(),
+		};
 
-		if showing_all {
-			all_button.set_colors(polybar::defaults::FOCUSED_FG, polybar::defaults::FOCUSED_BG);
-		} else {
-			all_button.set_colors(polybar::defaults::FG, polybar::defaults::BG);
-		}
+		let mut all_button = POLYBAR_CFG.get_label("groups", Some(all_state), false);
 
-		print!("{}", all_button);
+		all_button.actions = Some(Actions {
+			left_click: Some(this_command_abs() + " polybar group all"),
+			middle_click: None,
+			right_click: None,
+		});
+
+		format.labels.insert("all".to_owned(), vec![all_button]);
+	} else {
+		format.labels.insert("all".to_owned(), vec![]);
 	}
 
-	if showing_all {
-		active_groups = vec![];
-	}
-
-	let focused_ws = workspaces::visible_or_focused(&focused_output);
-	let focused_group = name::group(focused_ws.name.as_str());
+	let focused_ws = i3::get_focused_workspace();
+	let focused_group = focused_ws.group();
+	let mut state_label = vec![];
 	for g in groups {
-		let mut group_btn = polybar::Label::new(&g, 1, 0);
-		group_btn.font = Some(1);
-
 		let left_click = this_command_abs() + " polybar group only " + g.as_ref();
 		let secondary_click = this_command_abs() + " polybar group toggle " + g.as_ref();
 
-		group_btn.set_actions(
-			Some(left_click),
-			Some(secondary_click.clone()),
-			Some(secondary_click),
-		);
+		let group_actions = Actions {
+			left_click: Some(left_click),
+			middle_click: Some(secondary_click.clone()),
+			right_click: Some(secondary_click),
+		};
 
-		if showing_all {
+		let group_state = if showing_all {
 			if &g == &focused_group {
-				group_btn.set_colors(
-					polybar::defaults::GROUP_FOCUSED_FG,
-					polybar::defaults::GROUP_FOCUSED_BG,
-				);
+				"focused"
 			} else {
-				group_btn.set_colors(polybar::defaults::GROUP_FG, polybar::defaults::GROUP_BG);
+				"unfocused"
 			}
 		} else if active_groups.contains(&g) {
-			group_btn.set_colors(
-				polybar::defaults::GROUP_ACTIVE_FG,
-				polybar::defaults::GROUP_ACTIVE_BG,
-			);
+			"activated"
 		} else {
-			// Hidden
 			if &g == &focused_group {
-				group_btn.set_colors(
-					polybar::defaults::GROUP_HIDDEN_FOCUSED_FG,
-					polybar::defaults::GROUP_HIDDEN_FOCUSED_BG,
-				);
+				"hidden-focused"
 			} else {
-				group_btn.set_colors(
-					polybar::defaults::GROUP_HIDDEN_FG,
-					polybar::defaults::GROUP_HIDDEN_BG,
-				);
+				"hidden-unfocused"
 			}
-		}
+		};
 
-		print!("{}", group_btn);
+		let mut group_btn = POLYBAR_CFG.get_label("groups", Some(group_state.to_owned()), false);
+		group_btn.label = g.to_owned();
+		group_btn.actions = Some(group_actions);
+
+		state_label.push(group_btn);
 	}
+	format.labels.insert("state".to_owned(), state_label);
+
+	print!("{}", format);
 }

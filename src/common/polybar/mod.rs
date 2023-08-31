@@ -1,4 +1,4 @@
-pub mod defaults;
+// pub mod defaults;
 
 use std::fmt;
 use std::process::Command;
@@ -26,9 +26,9 @@ pub fn update() {
 		.ok();
 }
 
-pub const LEFT_CLICK: &str = "left_click";
-pub const MIDDLE_CLICK: &str = "middle_click";
-pub const RIGHT_CLICK: &str = "right_click";
+// pub const LEFT_CLICK: &str = "left_click";
+// pub const MIDDLE_CLICK: &str = "middle_click";
+// pub const RIGHT_CLICK: &str = "right_click";
 
 #[derive(Debug, Clone)]
 pub struct Actions {
