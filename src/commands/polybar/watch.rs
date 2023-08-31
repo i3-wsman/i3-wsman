@@ -3,7 +3,7 @@ use i3_ipc::{
 	I3Stream,
 };
 
-use crate::common::polybar;
+use crate::polybar;
 
 pub fn exec(_: Vec<String>) {
 	let mut i3 = I3Stream::conn_sub(&[Subscribe::Window, Subscribe::Workspace]).unwrap();

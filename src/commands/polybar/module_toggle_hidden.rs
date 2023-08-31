@@ -1,5 +1,9 @@
 use crate::{
-	common::this_command_abs, groups, i3::get_current_output, polybar::Actions, POLYBAR_CFG,
+	common::this_command_abs,
+	groups,
+	i3::get_current_output,
+	polybar::{Actions, WILDCARD},
+	POLYBAR_CFG,
 };
 
 pub fn exec(_: Vec<String>) {
@@ -23,7 +27,7 @@ pub fn exec(_: Vec<String>) {
 
 	let label = POLYBAR_CFG.get_label("show-hidden-toggle", Some(key_state.to_owned()), false);
 	let mut format = POLYBAR_CFG.get_format("show-hidden-toggle", Some(key_state.to_owned()));
-	format.labels.insert("*".to_owned(), label);
+	format.labels.insert(WILDCARD.to_owned(), vec![label]);
 	format.container.actions = Some(actions);
 
 	print!("{}", format);

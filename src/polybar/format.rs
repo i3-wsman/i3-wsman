@@ -6,25 +6,31 @@ use super::Label;
 #[derive(Debug)]
 pub struct Format {
 	pub container: Label,
-	pub labels: HashMap<String, Label>,
+	pub labels: HashMap<String, Vec<Label>>,
 	pub prefix: Option<Label>,
 	pub suffix: Option<Label>,
 }
 
-static WILDCARD: &str = "*";
+pub static WILDCARD: &str = "*";
 
 impl fmt::Display for Format {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		let mut label = self.container.label.clone();
 
-		for (state, l) in &self.labels {
+		for (state, labels) in &self.labels {
 			let label_tag: String = if state == WILDCARD {
 				"<label>".to_owned()
 			} else {
 				"<label-".to_string() + state.as_ref() + ">"
 			};
 
-			label = label.replace(label_tag.as_str(), l.to_string().as_ref());
+			let label_body = labels
+				.iter()
+				.map(|l| l.to_string())
+				.reduce(|acc, l| acc + l.as_str())
+				.unwrap_or("".to_owned());
+
+			label = label.replace(label_tag.as_str(), label_body.as_str());
 		}
 
 		let before_label = match self.prefix.clone() {

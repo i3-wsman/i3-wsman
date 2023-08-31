@@ -40,9 +40,13 @@ impl fmt::Display for Label {
 			suffix = "%{T-}".to_string() + suffix.as_ref();
 		}
 
-		if let Some(padding) = self.padding.clone() {
-			prefix = prefix + format!("%{{O{}}}", padding).as_ref();
-			suffix = format!("%{{O{}}}", padding) + suffix.as_ref();
+		if let Some(margin) = self.margin.clone() {
+			let margin = match margin.parse::<usize>() {
+				Ok(i) => " ".repeat(i),
+				Err(_) => format!("%{{O{}}}", margin),
+			};
+			prefix = prefix + margin.as_ref();
+			suffix = margin + suffix.as_ref();
 		}
 
 		if let Some(actions) = self.actions.clone() {
@@ -80,9 +84,13 @@ impl fmt::Display for Label {
 			suffix = "%{B-}".to_string() + suffix.as_ref();
 		}
 
-		if let Some(margin) = self.margin.clone() {
-			prefix = prefix + format!("%{{O{}}}", margin).as_ref();
-			suffix = format!("%{{O{}}}", margin) + suffix.as_ref();
+		if let Some(padding) = self.padding.clone() {
+			let padding = match padding.parse::<usize>() {
+				Ok(i) => " ".repeat(i),
+				Err(_) => format!("%{{O{}}}", padding),
+			};
+			prefix = prefix + padding.as_ref();
+			suffix = padding + suffix.as_ref();
 		}
 
 		write!(f, "{}{}{}", prefix, self.label, suffix)

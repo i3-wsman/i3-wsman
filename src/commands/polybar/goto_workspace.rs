@@ -1,6 +1,6 @@
 use crate::{
-	common::polybar,
 	i3::{self, workspace::Workspace},
+	polybar,
 };
 
 use super::help;

@@ -1,7 +1,7 @@
 mod goto_workspace;
 mod group;
 mod help;
-// mod module_groups;
+mod module_groups;
 mod module_toggle_hidden;
 // mod module_workspaces;
 mod poke;
@@ -21,7 +21,7 @@ lazy_static! {
 
 		cmds.insert(DEFAULT_CMD, exec as CommandFn);
 
-		// cmds.insert("module-groups", module_groups::exec as CommandFn);
+		cmds.insert("module-groups", module_groups::exec as CommandFn);
 		cmds.insert("module-toggle-hidden", module_toggle_hidden::exec as CommandFn);
 		// cmds.insert("module-workspaces", module_workspaces::exec as CommandFn);
 

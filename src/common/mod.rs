@@ -7,7 +7,7 @@ pub mod constraint;
 // pub mod moves;
 // pub mod name;
 // pub mod neighbor;
-pub mod polybar;
+// pub mod polybar;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Direction {

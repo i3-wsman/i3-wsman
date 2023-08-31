@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
 use crate::{
-	common::{constraint::Constraint, polybar, this_command, Direction},
+	common::{constraint::Constraint, this_command, Direction},
 	i3::{self, get_filtered_criteria, get_focused_workspace, workspace::assemble_name},
+	polybar,
 };
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};

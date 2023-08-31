@@ -4,7 +4,7 @@ mod format;
 mod label;
 // pub mod presets;
 
-pub use format::Format;
+pub use format::{Format, WILDCARD};
 pub use label::Label;
 
 #[derive(Debug, Default, Clone)]
