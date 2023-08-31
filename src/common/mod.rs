@@ -4,10 +4,6 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 pub mod constraint;
-// pub mod moves;
-// pub mod name;
-// pub mod neighbor;
-// pub mod polybar;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Direction {
