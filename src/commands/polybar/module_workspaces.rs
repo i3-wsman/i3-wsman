@@ -1,112 +1,73 @@
-use crate::POLYBAR_CFG;
-
-use crate::common::{
-	constraint::{Constraint, Constraints},
-	groups, name, outputs, polybar, this_command_abs, workspaces,
-};
+use crate::{common::this_command_abs, groups, i3, polybar::Actions, POLYBAR_CFG};
 
 pub fn exec(_: Vec<String>) {
-	let show_hidden = groups::show_hidden_enabled();
-	let focused_output = outputs::focused();
+	let focused_output = i3::get_current_output();
+	let workspaces = i3::get_filtered_workspaces(false);
+	let active_groups = groups::active_for_output(Some(focused_output.clone()));
+	let showing_all = focused_output.showing_all();
 
-	let mut show_constraints = Constraints::new();
-	show_constraints.add(Constraint::NoGroup);
-	show_constraints.add(Constraint::AllowUrgent);
+	let mut format = POLYBAR_CFG.get_format("workspaces", None);
+	// let separator = POLYBAR_CFG.get_label("workspaces", None, Some("separator".to_owned()));
+	// let output_separator = POLYBAR_CFG.get_label("workspaces", None, Some("output-separator".to_owned()));
 
-	if !show_hidden {
-		show_constraints.add(Constraint::Group);
-	}
-	if POLYBAR_CFG.pin_workspaces() {
-		show_constraints.add(Constraint::Output);
-		show_constraints.output = focused_output.clone();
-	}
-
-	let visible_workspaces = workspaces::visible();
-	let mut workspaces = workspaces::get(show_constraints, false);
-
-	for visible_ws in visible_workspaces {
-		if !workspaces.contains(&visible_ws) && visible_ws.output == focused_output {
-			workspaces.push(visible_ws);
-		}
-	}
-
-	workspaces.sort_by(|w1, w2| w1.num.cmp(&w2.num));
-
-	let mut avail_constraints = Constraints::new();
-	if POLYBAR_CFG.pin_workspaces() {
-		avail_constraints.add(Constraint::Output);
-		avail_constraints.output = focused_output.clone();
-	}
-	let groups = groups::available(avail_constraints);
-
-	let active_groups = groups::active(focused_output.clone());
-	let showing_all = active_groups.len() == 0 || groups == active_groups;
 	let mut cur_output = "".to_string();
+	let mut state_label = vec![];
 	for ws in workspaces {
-		if cur_output.len() > 0 && cur_output != ws.output {
-			print!("  ");
+		if cur_output.len() > 0 && cur_output != ws.output() {
+			// state_label.push(output_separator.clone());
+			println!("  ");
+		} else {
+			// state_label.push(separator.clone());
 		}
-		cur_output = ws.output.to_owned();
+		cur_output = ws.output();
 
-		let mut ws_label_btn = polybar::Label::new(polybar::defaults::WS_LABEL, 2, 0);
-		ws_label_btn.font = Some(3);
-
-		let cmd = this_command_abs() + " polybar goto " + ws.num.to_string().as_ref();
-		ws_label_btn.set_action(polybar::LEFT_CLICK, &cmd);
-
-		let ws_group = name::group(ws.name.as_str());
-		if ws_group == "" || showing_all || active_groups.contains(&ws_group) {
-			if ws.focused {
-				ws_label_btn
-					.set_colors(polybar::defaults::FOCUSED_FG, polybar::defaults::FOCUSED_BG);
-				ws_label_btn.label = polybar::defaults::FOCUSED_WS_LABEL.to_string();
-			} else if ws.urgent {
-				ws_label_btn.set_colors(polybar::defaults::URGENT_FG, polybar::defaults::URGENT_BG);
-				ws_label_btn.label = polybar::defaults::URGENT_WS_LABEL.to_string();
-			} else if ws.visible {
-				ws_label_btn
-					.set_colors(polybar::defaults::VISIBLE_FG, polybar::defaults::VISIBLE_BG);
-				ws_label_btn.label = polybar::defaults::VISIBLE_WS_LABEL.to_string();
-			} else {
-				ws_label_btn.set_colors(polybar::defaults::FG, polybar::defaults::BG);
-			}
-
+		let ws_group = ws.group();
+		let (section, ws_state) = if ws_group == "" || active_groups.contains(&ws_group) {
 			if ws_group == "" && !showing_all {
-				if ws.focused {
-					ws_label_btn.label = polybar::defaults::HIDDEN_FOCUSED_WS_LABEL.to_string();
-				} else if ws.urgent {
-					ws_label_btn.label = polybar::defaults::HIDDEN_URGENT_WS_LABEL.to_string();
-				} else if ws.visible {
-					ws_label_btn.label = polybar::defaults::HIDDEN_VISIBLE_WS_LABEL.to_string();
+				if ws.focused() {
+					("workspaces/unassigned", "unassigned-focused")
+				} else if ws.urgent() {
+					("workspaces/unassigned", "unassigned-urgent")
+				} else if ws.visible() {
+					("workspaces/unassigned", "unassigned-visible")
 				} else {
-					ws_label_btn.label = polybar::defaults::HIDDEN_WS_LABEL.to_string();
+					("workspaces/unassigned", "unassigned-unfocused")
+				}
+			} else {
+				if ws.focused() {
+					("workspaces", "focused")
+				} else if ws.urgent() {
+					("workspaces", "urgent")
+				} else if ws.visible() {
+					("workspaces", "visible")
+				} else {
+					("workspaces", "unfocused")
 				}
 			}
 		} else {
-			if ws.focused {
-				ws_label_btn.set_colors(
-					polybar::defaults::HIDDEN_FOCUSED_FG,
-					polybar::defaults::HIDDEN_FOCUSED_BG,
-				);
-				ws_label_btn.label = polybar::defaults::HIDDEN_FOCUSED_WS_LABEL.to_string();
-			} else if ws.urgent {
-				ws_label_btn.set_colors(
-					polybar::defaults::HIDDEN_URGENT_FG,
-					polybar::defaults::HIDDEN_URGENT_BG,
-				);
-				ws_label_btn.label = polybar::defaults::HIDDEN_URGENT_WS_LABEL.to_string();
-			} else if ws.visible {
-				ws_label_btn.set_colors(
-					polybar::defaults::HIDDEN_VISIBLE_FG,
-					polybar::defaults::HIDDEN_VISIBLE_BG,
-				);
-				ws_label_btn.label = polybar::defaults::HIDDEN_VISIBLE_WS_LABEL.to_string();
+			if ws.focused() {
+				("workspaces/group-hidden", "focused")
+			} else if ws.urgent() {
+				("workspaces/group-hidden", "urgent")
+			} else if ws.visible() {
+				("workspaces/group-hidden", "visible")
 			} else {
-				ws_label_btn.set_colors(polybar::defaults::HIDDEN_FG, polybar::defaults::HIDDEN_BG);
-				ws_label_btn.label = polybar::defaults::HIDDEN_WS_LABEL.to_string();
+				("workspaces/group-hidden", "unfocused")
 			}
-		}
+		};
 
-		print!("{}", ws_label_btn);
+		let mut ws_label_btn = POLYBAR_CFG.get_label(section, Some(ws_state.to_owned()), None);
+		let cmd = this_command_abs() + " polybar goto " + ws.num().to_string().as_ref();
+
+		ws_label_btn.actions = Some(Actions {
+			left_click: Some(cmd),
+			middle_click: None,
+			right_click: None,
+		});
+
+		state_label.push(ws_label_btn);
 	}
+
+	format.labels.insert("state".to_string(), state_label);
+	print!("{}", format);
 }

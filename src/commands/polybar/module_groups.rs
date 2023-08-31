@@ -1,25 +1,9 @@
-use crate::{
-	common::{
-		constraint::{Constraint, Criteria},
-		this_command_abs,
-	},
-	groups, i3,
-	polybar::Actions,
-	POLYBAR_CFG,
-};
+use crate::{common::this_command_abs, groups, i3, polybar::Actions, POLYBAR_CFG};
 
 pub fn exec(mut args: Vec<String>) {
 	let hide_all_button = args.len() > 0 && args.remove(0) == "no-all";
 
-	let show_hidden = groups::show_hidden_enabled();
 	let focused_output = i3::get_current_output();
-
-	let mut show_criteria = Criteria::new();
-	if !show_hidden {
-		show_criteria.add(Constraint::Group);
-	}
-	show_criteria.add(Constraint::Output);
-	show_criteria.output = Some(focused_output.clone());
 
 	let groups = groups::list_for_output(Some(focused_output.clone()));
 	let active_groups = groups::active_for_output(Some(focused_output.clone()));
@@ -33,7 +17,7 @@ pub fn exec(mut args: Vec<String>) {
 			false => "all".to_string(),
 		};
 
-		let mut all_button = POLYBAR_CFG.get_label("groups", Some(all_state), false);
+		let mut all_button = POLYBAR_CFG.get_label("groups", Some(all_state), None);
 
 		all_button.actions = Some(Actions {
 			left_click: Some(this_command_abs() + " polybar group all"),
@@ -46,7 +30,7 @@ pub fn exec(mut args: Vec<String>) {
 		format.labels.insert("all".to_owned(), vec![]);
 	}
 
-	let focused_ws = i3::get_focused_workspace();
+	let focused_ws = i3::get_current_workspace();
 	let focused_group = focused_ws.group();
 	let mut state_label = vec![];
 	for g in groups {
@@ -75,7 +59,7 @@ pub fn exec(mut args: Vec<String>) {
 			}
 		};
 
-		let mut group_btn = POLYBAR_CFG.get_label("groups", Some(group_state.to_owned()), false);
+		let mut group_btn = POLYBAR_CFG.get_label("groups", Some(group_state.to_owned()), None);
 		group_btn.label = g.to_owned();
 		group_btn.actions = Some(group_actions);
 

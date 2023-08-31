@@ -61,6 +61,7 @@ pub fn list_for_output(output: Option<Output>) -> Vec<String> {
 	}
 
 	dedup_vec(&mut final_groups);
+	final_groups.retain(|x| !x.is_empty());
 
 	final_groups
 }
@@ -76,6 +77,7 @@ pub fn active_for_output(output: Option<Output>) -> Vec<String> {
 	groups.extend(CONFIG.groups.always_visible.to_owned());
 	groups.sort();
 	groups.dedup();
+	groups.retain(|x| !x.is_empty());
 
 	groups
 }
@@ -97,6 +99,7 @@ fn update_groups(output: Output, mut groups: Vec<String>) -> Vec<String> {
 
 	groups.sort();
 	groups.dedup();
+	groups.retain(|x| !x.is_empty());
 
 	state.groups.insert(output_name, groups.clone());
 	state::set(state);
