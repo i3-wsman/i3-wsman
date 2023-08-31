@@ -1,50 +1,30 @@
+use std::collections::HashMap;
 use std::fmt;
 
-use super::{Actions, Label};
+use super::Label;
 
 #[derive(Debug)]
 pub struct Format {
-	pub format: String,
-	pub label: Label,
+	pub container: Label,
+	pub labels: HashMap<String, Label>,
 	pub prefix: Option<Label>,
 	pub suffix: Option<Label>,
-
-	pub font: Option<u64>,
-	pub actions: Option<Actions>,
-
-	pub foreground: Option<String>,
-	pub background: Option<String>,
-	pub underline: Option<String>,
-	pub overline: Option<String>,
-	pub padding: Option<String>,
-	pub margin: Option<String>,
 }
+
+static WILDCARD: &str = "*";
 
 impl fmt::Display for Format {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		let label = self.format.clone();
+		let mut label = self.container.label.clone();
 
-		let mut prefix = "".to_owned();
-		let mut suffix = "".to_owned();
+		for (state, l) in &self.labels {
+			let label_tag: String = if state == WILDCARD {
+				"<label>".to_owned()
+			} else {
+				"<label-".to_string() + state.as_ref() + ">"
+			};
 
-		if let Some(font) = self.font {
-			prefix = prefix + format!("%{{T{}}}", font).as_ref();
-			suffix = "%{T-}".to_string() + suffix.as_ref();
-		}
-
-		if let Some(actions) = self.actions.clone() {
-			if let Some(cmd) = actions.left_click {
-				prefix = prefix + format!("%{{A1:{}:}}", cmd).as_ref();
-				suffix = "%{A}".to_string() + suffix.as_ref();
-			}
-			if let Some(cmd) = actions.middle_click {
-				prefix = prefix + format!("%{{A2:{}:}}", cmd).as_ref();
-				suffix = "%{A}".to_string() + suffix.as_ref();
-			}
-			if let Some(cmd) = actions.right_click {
-				prefix = prefix + format!("%{{A3:{}:}}", cmd).as_ref();
-				suffix = "%{A}".to_string() + suffix.as_ref();
-			}
+			label = label.replace(label_tag.as_str(), l.to_string().as_ref());
 		}
 
 		let before_label = match self.prefix.clone() {
@@ -57,24 +37,8 @@ impl fmt::Display for Format {
 			None => "".to_string(),
 		};
 
-		let label = format!(
-			"{}{}{}{}{}",
-			before_label,
-			prefix,
-			label.replace("<label>", self.label.to_string().as_ref()),
-			suffix,
-			after_label,
-		);
-
-		let container = Label {
-			label,
-			foreground: self.foreground.clone(),
-			background: self.background.clone(),
-			underline: self.underline.clone(),
-			overline: self.overline.clone(),
-			padding: self.padding.clone(),
-			margin: self.margin.clone(),
-		};
+		let mut container = self.container.clone();
+		container.label = format!("{}{}{}", before_label, label, after_label,);
 
 		write!(f, "{}", container)
 	}
