@@ -1,4 +1,10 @@
-use crate::{common::this_command_abs, groups, i3, polybar::Actions, POLYBAR_CFG};
+use crate::{
+	common::this_command_abs,
+	groups,
+	i3::{self, Workspace},
+	polybar::Actions,
+	POLYBAR_CFG,
+};
 
 pub fn exec(mut args: Vec<String>) {
 	let hide_all_button = args.len() > 0 && args.remove(0) == "no-all";
@@ -60,7 +66,19 @@ pub fn exec(mut args: Vec<String>) {
 		};
 
 		let mut group_btn = POLYBAR_CFG.get_label("groups", Some(group_state.to_owned()), None);
-		group_btn.label = g.to_owned();
+
+		group_btn.tokens.insert("name".to_owned(), g.to_owned());
+
+		let count = i3::get_workspaces()
+			.iter()
+			.filter(|w| w.group() == g)
+			.collect::<Vec<&Workspace>>()
+			.len();
+
+		group_btn
+			.tokens
+			.insert("count".to_owned(), count.to_string());
+
 		group_btn.actions = Some(group_actions);
 
 		state_label.push(group_btn);

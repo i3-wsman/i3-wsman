@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt;
 
 use super::Actions;
@@ -14,6 +15,8 @@ pub struct Label {
 
 	pub font: Option<u64>,
 	pub actions: Option<Actions>,
+
+	pub tokens: HashMap<String, String>,
 
 	pub foreground: Option<String>,
 	pub background: Option<String>,
@@ -93,6 +96,19 @@ impl fmt::Display for Label {
 			suffix = padding + suffix.as_ref();
 		}
 
-		write!(f, "{}{}{}", prefix, self.label, suffix)
+		let mut label = self.label.clone();
+		for (token, value) in &self.tokens {
+			let token_tag: String = format!("%{}%", token);
+
+			//let token_body = labels
+			//	.iter()
+			//	.map(|l| l.to_string())
+			//	.reduce(|acc, l| acc + l.as_str())
+			//	.unwrap_or("".to_owned());
+
+			label = label.replace(token_tag.as_str(), value.as_str());
+		}
+
+		write!(f, "{}{}{}", prefix, label, suffix)
 	}
 }
