@@ -6,6 +6,8 @@ pub fn exec(_: Vec<String>) {
 	let active_groups = groups::active_for_output(Some(focused_output.clone()));
 	let showing_all = focused_output.showing_all();
 
+	let enable_click = POLYBAR_CFG.enable_click();
+
 	let mut format = POLYBAR_CFG.get_format("workspaces", None);
 	// let separator = POLYBAR_CFG.get_label("workspaces", None, Some("separator".to_owned()));
 	// let output_separator = POLYBAR_CFG.get_label("workspaces", None, Some("output-separator".to_owned()));
@@ -59,11 +61,13 @@ pub fn exec(_: Vec<String>) {
 		let mut ws_label_btn = POLYBAR_CFG.get_label(section, Some(ws_state.to_owned()), None);
 		let cmd = this_command_abs() + " polybar goto " + ws.num().to_string().as_ref();
 
-		ws_label_btn.actions = Some(Actions {
-			left_click: Some(cmd),
-			middle_click: None,
-			right_click: None,
-		});
+		if enable_click {
+			ws_label_btn.actions = Some(Actions {
+				left_click: Some(cmd),
+				middle_click: None,
+				right_click: None,
+			});
+		}
 
 		state_label.push(ws_label_btn);
 	}

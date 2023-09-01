@@ -22,7 +22,10 @@ pub fn get_filtered_criteria(force_output: bool) -> Criteria {
 	let mut criteria = Criteria::new();
 	criteria.add(Constraint::Group);
 	criteria.add(Constraint::NoGroup);
-	criteria.add(Constraint::AllowUrgent);
+
+	if POLYBAR_CFG.show_hidden_urgent() {
+		criteria.add(Constraint::AllowUrgent);
+	}
 
 	if force_output || POLYBAR_CFG.pin_workspaces() == true {
 		criteria.add(Constraint::Output);
