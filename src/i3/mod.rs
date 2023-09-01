@@ -58,6 +58,14 @@ pub fn get_focused_workspace() -> Workspace {
 		.unwrap()
 }
 
+pub fn get_current_workspace_for_output(output: Output) -> Workspace {
+	get_workspaces_from_i3()
+		.iter()
+		.find(|ws| ws.visible && ws.output == output.name())
+		.map(|ws| Workspace::from_ws(ws))
+		.unwrap()
+}
+
 pub fn get_current_workspace() -> Workspace {
 	let current_output = get_current_output();
 	get_workspaces_from_i3()

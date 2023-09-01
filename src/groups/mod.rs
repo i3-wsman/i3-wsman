@@ -118,8 +118,9 @@ fn update_groups(output: Output, mut groups: Vec<String>) -> Vec<String> {
 
 		for o in outputs {
 			let mut criteria = get_filtered_criteria(true);
-			criteria.output = Some(o);
-			let next = i3::get_focused_workspace().get_closest_neighbor(Some(criteria), None);
+			criteria.output = Some(o.clone());
+			let next =
+				i3::get_current_workspace_for_output(o).get_closest_neighbor(Some(criteria), None);
 			if let Some(ws) = next {
 				i3::run_command(format!("workspace {}", ws.full_name()));
 			}
