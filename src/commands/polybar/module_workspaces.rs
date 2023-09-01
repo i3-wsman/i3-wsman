@@ -1,10 +1,19 @@
 use crate::{common::this_command_abs, groups, i3, polybar::Actions, POLYBAR_CFG};
 
+static FOCUSED: &str = "focused";
+static URGENT: &str = "urgent";
+static VISIBLE: &str = "visible";
+static UNFOCUSED: &str = "unfocused";
+
+static SECT_WORKSPACES: &str = "workspaces";
+static SECT_UNASSIGNED: &str = "workspaces/unassigned";
+static SECT_HIDDEN: &str = "workspaces/group-hidden";
+
 pub fn exec(_: Vec<String>) {
 	let focused_output = i3::get_current_output();
 	let workspaces = i3::get_filtered_workspaces(false);
 	let active_groups = groups::active_for_output(Some(focused_output.clone()));
-	let showing_all = focused_output.showing_all();
+	// let showing_all = focused_output.showing_all();
 
 	let enable_click = POLYBAR_CFG.enable_click();
 
@@ -24,41 +33,26 @@ pub fn exec(_: Vec<String>) {
 		cur_output = ws.output();
 
 		let ws_group = ws.group();
-		let (section, ws_state) = if ws_group == "" || active_groups.contains(&ws_group) {
-			if ws_group == "" && !showing_all {
-				if ws.focused() {
-					("workspaces/unassigned", "unassigned-focused")
-				} else if ws.urgent() {
-					("workspaces/unassigned", "unassigned-urgent")
-				} else if ws.visible() {
-					("workspaces/unassigned", "unassigned-visible")
-				} else {
-					("workspaces/unassigned", "unassigned-unfocused")
-				}
-			} else {
-				if ws.focused() {
-					("workspaces", "focused")
-				} else if ws.urgent() {
-					("workspaces", "urgent")
-				} else if ws.visible() {
-					("workspaces", "visible")
-				} else {
-					("workspaces", "unfocused")
-				}
-			}
+		let section = if ws_group == "" {
+			SECT_UNASSIGNED
+		} else if active_groups.contains(&ws_group) {
+			SECT_WORKSPACES
 		} else {
-			if ws.focused() {
-				("workspaces/group-hidden", "focused")
-			} else if ws.urgent() {
-				("workspaces/group-hidden", "urgent")
-			} else if ws.visible() {
-				("workspaces/group-hidden", "visible")
-			} else {
-				("workspaces/group-hidden", "unfocused")
-			}
+			SECT_HIDDEN
+		};
+
+		let ws_state = if ws.focused() {
+			FOCUSED
+		} else if ws.urgent() {
+			URGENT
+		} else if ws.visible() {
+			VISIBLE
+		} else {
+			UNFOCUSED
 		};
 
 		let mut ws_label_btn = POLYBAR_CFG.get_label(section, Some(ws_state.to_owned()), None);
+
 		let cmd = this_command_abs() + " polybar goto " + ws.num().to_string().as_ref();
 
 		if enable_click {
@@ -68,6 +62,16 @@ pub fn exec(_: Vec<String>) {
 				right_click: None,
 			});
 		}
+
+		ws_label_btn.tokens.insert("name".to_owned(), ws.name());
+		ws_label_btn.tokens.insert("group".to_owned(), ws.group());
+		ws_label_btn
+			.tokens
+			.insert("full_name".to_owned(), ws.full_name());
+		ws_label_btn
+			.tokens
+			.insert("index".to_owned(), ws.num().to_string());
+		ws_label_btn.tokens.insert("output".to_owned(), ws.output());
 
 		state_label.push(ws_label_btn);
 	}

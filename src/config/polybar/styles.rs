@@ -105,6 +105,7 @@ impl Config {
 		Label {
 			label: styles.body,
 			actions: None,
+			tokens: Default::default(),
 			font: styles.font,
 			foreground: styles.foreground,
 			background: styles.background,
