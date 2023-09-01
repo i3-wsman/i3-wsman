@@ -1,5 +1,8 @@
-use crate::common::{
-	constraint, constraint::Constraint, groups, moves, outputs, polybar, this_command, workspaces,
+use crate::{
+	common::this_command,
+	groups,
+	i3::{self, Workspace},
+	polybar,
 };
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
@@ -35,7 +38,7 @@ pub fn help(_: Vec<String>) {
 	println!("      {} {} list", this_command(), CMD.as_str());
 	println!("          List all groups\n\r");
 	println!(
-		"      {} {} assign <workspace-name> <group-name>",
+		"      {} {} assign [<workspace-name>] <group-name>",
 		this_command(),
 		CMD.as_str()
 	);
@@ -72,16 +75,7 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(args: Vec<String>) {
-	let mut constraints = constraint::from_vec(args.to_owned());
-
-	if args.len() == 0 {
-		constraints.add(Constraint::Output);
-		constraints.output = outputs::focused();
-	}
-
-	let groups = groups::available(constraints);
-	let output = serde_json::to_string_pretty(&groups).unwrap();
-	println!("{}", output);
+	list(args);
 }
 
 pub fn assign(args: Vec<String>) {
@@ -95,13 +89,13 @@ pub fn assign(args: Vec<String>) {
 
 	let possible_ws = if args.len() > 1 {
 		let ws_name = args[0].clone();
-		workspaces::by_name(ws_name.clone())
+		Workspace::by_name(ws_name.as_str())
 	} else {
-		Some(workspaces::focused())
+		Some(i3::get_current_workspace())
 	};
 
-	if let Some(ws) = possible_ws {
-		moves::rename(ws, group_name);
+	if let Some(mut ws) = possible_ws {
+		ws.set_group(group_name);
 	} else {
 		println!("No workspace named {}", args[0].clone());
 	}
@@ -109,95 +103,48 @@ pub fn assign(args: Vec<String>) {
 	polybar::update();
 }
 
-pub fn list(args: Vec<String>) {
-	let mut constraints = constraint::from_vec(args.to_owned());
-
-	if args.len() == 0 {
-		constraints.add(Constraint::Output);
-		constraints.output = outputs::focused();
-	}
-
-	let groups = groups::available(constraints);
+pub fn list(_: Vec<String>) {
+	let groups = groups::list_for_output(None);
 	let output = serde_json::to_string_pretty(&groups).unwrap();
 	println!("{}", output);
 }
 
-pub fn list_active(args: Vec<String>) {
-	let output = if args.len() > 0 {
-		args[0].clone()
-	} else {
-		outputs::focused()
-	};
-
-	let groups = groups::active(output);
+pub fn list_active(_: Vec<String>) {
+	let groups = groups::active_for_output(None);
 	let output = serde_json::to_string_pretty(&groups).unwrap();
 	println!("{}", output);
 }
 
-pub fn all(args: Vec<String>) {
-	let output = if args.len() > 0 {
-		args[0].clone()
-	} else {
-		outputs::focused()
-	};
-
-	let groups = groups::all(output);
+pub fn all(_: Vec<String>) {
+	let groups = groups::show_all(None);
 	let output = serde_json::to_string_pretty(&groups).unwrap();
 	println!("{}", output);
 }
 
 pub fn only(mut args: Vec<String>) {
 	let group_name = args.remove(0);
-
-	let output = if args.len() > 0 {
-		args[0].clone()
-	} else {
-		outputs::focused()
-	};
-
-	let groups = groups::only(group_name, output);
+	let groups = groups::show_only(group_name, None);
 	let output = serde_json::to_string_pretty(&groups).unwrap();
 	println!("{}", output);
 }
 
 pub fn show(mut args: Vec<String>) {
 	let group_name = args.remove(0);
-
-	let output = if args.len() > 0 {
-		args[0].clone()
-	} else {
-		outputs::focused()
-	};
-
-	let groups = groups::show(group_name, output);
+	let groups = groups::show(group_name, None);
 	let output = serde_json::to_string_pretty(&groups).unwrap();
 	println!("{}", output);
 }
 
 pub fn hide(mut args: Vec<String>) {
 	let group_name = args.remove(0);
-
-	let output = if args.len() > 0 {
-		args[0].clone()
-	} else {
-		outputs::focused()
-	};
-
-	let groups = groups::hide(group_name, output);
+	let groups = groups::hide(group_name, None);
 	let output = serde_json::to_string_pretty(&groups).unwrap();
 	println!("{}", output);
 }
 
 pub fn toggle(mut args: Vec<String>) {
 	let group_name = args.remove(0);
-
-	let output = if args.len() > 0 {
-		args[0].clone()
-	} else {
-		outputs::focused()
-	};
-
-	let groups = groups::toggle(group_name, output);
+	let groups = groups::toggle(group_name, None);
 	let output = serde_json::to_string_pretty(&groups).unwrap();
 	println!("{}", output);
 }

@@ -238,6 +238,20 @@ impl Workspace {
 		}
 	}
 
+	pub fn set_name(&mut self, new_name: String) {
+		let cur_name = self.full_name();
+		let new_name = assemble_name(self.num(), self.group(), new_name);
+		i3::run_command(format!("rename workspace {} to {}", cur_name, new_name));
+		self.root = get_workspace_from_i3_by_name(new_name.as_str()).unwrap();
+	}
+
+	pub fn set_group(&mut self, new_group: String) {
+		let cur_name = self.full_name();
+		let new_name = assemble_name(self.num(), new_group, self.name());
+		i3::run_command(format!("rename workspace {} to {}", cur_name, new_name));
+		self.root = get_workspace_from_i3_by_name(new_name.as_str()).unwrap();
+	}
+
 	pub fn reorder(&mut self, new_pos: i32) {
 		let cur_name = self.full_name();
 		let new_name = assemble_name(new_pos, self.group(), self.name());
