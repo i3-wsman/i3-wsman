@@ -52,12 +52,16 @@ fn main() {
 		commands::actions::reorder::CMD.as_str(),
 		commands::actions::reorder::SUBCMDS.clone(),
 	);
+	cmds.insert(
+		commands::cli::rename::CMD.as_str(),
+		commands::cli::rename::SUBCMDS.clone(),
+	);
 	// // @TODO: move-container-to
 
-	// cmds.insert(
-	// 	commands::group::CMD.as_str(),
-	// 	commands::group::SUBCMDS.clone(),
-	// );
+	cmds.insert(
+		commands::cli::group::CMD.as_str(),
+		commands::cli::group::SUBCMDS.clone(),
+	);
 
 	cmds.insert(
 		commands::polybar::CMD.as_str(),
@@ -80,7 +84,8 @@ fn main() {
 		commands::actions::prev::CMD.as_str(),
 		commands::actions::adjacent::CMD.as_str(),
 		commands::actions::reorder::CMD.as_str(),
-		// commands::group::CMD.as_str(),
+		commands::cli::rename::CMD.as_str(),
+		commands::cli::group::CMD.as_str(),
 		commands::polybar::CMD.as_str(),
 		commands::cli::get_workspaces::CMD.as_str(),
 	];
