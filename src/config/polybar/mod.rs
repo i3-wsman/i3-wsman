@@ -46,21 +46,20 @@ impl Config {
 	}
 
 	fn complain<T: Any + Debug>(&self, section: &str, key: &str, default: &T) {
-		eprintln!(
-			"Polybar Error: Invalid value in {}",
-			CONFIG_PATH.to_str().unwrap()
-		);
+		eprintln!("Polybar Error: Bad config value");
 
-		eprintln!("\t[{}]", section);
-		eprintln!("\t...");
+		eprintln!("  --> {}", CONFIG_PATH.to_str().unwrap());
+		eprintln!("   |");
+		eprintln!("   |\t[{}]", section);
 		let value = (&self.root).get(section, key).unwrap();
 		let clean_val = value.trim();
-		eprintln!("\t{} = {}", key, clean_val);
+		eprintln!("   |");
+		eprintln!("   |\t{} = {}", key, clean_val);
 
 		let arrow = "-".repeat(key.len() + 3) + "^".repeat(clean_val.len()).as_ref();
-		eprintln!("\t{}", arrow);
-
-		eprintln!("\n\r\tDefaulting to: {:?}", default as &dyn Any);
+		eprintln!("   |\t{}", arrow);
+		eprintln!("   |");
+		eprintln!("   = defaulting to: `{:?}`\n\r", default);
 	}
 }
 
