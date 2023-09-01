@@ -6,7 +6,7 @@ use crate::{
 		constraint::{Constraint, Criteria},
 		Direction,
 	},
-	groups, i3, CONFIG,
+	groups, i3, CONFIG, POLYBAR_CFG,
 };
 
 use super::{get_current_output, get_matching_workspaces, get_workspaces, get_workspaces_from_i3};
@@ -125,6 +125,11 @@ impl Workspace {
 			return self.focused();
 		}
 
+		let always_show_urgent = POLYBAR_CFG.show_urgent();
+		if always_show_urgent && criteria.contains(Constraint::AllowUrgent) && self.urgent() {
+			return true;
+		}
+
 		if criteria.contains(Constraint::Output) {
 			match criteria.output.clone() {
 				Some(output) => {
@@ -136,7 +141,7 @@ impl Workspace {
 			}
 		}
 
-		if criteria.contains(Constraint::AllowUrgent) && self.urgent() {
+		if !always_show_urgent && criteria.contains(Constraint::AllowUrgent) && self.urgent() {
 			return true;
 		}
 
