@@ -51,6 +51,8 @@ unique_groups_on_outputs = true
 hide_unassigned_workspaces = false
 # Auto-focus the nearest workspace within the active group.
 auto_focus_nearest_group = true
+# COMING SOON: When focusing an "always_visible" group that has no workspaces, create a new workspace
+#create_workspace_for_empty_groups = true
 
 ## Workspace Creation Settings
 [create]
