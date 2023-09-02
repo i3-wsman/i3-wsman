@@ -3,11 +3,24 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
 use std::fs::{File, OpenOptions};
-use std::io::{Read, Write};
+use std::io::{self, Read, Write};
 use std::path::PathBuf;
+use std::sync::Mutex;
 
 use crate::i3;
 use crate::CONFIG;
+
+lazy_static! {
+	static ref I3_LOCK_PATH: PathBuf = get_tmpf("i3.lock");
+	static ref I3_LOCK: Mutex<io::Result<std::fs::File>> = Mutex::new(
+		OpenOptions::new()
+			.read(true)
+			.write(true)
+			.create(true)
+			.open(I3_LOCK_PATH.to_owned())
+	);
+	static ref I3_LOCK_OBTAINED: Mutex<bool> = Mutex::new(false);
+}
 
 type StateGroups = HashMap<String, Vec<String>>;
 
@@ -53,14 +66,49 @@ fn get_tmpf(filename: &str) -> PathBuf {
 		env::temp_dir()
 	};
 
-	let temp_file_path = temp_dir.join(filename);
+	temp_dir.join(filename)
+}
 
-	if !temp_file_path.exists() {
-		File::create(&temp_file_path).expect("Failed to create temporary file");
-		set(default());
+pub fn obtain_i3_lock() -> Result<(), io::Error> {
+	let mut locked = I3_LOCK_OBTAINED.lock().unwrap();
+	if *locked == true {
+		return Ok(());
 	}
+	let lockfile = I3_LOCK.lock().unwrap();
+	if let Ok(file) = &*lockfile {
+		file.lock_exclusive()?;
+	} else {
+		return Err(io::Error::new(
+			io::ErrorKind::Other,
+			format!(
+				"Failed to initialize lock file: {}",
+				I3_LOCK_PATH.as_os_str().to_string_lossy()
+			),
+		));
+	}
+	*locked = true;
+	Ok(())
+}
 
-	temp_file_path
+pub fn release_i3_lock() -> Result<(), io::Error> {
+	let mut locked = I3_LOCK_OBTAINED.lock().unwrap();
+	if *locked == false {
+		return Ok(());
+	}
+	let lockfile = I3_LOCK.lock().unwrap();
+	if let Ok(file) = &*lockfile {
+		file.unlock()?;
+	} else {
+		return Err(io::Error::new(
+			io::ErrorKind::Other,
+			format!(
+				"Failed to initialize lock file: {}",
+				I3_LOCK_PATH.as_os_str().to_string_lossy()
+			),
+		));
+	}
+	*locked = false;
+	Ok(())
 }
 
 pub fn set(state: State) {
@@ -74,6 +122,11 @@ pub fn set(state: State) {
 	let serialized_data = serde_json::to_string(&state).expect("Failed to serialize state");
 
 	let temp_file_path = get_tmpf("state");
+	if !temp_file_path.exists() {
+		File::create(&temp_file_path).expect("Failed to create temporary file");
+		set(default());
+	}
+
 	let mut file = OpenOptions::new()
 		.write(true)
 		.create(true)
@@ -89,6 +142,10 @@ pub fn set(state: State) {
 
 pub fn get() -> State {
 	let temp_file_path = get_tmpf("state");
+	if !temp_file_path.exists() {
+		set(default());
+	}
+
 	let mut file = File::open(&temp_file_path).expect("Failed to open temporary file");
 
 	file.lock_shared().expect("Failed to lock file");

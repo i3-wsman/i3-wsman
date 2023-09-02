@@ -1,4 +1,9 @@
-use crate::{common::this_command_abs, groups, i3, polybar::Actions, POLYBAR_CFG};
+use crate::{
+	common::{constraint::Constraint, this_command_abs},
+	groups, i3,
+	polybar::Actions,
+	POLYBAR_CFG,
+};
 
 static FOCUSED: &str = "focused";
 static URGENT: &str = "urgent";
@@ -11,9 +16,15 @@ static SECT_HIDDEN: &str = "workspaces/group-hidden";
 
 pub fn exec(_: Vec<String>) {
 	let focused_output = i3::get_current_output();
-	let workspaces = i3::get_filtered_workspaces(false);
+	let mut criteria = i3::get_filtered_criteria(false);
+
+	if focused_output.showing_all() || groups::show_hidden_enabled() {
+		criteria.remove(Constraint::Group);
+		criteria.remove(Constraint::NoGroup);
+	}
+
+	let workspaces = i3::get_matching_workspaces(criteria);
 	let active_groups = groups::active_for_output(Some(focused_output.clone()));
-	// let showing_all = focused_output.showing_all();
 
 	let enable_click = POLYBAR_CFG.enable_click();
 

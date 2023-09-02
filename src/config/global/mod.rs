@@ -14,7 +14,7 @@ mod startup;
 pub use create::Create;
 pub use focus::Focus;
 pub use groups::Groups;
-pub use navigation::{GotoBehavior, Navigation, NavigationBehavior};
+pub use navigation::{GotoBehavior, Navigation, NavigationBehavior, NavigationDirection};
 pub use startup::Startup;
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone)]

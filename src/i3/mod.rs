@@ -3,7 +3,7 @@ use std::env;
 
 use crate::{
 	common::constraint::{Constraint, Criteria},
-	POLYBAR_CFG,
+	state, CONFIG, POLYBAR_CFG,
 };
 
 pub mod outputs;
@@ -14,14 +14,19 @@ pub use workspace::Workspace;
 
 pub fn run_command(payload: String) {
 	let mut i3 = I3::connect().unwrap();
+	state::obtain_i3_lock().ok();
 	i3.run_command(payload).ok();
 }
 
 // Criteria
 pub fn get_filtered_criteria(force_output: bool) -> Criteria {
 	let mut criteria = Criteria::new();
+	criteria.add(Constraint::Focused);
 	criteria.add(Constraint::Group);
-	criteria.add(Constraint::NoGroup);
+
+	if !CONFIG.focus.hide_unassigned_workspaces {
+		criteria.add(Constraint::NoGroup);
+	}
 
 	if POLYBAR_CFG.show_hidden_urgent() {
 		criteria.add(Constraint::AllowUrgent);
@@ -38,8 +43,8 @@ pub fn get_filtered_criteria(force_output: bool) -> Criteria {
 // Workspaces
 fn get_workspaces_from_i3() -> Vec<reply::Workspace> {
 	let mut i3 = I3::connect().unwrap();
-	let mut workspaces = i3.get_workspaces().unwrap();
-	workspaces.sort_by(|w1, w2| w1.num.cmp(&w2.num));
+	let workspaces = i3.get_workspaces().unwrap();
+	// workspaces.sort_by(|w1, w2| w1.num.cmp(&w2.num));
 	workspaces
 }
 
@@ -89,6 +94,22 @@ pub fn get_matching_workspaces(criteria: Criteria) -> Vec<Workspace> {
 
 pub fn get_filtered_workspaces(force_output: bool) -> Vec<Workspace> {
 	get_matching_workspaces(get_filtered_criteria(force_output))
+}
+
+pub fn workspace_maintenance() {
+	let outputs = get_outputs();
+	let mut criteria = Criteria::new();
+	criteria.add(Constraint::Output);
+
+	let mut i = 1;
+	for o in outputs {
+		criteria.output = Some(o);
+		let workspaces = get_matching_workspaces(criteria.clone());
+		for mut ws in workspaces {
+			ws.reorder(i);
+			i = i + 1;
+		}
+	}
 }
 
 // Outputs

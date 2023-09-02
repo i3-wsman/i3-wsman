@@ -78,6 +78,11 @@ fn main() {
 		commands::cli::config::SUBCMDS.clone(),
 	);
 
+	cmds.insert(
+		commands::cli::maintenance::CMD.as_str(),
+		commands::cli::maintenance::SUBCMDS.clone(),
+	);
+
 	let help_order: Vec<&str> = vec![
 		commands::actions::goto::CMD.as_str(),
 		commands::actions::next::CMD.as_str(),
@@ -103,6 +108,7 @@ fn main() {
 			} else {
 				DEFAULT_CMD
 			};
+
 			match cmd_map.get(subcmd) {
 				Some(func) if subcmd == DEFAULT_CMD => {
 					func(args[2..].to_vec());
@@ -120,8 +126,6 @@ fn main() {
 					func(args[2..].to_vec());
 				}
 			}
-
-			return;
 		}
 		None if command == "constraints" => {
 			println!("Usage: {} <command> <...args>", common::this_command());
@@ -160,6 +164,8 @@ fn main() {
 			println!("    {} help", common::this_command());
 		}
 	};
+
+	state::release_i3_lock().ok();
 }
 
 fn help_constraints(_: Vec<String>) {

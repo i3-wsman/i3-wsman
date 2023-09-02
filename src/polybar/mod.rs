@@ -2,7 +2,6 @@ use std::process::Command;
 
 mod format;
 mod label;
-// pub mod presets;
 
 pub use format::{Format, WILDCARD};
 pub use label::Label;
@@ -17,11 +16,6 @@ pub struct Actions {
 pub fn update() {
 	Command::new("polybar-msg")
 		.arg("action")
-		.arg("#i3wsm.hook.0")
-		.output()
-		.ok();
-	Command::new("polybar-msg")
-		.arg("action")
 		.arg("#i3wsm-groups.hook.0")
 		.output()
 		.ok();
@@ -33,6 +27,11 @@ pub fn update() {
 	Command::new("polybar-msg")
 		.arg("action")
 		.arg("#i3wsm-toggle-hidden.hook.0")
+		.output()
+		.ok();
+	Command::new("polybar-msg")
+		.arg("action")
+		.arg("#i3wsm.hook.0")
 		.output()
 		.ok();
 }

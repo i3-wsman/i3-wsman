@@ -4,14 +4,14 @@ mod goto_behavior;
 mod navigation_behavior;
 
 pub use goto_behavior::GotoBehavior;
-pub use navigation_behavior::NavigationBehavior;
+pub use navigation_behavior::{NavigationBehavior, NavigationDirection};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(default)]
 pub struct Navigation {
 	pub allow_urgent: bool,
-	pub next: NavigationNext,
-	pub prev: NavigationPrev,
+	pub next: NavigationCfg,
+	pub prev: NavigationCfg,
 	pub goto: Goto,
 }
 
@@ -19,8 +19,8 @@ impl Default for Navigation {
 	fn default() -> Self {
 		Self {
 			allow_urgent: true,
-			next: NavigationNext::default(),
-			prev: NavigationPrev::default(),
+			next: NavigationCfg::default(),
+			prev: NavigationCfg::default(),
 			goto: Goto::default(),
 		}
 	}
@@ -28,25 +28,11 @@ impl Default for Navigation {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(default)]
-pub struct NavigationPrev {
+pub struct NavigationCfg {
 	pub behavior: NavigationBehavior,
 }
 
-impl Default for NavigationPrev {
-	fn default() -> Self {
-		Self {
-			behavior: NavigationBehavior::Create,
-		}
-	}
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-#[serde(default)]
-pub struct NavigationNext {
-	pub behavior: NavigationBehavior,
-}
-
-impl Default for NavigationNext {
+impl Default for NavigationCfg {
 	fn default() -> Self {
 		Self {
 			behavior: NavigationBehavior::Create,
@@ -58,16 +44,18 @@ impl Default for NavigationNext {
 #[serde(default)]
 pub struct Goto {
 	pub behavior: GotoBehavior,
-	pub ignore_focus: bool,
 	pub restrict_to_output: bool,
+	pub include_hidden_groups: bool,
+	pub honor_show_hidden: bool,
 }
 
 impl Default for Goto {
 	fn default() -> Self {
 		Self {
 			behavior: GotoBehavior::Stop,
-			ignore_focus: false,
 			restrict_to_output: true,
+			include_hidden_groups: false,
+			honor_show_hidden: false,
 		}
 	}
 }

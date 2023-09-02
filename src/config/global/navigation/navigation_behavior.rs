@@ -1,6 +1,13 @@
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
+use crate::CONFIG;
+
+pub enum NavigationDirection {
+	Prev,
+	Next,
+}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 pub enum NavigationBehavior {
 	Create,
@@ -32,13 +39,22 @@ impl NavigationBehavior {
 		}
 	}
 
-	pub fn from_argv(argv: &mut Vec<String>) -> Result<Self, ()> {
+	pub fn from_argv(
+		argv: &mut Vec<String>,
+		nav_type: Option<NavigationDirection>,
+	) -> Result<Self, ()> {
 		match Self::from_arg(argv.get(0).unwrap_or(&"".to_string())) {
 			Ok(b) => {
 				argv.remove(0);
 				Ok(b)
 			}
-			Err(_) => Ok(Self::Create),
+			Err(_) => match nav_type {
+				Some(n) => match n {
+					NavigationDirection::Prev => Ok(CONFIG.navigation.prev.behavior.clone()),
+					NavigationDirection::Next => Ok(CONFIG.navigation.next.behavior.clone()),
+				},
+				None => Ok(Self::Create),
+			},
 		}
 	}
 

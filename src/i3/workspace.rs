@@ -6,10 +6,13 @@ use crate::{
 		constraint::{Constraint, Criteria},
 		Direction,
 	},
-	groups, i3, CONFIG, POLYBAR_CFG,
+	i3, POLYBAR_CFG,
 };
 
-use super::{get_current_output, get_matching_workspaces, get_workspaces, get_workspaces_from_i3};
+use super::{
+	get_current_output, get_matching_workspaces, get_outputs, get_workspaces,
+	get_workspaces_from_i3,
+};
 
 #[derive(Debug, Clone)]
 pub struct Workspace {
@@ -121,10 +124,6 @@ impl Workspace {
 	}
 
 	pub fn matches(&self, criteria: Criteria) -> bool {
-		if criteria.contains(Constraint::Focused) {
-			return self.focused();
-		}
-
 		let always_show_urgent = POLYBAR_CFG.show_urgent();
 		if always_show_urgent && criteria.contains(Constraint::AllowUrgent) && self.urgent() {
 			return true;
@@ -141,6 +140,10 @@ impl Workspace {
 			}
 		}
 
+		if criteria.contains(Constraint::Focused) && self.focused() {
+			return true;
+		}
+
 		if !always_show_urgent && criteria.contains(Constraint::AllowUrgent) && self.urgent() {
 			return true;
 		}
@@ -155,20 +158,18 @@ impl Workspace {
 			}
 		}
 
-		let output = match criteria.output.clone() {
-			Some(o) => o,
-			None => get_current_output(),
-		};
+		//let output = match criteria.output.clone() {
+		//	Some(o) => o,
+		//	None => get_current_output(),
+		//};
 
-		if output.showing_all() == true || groups::show_hidden_enabled() {
-			return true;
-		}
+		// if output.showing_all() == true || groups::show_hidden_enabled() {
+		// 	return true;
+		// }
 
-		let ws_group = self.group();
-		if ws_group.len() == 0 {
-			if criteria.contains(Constraint::NoGroup) || criteria.contains(Constraint::Group) {
-				return !CONFIG.focus.hide_unassigned_workspaces;
-			}
+		if criteria.contains(Constraint::NoGroup) && self.group().len() == 0 {
+			// || criteria.contains(Constraint::Group) {
+			return true; // !CONFIG.focus.hide_unassigned_workspaces;
 		}
 
 		if criteria.contains(Constraint::Group) {
@@ -176,7 +177,7 @@ impl Workspace {
 				Some(o) => o,
 				None => get_current_output(),
 			};
-			return output.has_active_group(ws_group);
+			return output.has_active_group(self.group());
 		}
 
 		return true;
@@ -253,6 +254,10 @@ impl Workspace {
 	}
 
 	pub fn reorder(&mut self, new_pos: i32) {
+		if new_pos == self.num() {
+			return;
+		}
+
 		let cur_name = self.full_name();
 		let new_name = assemble_name(new_pos, self.group(), self.name());
 		i3::run_command(format!("rename workspace {} to {}", cur_name, new_name));
@@ -260,26 +265,28 @@ impl Workspace {
 	}
 
 	pub fn scoot(&mut self) {
-		let prev_neighbor = self.get_neighbor(None, Some(Direction::Left));
-		let next_neighbor = self.get_closest_neighbor(None, Some(Direction::Right));
+		let mut outputs = get_outputs();
+		let mut workspaces = get_workspaces();
 
-		let new_pos = match prev_neighbor {
-			Some(prev) => prev.num() + 2,
-			None => 2,
-		};
+		outputs.reverse();
+		workspaces.reverse();
 
-		match next_neighbor {
-			Some(mut next) => {
-				if next.num() == new_pos {
-					next.scoot();
-					self.reorder(new_pos);
-				} else {
-					self.reorder(new_pos);
-					next.scoot();
+		let mut i = TryInto::<i32>::try_into(workspaces.len()).unwrap() + 1;
+		for o in outputs {
+			let workspaces = workspaces.clone();
+			for mut ws in workspaces {
+				if o.name() != ws.output() {
+					continue;
 				}
+
+				ws.reorder(i);
+
+				if ws.full_name() == self.full_name() {
+					i = i - 1;
+				}
+				i = i - 1;
 			}
-			None => self.reorder(new_pos),
-		};
+		}
 	}
 }
 
@@ -288,7 +295,6 @@ impl Serialize for Workspace {
 	where
 		S: Serializer,
 	{
-		// 3 is the number of fields in the struct.
 		let mut state = serializer.serialize_struct("Workspace", 10)?;
 		state.serialize_field("id", &self.id())?;
 		state.serialize_field("num", &self.num())?;
