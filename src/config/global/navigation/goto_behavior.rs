@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
+use crate::CONFIG;
+
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 pub enum GotoBehavior {
 	Create,
@@ -36,7 +38,7 @@ impl GotoBehavior {
 				argv.remove(0);
 				Ok(b)
 			}
-			Err(_) => Ok(Self::Create),
+			Err(_) => Ok(CONFIG.navigation.goto.behavior.clone()),
 		}
 	}
 

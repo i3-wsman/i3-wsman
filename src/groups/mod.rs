@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	common::dedup_vec,
+	common::{constraint::Constraint, dedup_vec},
 	i3::{self, get_current_output, get_filtered_criteria, get_outputs, Output},
 	state, CONFIG,
 };
@@ -118,6 +118,7 @@ fn update_groups(output: Output, mut groups: Vec<String>) -> Vec<String> {
 
 		for o in outputs {
 			let mut criteria = get_filtered_criteria(true);
+			criteria.remove(Constraint::AllowUrgent);
 			criteria.output = Some(o.clone());
 			let next =
 				i3::get_current_workspace_for_output(o).get_closest_neighbor(Some(criteria), None);

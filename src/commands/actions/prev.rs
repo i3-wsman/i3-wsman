@@ -1,10 +1,13 @@
 use std::collections::HashMap;
 
 use crate::{
-	common::{constraint, this_command, Direction},
-	config::global::NavigationBehavior,
+	common::{
+		constraint::{self, Constraint},
+		this_command, Direction,
+	},
+	config::global::{NavigationBehavior, NavigationDirection},
 	i3::{self, get_filtered_criteria, get_focused_workspace, get_matching_workspaces},
-	polybar,
+	polybar, CONFIG,
 };
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
@@ -58,12 +61,18 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(mut args: Vec<String>) {
-	let behavior = NavigationBehavior::from_argv(&mut args).unwrap();
+	let behavior =
+		NavigationBehavior::from_argv(&mut args, Some(NavigationDirection::Prev)).unwrap();
 
 	let criteria = if args.len() > 0 {
 		constraint::from_vec(args.to_owned())
 	} else {
-		get_filtered_criteria(true)
+		let mut criteria = get_filtered_criteria(true);
+		criteria.remove(Constraint::Focused);
+		if !CONFIG.navigation.allow_urgent {
+			criteria.remove(Constraint::AllowUrgent);
+		}
+		criteria
 	};
 
 	let focused = get_focused_workspace();
@@ -86,6 +95,5 @@ pub fn exec(mut args: Vec<String>) {
 		}
 	}
 
-	// workspaces::maintenance();
 	polybar::update();
 }

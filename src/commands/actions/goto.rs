@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
 use crate::{
-	common::this_command,
+	common::{constraint::Constraint, this_command},
 	config::global::GotoBehavior,
-	i3::{self, get_filtered_workspaces},
-	polybar,
+	groups,
+	i3::{self, get_filtered_criteria, get_matching_workspaces},
+	polybar, CONFIG,
 };
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
@@ -56,7 +57,22 @@ pub fn exec(mut args: Vec<String>) {
 
 	let behavior = GotoBehavior::from_argv(&mut args).unwrap();
 
-	let workspaces = get_filtered_workspaces(false);
+	let mut criteria = get_filtered_criteria(true);
+	criteria.remove(Constraint::Focused);
+
+	if !CONFIG.navigation.goto.restrict_to_output {
+		criteria.remove(Constraint::Output);
+	}
+
+	if CONFIG.navigation.goto.include_hidden_groups {
+		criteria.remove(Constraint::Group);
+		criteria.remove(Constraint::NoGroup);
+	} else if groups::show_hidden_enabled() && CONFIG.navigation.goto.honor_show_hidden {
+		criteria.remove(Constraint::Group);
+		criteria.remove(Constraint::NoGroup);
+	}
+
+	let workspaces = get_matching_workspaces(criteria);
 
 	let nth = nth_try.unwrap();
 	if nth < 1 {
