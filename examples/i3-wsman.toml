@@ -66,28 +66,32 @@ auto_focus_nearest_group = true
 
 # Workspace Navigation Settings
 [navigation]
-# COMING SOON: Allow navigating to urgent workspaces even if they're outside any active groups
-#allow_urgent = true
+# Allow navigating to urgent workspaces even if they're outside any active groups
+# Requires `show-hidden-urgent` in polybar config
+allow_urgent = true
 
 [navigation.next]
-# COMING SOON: What happens if no next workspace exists.
+# What happens if no next workspace exists.
 # Options: Create, Loop, Stop
-#behavior = "Create"
+behavior = "Create"
 
 #[navigation.prev]
-# COMING SOON: What happens if no previous workspace exists.
+# What happens if no previous workspace exists.
 # Options: Create, Loop, Stop
-#behavior = "Create"
+behavior = "Create"
 
 # Goto Behavior
 [navigation.goto]
-# COMING SOON: Limit 'goto' navigation to the focused output.
-#restrict_to_output = true
+# Limit 'goto' navigation to the focused output.
+restrict_to_output = true
 
-# COMING SOON: What happens if the Nth workspace doesn't exist.
+# What happens if the Nth workspace doesn't exist.
 # Options: Create, Stop
-#behavior = "Stop"
+behavior = "Stop"
 
-# COMING SOON: Whether to jump to the actual Nth workspace or within the active groups.
-#ignore_focus = false
+# Whether goto is limited to workspaces in active groups only
+include_hidden_groups = false
+
+# If show_hidden is on, include workspaces not in any activated group
+honor_show_hidden = true
 
