@@ -65,12 +65,18 @@
   - Optional: Create new, loop, or do nothing
 - New workspaces inherit the group of the current workspace
 
+#### Configuration
+- `i3-wsman` configuration
+  - New Startup, Create, and Navigation options coming
+- Polybar module formatting and styling
+
 
 ## Coming Soon
 
-- Expanded `i3-wsman` configuration
-  - New Startup, Create, and Navigation options coming
-- Polybar module formatting and styling
+- Finish `i3-wsman` configuration
+- Polybar formatting:
+  - Last missing label styles: `label-*-minlen`, `-maxlen`, `-ellipsis`, `-alignment`
+  - Add missing labels: `label-separator`, `label-output-separator`
 - CLI Configurator for config and polybar styling
 - Move window/container to next/prev workspace
 - Move window/container to new workspace on the left/right
@@ -122,19 +128,27 @@ bindsym $mod+9 exec --no-startup-id "i3-wsman goto 9"
 bindsym $mod+0 exec --no-startup-id "i3-wsman goto 10"
 
 # Left/Right Navigation
+# Ctrl + Super + Left/Right
 bindsym $mod+Ctrl+Left exec --no-startup-id "i3-wsman prev create group nogroup output"
 bindsym $mod+Ctrl+Right exec --no-startup-id "i3-wsman next create group nogroup output"
 
 # Reorder Workspace
-bindsym $mod+Shift+Ctrl+Left exec --no-startup-id "i3-wsman reorder left"
-bindsym $mod+Shift+Ctrl+Right exec --no-startup-id "i3-wsman reorder right"
+# Ctrl + Super + Shift + Left/Right
+bindsym $mod+Ctrl+Shift+Left exec --no-startup-id "i3-wsman reorder left"
+bindsym $mod+Ctrl+Shift+Right exec --no-startup-id "i3-wsman reorder right"
 
 # Create adjacent workspace
-bindsym $mod+Mod1+Left exec --no-startup-id "i3-wsman adjacent left"
-bindsym $mod+Mod1+Right exec --no-startup-id "i3-wsman adjacent right"
+# Ctrl + Alt + Super + Left/Right
+bindsym $mod+Ctrl+Mod1+Left exec --no-startup-id "i3-wsman adjacent left"
+bindsym $mod+Ctrl+Mod1+Right exec --no-startup-id "i3-wsman adjacent right"
 
 # Assign workspace to group
+# Super + Shift + g
 bindsym $mod+Shift+g exec --no-startup-id i3-input -F 'exec --no-startup-id "i3-wsman group assign %s"' -P 'Group: '
+
+# Rename workspace
+# Super + Shift + n
+bindsym $mod+Shift+n exec --no-startup-id i3-input -F 'exec --no-startup-id "i3-wsman rename %s"' -P 'Workspace Name: '
 
 # Start the i3-wsman watcher
 exec --no-startup-id "i3-wsman polybar watch"
@@ -155,7 +169,7 @@ modules-left = i3wsm-groups i3wsm-workspaces i3wsm-toggle-hidden
 
 [module/i3wsm-groups]
 type = custom/ipc
-hook-0 = i3-wsman polybar module-groups no-all
+hook-0 = i3-wsman polybar module-groups
 initial = 1
 format = <label>
 format-font = 3
