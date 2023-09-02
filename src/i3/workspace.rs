@@ -281,8 +281,8 @@ impl Workspace {
 				}
 
 				if ws.full_name() == self.full_name() {
-					i = i - 1;
 					ws.reorder(i);
+					i = i - 1;
 				} else {
 					ws.reorder(i);
 				}

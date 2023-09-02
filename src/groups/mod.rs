@@ -116,13 +116,25 @@ fn update_groups(output: Output, mut groups: Vec<String>) -> Vec<String> {
 			outputs
 		};
 
+		let active_groups = groups.clone();
 		for o in outputs {
-			let mut criteria = get_filtered_criteria(true);
-			criteria.remove(Constraint::AllowUrgent);
-			criteria.remove(Constraint::Focused);
-			criteria.output = Some(o.clone());
-			let next =
-				i3::get_current_workspace_for_output(o).get_closest_neighbor(Some(criteria), None);
+			if o.showing_all() {
+				continue;
+			}
+
+			let next = {
+				let focused = i3::get_current_workspace_for_output(o.clone());
+				if active_groups.contains(&focused.group()) {
+					Some(focused)
+				} else {
+					let mut criteria = get_filtered_criteria(true);
+					criteria.remove(Constraint::AllowUrgent);
+					criteria.remove(Constraint::Focused);
+					criteria.output = Some(o);
+					focused.get_closest_neighbor(Some(criteria), None)
+				}
+			};
+
 			if let Some(ws) = next {
 				i3::run_command(format!("workspace {}", ws.full_name()));
 			}

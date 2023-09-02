@@ -30,6 +30,8 @@ pub fn help(_: Vec<String>) {
 }
 
 pub fn exec(args: Vec<String>) {
+	i3::workspace_maintenance();
+
 	let output = get_current_output();
 	let focused = get_focused_workspace();
 
