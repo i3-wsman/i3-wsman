@@ -3,8 +3,6 @@ use std::process::Command;
 mod format;
 mod label;
 
-use crate::i3;
-
 pub use format::{Format, WILDCARD};
 pub use label::Label;
 
@@ -16,8 +14,6 @@ pub struct Actions {
 }
 
 pub fn update() {
-	i3::workspace_maintenance();
-
 	Command::new("polybar-msg")
 		.arg("action")
 		.arg("#i3wsm-groups.hook.0")

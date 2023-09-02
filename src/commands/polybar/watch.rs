@@ -3,17 +3,23 @@ use i3_ipc::{
 	I3Stream,
 };
 
-use crate::polybar;
+use crate::{i3, polybar, state};
+
+fn update() {
+	i3::workspace_maintenance();
+	state::release_i3_lock().ok();
+	polybar::update();
+}
 
 pub fn exec(_: Vec<String>) {
 	let mut i3 = I3Stream::conn_sub(&[Subscribe::Window, Subscribe::Workspace]).unwrap();
 	for e in i3.listen() {
 		match e.unwrap() {
-			Event::Workspace(_) => polybar::update(),
-			Event::Window(_) => polybar::update(),
-			Event::Output(_) => polybar::update(),
-			Event::Mode(_) => polybar::update(),
-			Event::BarConfig(_) => polybar::update(),
+			Event::Workspace(_) => update(),
+			Event::Window(_) => update(),
+			Event::Output(_) => update(),
+			Event::Mode(_) => update(),
+			Event::BarConfig(_) => update(),
 			_ => {}
 		}
 	}

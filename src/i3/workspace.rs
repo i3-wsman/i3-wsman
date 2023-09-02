@@ -210,6 +210,7 @@ impl Workspace {
 			Some(c) => get_matching_workspaces(c),
 			None => get_workspaces(),
 		};
+		workspaces.retain(|ws| ws.full_name() != self.full_name());
 
 		match direction {
 			Some(d) => match d {
@@ -279,11 +280,13 @@ impl Workspace {
 					continue;
 				}
 
-				ws.reorder(i);
-
 				if ws.full_name() == self.full_name() {
 					i = i - 1;
+					ws.reorder(i);
+				} else {
+					ws.reorder(i);
 				}
+
 				i = i - 1;
 			}
 		}

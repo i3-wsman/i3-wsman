@@ -56,7 +56,7 @@ pub fn exec(args: Vec<String>) {
 	}
 
 	let new_pos = match dir {
-		Direction::Left => focused.num() - 1,
+		Direction::Left => focused.num(),
 		Direction::Right => focused.num() + 1,
 	};
 
