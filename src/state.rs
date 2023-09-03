@@ -91,10 +91,15 @@ pub fn obtain_i3_lock() -> Result<(), io::Error> {
 }
 
 pub fn release_i3_lock() -> Result<(), io::Error> {
-	let mut locked = I3_LOCK_OBTAINED.lock().unwrap();
+	let locked = I3_LOCK_OBTAINED.lock().unwrap();
 	if *locked == false {
 		return Ok(());
 	}
+	drop(locked);
+
+	i3::workspace_maintenance();
+
+	let mut locked = I3_LOCK_OBTAINED.lock().unwrap();
 	let lockfile = I3_LOCK.lock().unwrap();
 	if let Ok(file) = &*lockfile {
 		file.unlock()?;

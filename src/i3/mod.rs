@@ -97,18 +97,15 @@ pub fn get_filtered_workspaces(force_output: bool) -> Vec<Workspace> {
 }
 
 pub fn workspace_maintenance() {
-	let outputs = get_outputs();
 	let mut criteria = Criteria::new();
 	criteria.add(Constraint::Output);
 
 	let mut i = 1;
-	for o in outputs {
-		criteria.output = Some(o);
-		let workspaces = get_matching_workspaces(criteria.clone());
-		for mut ws in workspaces {
-			ws.reorder(i);
-			i = i + 1;
-		}
+	let mut workspaces = get_workspaces();
+	workspaces.sort_by(|w1, w2| w1.num().cmp(&w2.num()));
+	for mut ws in workspaces {
+		ws.reorder(i);
+		i = i + 1;
 	}
 }
 

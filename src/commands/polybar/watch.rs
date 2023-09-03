@@ -3,11 +3,9 @@ use i3_ipc::{
 	I3Stream,
 };
 
-use crate::{i3, polybar, state};
+use crate::polybar;
 
 fn update() {
-	i3::workspace_maintenance();
-	state::release_i3_lock().ok();
 	polybar::update();
 }
 
