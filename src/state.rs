@@ -34,12 +34,25 @@ pub struct State {
 
 fn default() -> State {
 	let active_groups = CONFIG.startup.active_workspace_groups.to_owned();
+	let always_visible = CONFIG.groups.always_visible.to_owned();
+
+	let mut combined = vec![];
+	combined.extend(active_groups);
+	combined.extend(always_visible);
+	combined.sort();
+	combined.dedup();
+
+	let mut default_groups = CONFIG.groups.default_groups.to_owned();
+	default_groups.sort();
+	default_groups.dedup();
 
 	let mut groups: StateGroups = HashMap::new();
-	for o in i3::get_outputs() {
-		groups.insert(o.name(), active_groups.clone());
+	if default_groups != combined {
+		for o in i3::get_outputs() {
+			groups.insert(o.name(), combined.clone());
+		}
+		groups.insert(i3::outputs::XROOT.to_string(), combined);
 	}
-	groups.insert(i3::outputs::XROOT.to_string(), active_groups);
 
 	State {
 		groups,
@@ -121,8 +134,8 @@ pub fn set(state: State) {
 	state.global_groups = state
 		.groups
 		.get(&i3::outputs::XROOT.to_string())
-		.unwrap()
-		.clone();
+		.map(|v| v.clone())
+		.unwrap_or(vec![]);
 
 	let serialized_data = serde_json::to_string(&state).expect("Failed to serialize state");
 

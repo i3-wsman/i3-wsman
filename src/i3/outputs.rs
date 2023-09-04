@@ -79,13 +79,21 @@ impl Output {
 	}
 
 	pub fn active_groups(&self) -> Vec<String> {
+		if self.showing_all() {
+			return vec![];
+		}
+
 		let state = state::get();
-		match state.groups.get(&self.get_state_name()) {
-			Some(/* mut */ groups) => {
+		match state
+			.groups
+			.get(&self.get_state_name())
+			.map(|v| v.to_owned())
+		{
+			Some(mut groups) => {
 				// Is this needed? I guess we'll see!
-				// groups.extend(CONFIG.groups.always_visible.to_owned());
-				// groups.sort();
-				// groups.dedup();
+				groups.extend(CONFIG.groups.always_visible.to_owned());
+				groups.sort();
+				groups.dedup();
 				groups.to_owned()
 			}
 			None => vec![],
