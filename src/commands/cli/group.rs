@@ -2,8 +2,9 @@ use crate::{
 	common::this_command,
 	groups,
 	i3::{self, Workspace},
-	polybar,
 };
+
+use crate::commands::polybar::watch;
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
 use std::collections::HashMap;
@@ -100,7 +101,7 @@ pub fn assign(args: Vec<String>) {
 		println!("No workspace named {}", args[0].clone());
 	}
 
-	polybar::update();
+	watch::update_and_bg();
 }
 
 pub fn list(_: Vec<String>) {

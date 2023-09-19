@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::str::FromStr;
 
 use crate::groups::GroupSortMethod;
+
+pub type GroupBackgrounds = HashMap<String, Vec<String>>;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(default)]
@@ -11,6 +14,9 @@ pub struct Groups {
 	pub sort_method: GroupSortMethod,
 	pub sort_default_first: bool,
 	pub unique_groups_on_outputs: bool,
+	pub background_cmd: Option<String>,
+	pub background_screen_arg: Option<String>,
+	pub backgrounds: GroupBackgrounds,
 }
 
 impl Default for Groups {
@@ -21,6 +27,9 @@ impl Default for Groups {
 			sort_method: GroupSortMethod::Alphabetical,
 			sort_default_first: true,
 			unique_groups_on_outputs: true,
+			background_cmd: None,
+			background_screen_arg: None,
+			backgrounds: Default::default(),
 		}
 	}
 }

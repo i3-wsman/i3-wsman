@@ -69,16 +69,22 @@ fn usid() -> String {
 	format!("{}{}{}", session_id, vtnr, seat)
 }
 
-fn get_tmpf(filename: &str) -> PathBuf {
+pub fn get_tmpf_name(filename: &str) -> PathBuf {
 	let usid = usid();
-	let filename = format!("i3wsm__tmp_{}_{}", usid, filename);
+	PathBuf::from(format!("i3wsm__tmp_{}_{}", usid, filename))
+}
 
-	let temp_dir = if PathBuf::from("/dev/shm").exists() {
+pub fn get_tmpd() -> PathBuf {
+	if PathBuf::from("/dev/shm").exists() {
 		PathBuf::from("/dev/shm")
 	} else {
 		env::temp_dir()
-	};
+	}
+}
 
+pub fn get_tmpf(filename: &str) -> PathBuf {
+	let filename = get_tmpf_name(filename);
+	let temp_dir = get_tmpd();
 	temp_dir.join(filename)
 }
 
