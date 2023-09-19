@@ -6,7 +6,7 @@ mod module_toggle_hidden;
 mod module_workspaces;
 mod poke;
 mod toggle_hidden;
-mod watch;
+pub mod watch;
 
 use crate::common::{this_command, this_command_abs};
 
