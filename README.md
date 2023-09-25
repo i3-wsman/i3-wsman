@@ -93,18 +93,25 @@
 
 This project is **_brand new_**. These steps will become easier and more automated soon. Star and watch this repo for updates!
 
-### Build Manually
+### Step 1. Download or Build
+#### Download from Releases Page
+
+1. Download the `i3-wsman` executable from the [Releases Page](https://github.com/i3-wsman/i3-wsman/releases/latest)
+2. Place it somewhere in your `PATH`
+3. Ensure that it is executable (`chmod +x`)
+
+#### _OR,_ Build from Source
 
 1. Clone this repo
 2. Build the project with `cargo build --release`
 
-### Install
+### Step 2. Install
 
 Distro-specific packages will be coming soon. Star and watch this repo for updates!
 
-- Install `i3-wsm` by placing it in your path
+- Install `i3-wsm` by placing it in your `PATH`
 
-### Configure
+### Step 3. Configure
 
 1. Copy [`examples/i3-wsman.toml`](examples/i3-wsman.toml) to `~/.config/i3/i3-wsman.toml` (CLI Configurator coming soon)
 2. Update your `~/.config/i3/config`
