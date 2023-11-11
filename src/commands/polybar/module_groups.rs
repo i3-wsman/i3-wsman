@@ -41,11 +41,12 @@ pub fn exec(mut args: Vec<String>) {
 	let mut state_label = vec![];
 	for g in groups {
 		let left_click = this_command_abs() + " polybar group only " + g.as_ref();
+		let middle_click = this_command_abs() + " group assign " + g.as_ref();
 		let secondary_click = this_command_abs() + " polybar group toggle " + g.as_ref();
 
 		let group_actions = Actions {
 			left_click: Some(left_click),
-			middle_click: Some(secondary_click.clone()),
+			middle_click: Some(middle_click),
 			right_click: Some(secondary_click),
 		};
 
