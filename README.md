@@ -31,6 +31,8 @@
 
 <img src="docs/images/focus-multitask.webp" alt="i3-wsman allows you to multitask" />
 
+**Quickly Group Workspaces**: _Middle-click_ to assign the current workspace to a group.
+
 
 ### Organize and Create Workspaces
 
