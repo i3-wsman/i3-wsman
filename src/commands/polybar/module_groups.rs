@@ -27,7 +27,7 @@ pub fn exec(mut args: Vec<String>) {
 
 		all_button.actions = Some(Actions {
 			left_click: Some(this_command_abs() + " polybar group all"),
-			middle_click: None,
+			middle_click: Some(this_command_abs() + " group assign"),
 			right_click: None,
 		});
 
