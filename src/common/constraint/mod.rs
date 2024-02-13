@@ -1,6 +1,13 @@
 use std::str::FromStr;
 
+// #[cfg(not(test))]
 use crate::i3::{get_current_output, outputs::Output};
+
+// #[cfg(test)]
+// use tests::{get_current_output, Output};
+
+#[cfg(test)]
+pub mod tests;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Constraint {
@@ -67,6 +74,11 @@ impl Criteria {
 	pub fn contains(&self, constraint: Constraint) -> bool {
 		constraint == Constraint::None && self.bit == Constraint::None as u32
 			|| (self.bit & constraint as u32) != 0
+	}
+
+	#[cfg(test)]
+	pub fn get_bits(&self) -> u32 {
+		self.bit
 	}
 }
 
