@@ -5,6 +5,9 @@ use std::str::FromStr;
 
 pub mod constraint;
 
+#[cfg(test)]
+pub mod tests;
+
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Direction {
 	Right,
@@ -39,10 +42,12 @@ impl Direction {
 	}
 }
 
+#[cfg(not(tarpaulin_include))]
 pub fn this_command_abs() -> String {
 	env::current_exe().unwrap().to_str().unwrap().to_string()
 }
 
+#[cfg(not(tarpaulin_include))]
 pub fn this_command() -> String {
 	let path: PathBuf = env::current_exe().unwrap();
 	path.file_name().unwrap().to_str().unwrap().to_string()
