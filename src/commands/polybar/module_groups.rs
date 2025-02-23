@@ -17,11 +17,18 @@ pub fn exec(mut args: Vec<String>) {
 
 	let mut format = POLYBAR_CFG.get_format("groups", None);
 
+	let focused_ws = i3::get_current_workspace();
+	let focused_group = focused_ws.group();
+
 	if !hide_all_button {
-		let all_state = match showing_all {
+		let mut all_state = match showing_all {
 			true => "all-activated".to_string(),
 			false => "all".to_string(),
 		};
+
+		if focused_group.is_empty() {
+			all_state = "all-focused".to_string();
+		}
 
 		let mut all_button = POLYBAR_CFG.get_label("groups", Some(all_state), None);
 
@@ -36,8 +43,6 @@ pub fn exec(mut args: Vec<String>) {
 		format.labels.insert("all".to_owned(), vec![]);
 	}
 
-	let focused_ws = i3::get_current_workspace();
-	let focused_group = focused_ws.group();
 	let mut state_label = vec![];
 	for g in groups {
 		let left_click = this_command_abs() + " polybar group only " + g.as_ref();
@@ -57,7 +62,11 @@ pub fn exec(mut args: Vec<String>) {
 				"unfocused"
 			}
 		} else if active_groups.contains(&g) {
-			"activated"
+			if &g == &focused_group {
+				"activated-focused"
+			} else {
+				"activated"
+			}
 		} else {
 			if &g == &focused_group {
 				"hidden-focused"
