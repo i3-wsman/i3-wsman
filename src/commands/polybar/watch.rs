@@ -11,7 +11,7 @@ use i3_ipc::{
 	I3Stream,
 };
 
-use crate::{i3, polybar};
+use crate::{groups, i3, polybar};
 
 lazy_static! {
 	static ref SHOULD_PROCEED: AtomicBool = AtomicBool::new(true);
@@ -64,11 +64,15 @@ fn update_bg() {
 	for o in outputs {
 		i = i + 1;
 
-		let ws = i3::get_current_workspace_for_output(o);
+		let ws = i3::get_current_workspace_for_output(o.clone());
 
 		let mut group = ws.group();
 		if group.is_empty() {
-			continue;
+			let mut groups = groups::active_for_output(Some(o));
+			if groups.len() != 1 {
+				continue;
+			}
+			group = groups.pop().unwrap();
 		}
 
 		if !bgs.contains_key(&group) {
