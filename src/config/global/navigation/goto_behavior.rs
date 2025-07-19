@@ -16,7 +16,7 @@ impl FromStr for GotoBehavior {
 		match Self::from_arg(s) {
 			Ok(b) => Ok(b),
 			Err(_) => {
-				eprintln!("Warning: Invalid value '{}' for 'navigation.goto.behavior'. Falling back to 'Stop'.", s);
+				eprintln!("Warning: Invalid value '{}' for 'navigation.goto.behavior'. Falling back to 'Create'.", s);
 				Ok(GotoBehavior::Create)
 			}
 		}
