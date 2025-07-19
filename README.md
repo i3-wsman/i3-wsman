@@ -111,7 +111,7 @@ This project is **_brand new_**. These steps will become easier and more automat
 
 Distro-specific packages will be coming soon. Star and watch this repo for updates!
 
-- Install `i3-wsm` by placing it in your `PATH`
+- Install `i3-wsman` by placing it in your `PATH`
 
 ### Step 3. Configure
 
