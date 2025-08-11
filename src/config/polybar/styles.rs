@@ -1,10 +1,9 @@
 use crate::polybar::{Format, Label};
 
 use super::Config;
+use once_cell::sync::Lazy;
 
-lazy_static! {
-	static ref QUOTES: [char; 2] = ['"', '\''];
-}
+static QUOTES: Lazy<[char; 2]> = Lazy::new(|| ['"', '\'']);
 
 #[derive(Debug)]
 struct Styles {
