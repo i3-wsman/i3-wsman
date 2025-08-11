@@ -6,30 +6,29 @@ use crate::{
 };
 
 use crate::{CommandFn, Commands, DEFAULT_CMD, HELP_CMD, WILD_CMD};
+use once_cell::sync::Lazy;
 use std::collections::HashMap;
 
-lazy_static! {
-	pub static ref CMD: String = "group".to_string();
-	pub static ref SUBCMDS: Commands = {
-		let mut cmds = HashMap::new();
-		cmds.insert(DEFAULT_CMD, exec as CommandFn);
+pub static CMD: Lazy<String> = Lazy::new(|| "group".to_string());
+pub static SUBCMDS: Lazy<Commands> = Lazy::new(|| {
+	let mut cmds = HashMap::new();
+	cmds.insert(DEFAULT_CMD, exec as CommandFn);
 
-		cmds.insert("list", list as CommandFn);
-		cmds.insert("assign", assign as CommandFn);
+	cmds.insert("list", list as CommandFn);
+	cmds.insert("assign", assign as CommandFn);
 
-		cmds.insert("list-active", list_active as CommandFn);
+	cmds.insert("list-active", list_active as CommandFn);
 
-		cmds.insert("show", show as CommandFn);
-		cmds.insert("hide", hide as CommandFn);
-		cmds.insert("toggle", toggle as CommandFn);
-		cmds.insert("only", only as CommandFn);
-		cmds.insert("all", all as CommandFn);
+	cmds.insert("show", show as CommandFn);
+	cmds.insert("hide", hide as CommandFn);
+	cmds.insert("toggle", toggle as CommandFn);
+	cmds.insert("only", only as CommandFn);
+	cmds.insert("all", all as CommandFn);
 
-		cmds.insert(WILD_CMD, exec as CommandFn);
-		cmds.insert(HELP_CMD, help as CommandFn);
-		cmds
-	};
-}
+	cmds.insert(WILD_CMD, exec as CommandFn);
+	cmds.insert(HELP_CMD, help as CommandFn);
+	cmds
+});
 
 pub fn help(_: Vec<String>) {
 	println!("{} {} <command> [...args]", this_command(), CMD.as_str());

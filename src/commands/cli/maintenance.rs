@@ -1,3 +1,4 @@
+use once_cell::sync::Lazy;
 use std::collections::HashMap;
 
 use crate::{
@@ -7,16 +8,14 @@ use crate::{
 
 use super::get_workspaces;
 
-lazy_static! {
-	pub static ref CMD: String = "maintenance".to_string();
-	pub static ref SUBCMDS: Commands = {
-		let mut cmds = HashMap::new();
-		cmds.insert(DEFAULT_CMD, exec as CommandFn);
-		cmds.insert(WILD_CMD, exec as CommandFn);
-		cmds.insert(HELP_CMD, help as CommandFn);
-		cmds
-	};
-}
+pub static CMD: Lazy<String> = Lazy::new(|| "maintenance".to_string());
+pub static SUBCMDS: Lazy<Commands> = Lazy::new(|| {
+	let mut cmds = HashMap::new();
+	cmds.insert(DEFAULT_CMD, exec as CommandFn);
+	cmds.insert(WILD_CMD, exec as CommandFn);
+	cmds.insert(HELP_CMD, help as CommandFn);
+	cmds
+});
 
 pub fn help(_: Vec<String>) {
 	println!("{} {}", this_command(), CMD.as_str());

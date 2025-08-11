@@ -1,5 +1,4 @@
-#[macro_use]
-extern crate lazy_static;
+use once_cell::sync::Lazy;
 
 use i3_ipc::{Connect, I3Stream, I3 as I3_api};
 use std::collections::HashMap;
@@ -12,11 +11,9 @@ mod i3;
 mod polybar;
 mod state;
 
-lazy_static! {
-	pub static ref CONFIG: config::global::Config = config::global::load_cfg();
-	pub static ref POLYBAR_CFG: config::polybar::Config = Default::default();
-	pub static ref I3: I3Stream = I3_api::connect().unwrap();
-}
+pub static CONFIG: Lazy<config::global::Config> = Lazy::new(|| config::global::load_cfg());
+pub static POLYBAR_CFG: Lazy<config::polybar::Config> = Lazy::new(|| Default::default());
+pub static I3: Lazy<I3Stream> = Lazy::new(|| I3_api::connect().unwrap());
 
 pub type CommandFn = fn(Vec<String>);
 pub type Commands = HashMap<&'static str, CommandFn>;

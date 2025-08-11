@@ -1,4 +1,5 @@
 use fs2::FileExt;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
@@ -10,17 +11,17 @@ use std::sync::Mutex;
 use crate::i3;
 use crate::CONFIG;
 
-lazy_static! {
-	static ref I3_LOCK_PATH: PathBuf = get_tmpf("i3.lock");
-	static ref I3_LOCK: Mutex<io::Result<std::fs::File>> = Mutex::new(
+static I3_LOCK_PATH: Lazy<PathBuf> = Lazy::new(|| get_tmpf("i3.lock"));
+static I3_LOCK: Lazy<Mutex<io::Result<std::fs::File>>> = Lazy::new(|| {
+	Mutex::new(
 		OpenOptions::new()
 			.read(true)
 			.write(true)
 			.create(true)
-			.open(I3_LOCK_PATH.to_owned())
-	);
-	static ref I3_LOCK_OBTAINED: Mutex<bool> = Mutex::new(false);
-}
+			.open(I3_LOCK_PATH.to_owned()),
+	)
+});
+static I3_LOCK_OBTAINED: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
 
 type StateGroups = HashMap<String, Vec<String>>;
 

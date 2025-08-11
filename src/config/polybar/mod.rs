@@ -1,4 +1,5 @@
 use configparser::ini::Ini;
+use once_cell::sync::Lazy;
 use std::any::Any;
 use std::default::Default;
 use std::fmt::{self, Debug};
@@ -9,9 +10,7 @@ use super::get_path;
 mod i3_wsman;
 mod styles;
 
-lazy_static! {
-	static ref CONFIG_PATH: PathBuf = get_path("polybar", "ini");
-}
+static CONFIG_PATH: Lazy<PathBuf> = Lazy::new(|| get_path("polybar", "ini"));
 
 fn load() -> Ini {
 	let mut ini = Ini::new();
