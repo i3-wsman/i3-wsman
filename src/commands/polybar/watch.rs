@@ -10,13 +10,12 @@ use i3_ipc::{
 	event::{Event, Subscribe},
 	I3Stream,
 };
+use once_cell::sync::Lazy;
 
 use crate::{groups, i3, polybar};
 
-lazy_static! {
-	static ref SHOULD_PROCEED: AtomicBool = AtomicBool::new(true);
-	static ref PENDING_THREAD: Mutex<Option<JoinHandle<()>>> = Mutex::new(None);
-}
+static SHOULD_PROCEED: Lazy<AtomicBool> = Lazy::new(|| AtomicBool::new(true));
+static PENDING_THREAD: Lazy<Mutex<Option<JoinHandle<()>>>> = Lazy::new(|| Mutex::new(None));
 
 fn update() {
 	polybar::update();

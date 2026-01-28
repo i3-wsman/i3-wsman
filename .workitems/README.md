@@ -136,29 +136,30 @@ This section must be filled in for your repository.
 
 Coverage:
 - Line coverage command:
-	- `<fill>`
+	- `cargo llvm-cov --workspace --all-features --fail-under-lines 80 --fail-under-regions 70`
 - Branch coverage command:
-	- `<fill>`
+	- `cargo +nightly llvm-cov --workspace --all-features --branch`
 - CI job enforcing coverage:
-	- `<fill>`
+	- `None (not yet defined)`
 
 Docs:
 - End-user docs build command:
-	- `<fill>`
+	- `None (manual review of README changes)`
 - Contributor docs build command:
-	- `<fill>`
+	- `None (manual review of contributor-facing docs)`
 - Rustdoc build command:
-	- `<fill>`
+	- `cargo doc --no-deps`
 - CI job enforcing docs:
-	- `<fill>`
+	- `None (not yet defined)`
 
 Tests:
 - Unit:
-	- `<fill>`
+	- `cargo test`
 - Integration:
-	- `<fill>`
+	- `cargo test --tests`
 - Lint/format:
-	- `<fill>`
+	- `cargo fmt --check`
+	- `cargo clippy --all-targets --all-features -- -D warnings`
 
 ## Archival Rules
 
@@ -168,4 +169,3 @@ Move a workitem to `.workitems/archived/` and set `status: archived` when:
 - no longer aligned with product direction.
 
 Record the reason in the workitem’s Change Log, and set `supersedes`/`related` links as needed.
-

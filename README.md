@@ -165,6 +165,20 @@ exec --no-startup-id "i3-wsman polybar watch"
 
 </details>
 
+## Troubleshooting
+
+- `cargo build` failing with `lazy_static` in `src/commands/polybar/watch.rs` indicates an out-of-date branch; this repo now uses `once_cell` for static initialization.
+- If you suspect stale build artifacts, run `cargo clean` and rebuild with `cargo build --release`.
+
+## Development
+
+- Build: `cargo build --release`
+- Tests: `cargo test`
+- Lint/format: `cargo fmt --check` and `cargo clippy --all-targets --all-features -- -D warnings`
+- Rustdoc: `cargo doc --no-deps`
+- Coverage (stable): `cargo llvm-cov --workspace --all-features --fail-under-lines 80 --fail-under-regions 70`
+- Coverage (branch, nightly): `cargo +nightly llvm-cov --workspace --all-features --branch`
+
 
 <details>
 <summary><b>Click to see an example polybar/config.ini</b></summary>
@@ -199,4 +213,3 @@ format-font = 3
 ```
 
 </details>
-
