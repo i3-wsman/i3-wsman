@@ -100,7 +100,7 @@ pub fn assign(args: Vec<String>) {
 		println!("No workspace named {}", args[0].clone());
 	}
 
-	watch::update_and_bg();
+	watch::update_and_bg_blocking();
 }
 
 pub fn list(_: Vec<String>) {

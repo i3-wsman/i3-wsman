@@ -1,7 +1,7 @@
 ---
 id: WI-2026-01-28-background-changer-zombies
 title: "Background Changer Zombie Processes"
-status: refining
+status: done
 priority: P1
 risk: medium
 owner: "Joseph Dalrymple"
@@ -47,6 +47,7 @@ target_release: ""
 - CLI entry in `src/main.rs` routes to command modules.
 - Polybar watcher in `src/commands/polybar/watch.rs` subscribes to i3 events and triggers updates.
 - Background changes are driven by group assignments and outputs via `src/groups/` and `src/i3/`.
+- Current debounce uses a per-call thread with a global flag and joins the previous thread, which can block callers briefly.
 
 ### Key modules / boundaries
 - `src/commands/polybar/watch.rs`: background update logic + current per-event thread debounce + background command spawning.
@@ -69,6 +70,7 @@ target_release: ""
 ### Functional
 - FR1: Background updates are triggered via a single worker thread that coalesces events in a short window.
 - FR2: Background commands are reaped to prevent zombies.
+- FR3: CLI-triggered background updates complete before process exit.
 
 ### Non-functional
 - NFR1: No regression in responsiveness for workspace changes.
@@ -77,6 +79,7 @@ target_release: ""
 ## Acceptance Criteria
 - AC1 (Given/When/Then): Given repeated workspace events in quick succession, when updates occur, then only one background update is executed per burst.
 - AC2 (Given/When/Then): Given background changes are applied, when the background command exits, then no zombie process remains.
+- AC3 (Given/When/Then): Given a CLI-triggered background update, when the command returns to the shell, then the background command has completed and been reaped.
 
 ## Design
 ### Proposed approach
@@ -85,6 +88,7 @@ target_release: ""
 - Worker blocks on `recv()` and coalesces additional requests with `recv_timeout(50ms)`.
 - After coalescing, worker calls `update_bg()` exactly once.
 - In `update_bg()`, spawn each background command and hand off the `Child` to a short-lived reaper thread that waits, preventing zombies without blocking the worker.
+- For CLI-triggered updates, provide a blocking path (e.g., `update_and_bg_blocking()`) that runs the background update and waits for completion before returning.
 
 ### Alternatives considered
 - Option A: Keep current debounce thread and just add `wait()` (fixes zombies, but still spawns per event).
@@ -100,19 +104,19 @@ target_release: ""
 ## Documentation Deliverables (repo policy applies; enumerate here)
 ### End-user docs
 - Deliverables:
-	- Describe background update coalescing behavior and any user-visible impact.
+	- None (see Decision D4).
 - Location(s):
-	- `README.md` (exact section TBD).
+	- N/A.
 - Validation (command/CI job):
-	- Unknown (see Open Question Q1).
+	- N/A.
 
 ### Contributor docs
 - Deliverables:
-	- Note background worker design and rationale for reaping in developer docs.
+	- None (see Decision D4).
 - Location(s):
-	- `README.md` or a developer doc (TBD).
+	- N/A.
 - Validation (command/CI job):
-	- Unknown (see Open Question Q1).
+	- N/A.
 
 ### Rust docs (public API rustdoc)
 - Targets (modules/APIs):
@@ -120,11 +124,13 @@ target_release: ""
 - Examples/doctests:
 	- N/A.
 - Validation (command/CI job):
-	- Unknown (see Open Question Q1).
+	- `cargo doc --no-deps`
 
 ## Coverage Plan (repo policy applies; specify measurement + scope)
 - Measurement command(s) / CI job:
-	- Unknown (see Open Question Q1).
+	- `cargo llvm-cov --workspace --all-features --fail-under-lines 80 --fail-under-regions 70`
+	- `cargo +nightly llvm-cov --workspace --all-features --branch`
+	- CI: None (not yet defined).
 - Enforcement scope:
 	- no-regression on touched code (pending confirmation).
 - Expected hard-to-cover areas (if any):
@@ -169,18 +175,18 @@ target_release: ""
 - Q1: What are the canonical coverage/docs/test commands and CI jobs for this repo?
 	Owner: Joseph
 	Plan to resolve: Provide commands or point to CI configuration.
-	Status: open
-	Resolution:
+	Status: resolved
+	Resolution: Use `.workitems/README.md` canonical commands (llvm-cov line/branch, `cargo doc --no-deps`, manual doc review).
 - Q2: Keep debounce at 50ms or make it configurable?
 	Owner: Joseph
 	Plan to resolve: Confirm desired behavior.
-	Status: open
-	Resolution:
+	Status: resolved
+	Resolution: Keep 50ms debounce window.
 - Q3: Should background updates from short-lived CLI commands (e.g., `group assign`) be guaranteed before process exit, or is best-effort acceptable?
 	Owner: Joseph
 	Plan to resolve: Confirm desired behavior.
-	Status: open
-	Resolution:
+	Status: resolved
+	Resolution: CLI-triggered background updates must complete before process exit (blocking path).
 
 ## Decisions
 - D1 (2026-01-28): Use a single coalescing worker thread for background updates to reduce event-driven churn.
@@ -191,17 +197,42 @@ target_release: ""
 	Decision: Single worker thread with coalescing.
 	Rationale: Reduces thread churn and keeps behavior predictable.
 	Consequences: Additional shared state (channel/worker) in `watch.rs`.
+- D2 (2026-01-28): Keep debounce window at 50ms (not configurable).
+	Context: Current debounce is 50ms; question was whether to add configurability.
+	Options:
+	- Keep 50ms fixed.
+	- Make debounce configurable via config or flag.
+	Decision: Keep 50ms fixed.
+	Rationale: Simple behavior; avoids new config surface for now.
+	Consequences: Users cannot tune burst coalescing without code change.
+- D3 (2026-01-28): CLI-triggered background updates must complete before exit.
+	Context: CLI commands often exit immediately; detached threads may not run or reap children.
+	Options:
+	- Best-effort enqueue (may drop on exit).
+	- Blocking path for CLI updates.
+	Decision: Provide a blocking path for CLI-triggered background updates.
+	Rationale: Ensures background commands run and are reaped even for short-lived CLI invocations.
+	Consequences: CLI commands may block while background commands run; document this behavior.
+- D4 (2026-01-28): Skip end-user and contributor doc updates for background update behavior.
+	Context: README updates were reverted; behavior is internal and not user-facing enough to document.
+	Options:
+	- Add README notes describing coalescing + blocking behavior.
+	- Skip documentation changes.
+	Decision: Skip documentation changes.
+	Rationale: End users do not need this internal detail; contributor doc update not requested.
+	Consequences: Behavior remains undocumented; rely on workitem record for historical context.
 
 ## Execution Plan (atomic steps)
 
-### Step 1: Design worker threading + channel
-- Change summary: Introduce a background-update worker and channel in `src/commands/polybar/watch.rs`.
+### Step 1: Add worker + coalescing queue
+- Change summary: Replace the per-call debounce thread with a background-update worker and channel in `src/commands/polybar/watch.rs`.
 - Files likely touched: `src/commands/polybar/watch.rs`.
 - Implementation notes:
 	- Use stdlib `mpsc` channel or `crossbeam` only if already in deps (prefer std).
 	- Worker loops on `recv()` and drains with `recv_timeout(50ms)`.
+	- Update `update_and_bg()` to enqueue a request instead of spawning its own thread.
 - Verification:
-	- Build (command TBD, see Q1).
+	- `cargo build`
 - Docs update in this step:
 	- None.
 - Coverage impact + how validated:
@@ -209,14 +240,16 @@ target_release: ""
 - Rollback notes:
 	- Revert to current debounce implementation.
 
-### Step 2: Wire `update_and_bg()` to worker
-- Change summary: Replace per-call thread spawn with send to worker.
+### Step 2: CLI blocking path + reaping behavior
+- Change summary: Add a blocking variant for CLI usage and ensure background commands are reaped.
 - Files likely touched: `src/commands/polybar/watch.rs`.
 - Implementation notes:
 	- Keep `polybar::update()` call immediate.
 	- Ensure worker initialized lazily/once.
+	- Add a blocking variant for CLI usage (e.g., `update_and_bg_blocking()`), and update CLI call sites to use it.
+	- Ensure background commands are reaped (async for worker path, blocking waits for CLI path).
 - Verification:
-	- Build (command TBD).
+	- `cargo build`
 - Docs update in this step:
 	- None.
 - Coverage impact + how validated:
@@ -224,41 +257,47 @@ target_release: ""
 - Rollback notes:
 	- Revert `update_and_bg()` to prior flow.
 
-### Step 3: Reap background commands
-- Change summary: Add reaper for spawned background commands to prevent zombies.
-- Files likely touched: `src/commands/polybar/watch.rs`.
+### Step 3: Manual validation + doc decision
+- Change summary: Validate behavior in a real i3/polybar session and record documentation decision.
+- Files likely touched: None.
 - Implementation notes:
-	- Spawn command, then move `Child` into a short-lived thread that calls `wait()`.
+	- Confirm no zombies after background command exits.
+	- Confirm CLI-triggered update blocks until background command completes.
 - Verification:
-	- Manual validation: run background change and check for zombies.
+	- Manual validation (i3/polybar session).
 - Docs update in this step:
-	- None.
-- Coverage impact + how validated:
-	- None yet (command TBD).
-- Rollback notes:
-	- Revert to previous spawn behavior.
-
-### Step 4: Documentation + validation updates
-- Change summary: Update docs to reflect new background update behavior and add verification notes.
-- Files likely touched: `README.md` (exact location TBD).
-- Implementation notes:
-	- Add section describing coalescing and background command behavior.
-- Verification:
-	- Docs build command (TBD).
-- Docs update in this step:
-	- End-user + contributor notes.
+	- None (Decision D4).
 - Coverage impact + how validated:
 	- None.
 - Rollback notes:
-	- Revert documentation changes if needed.
+	- N/A.
 
 ## Work Log
 - 2026-01-28:
 	Summary: Created initial workitem and captured system context.
 	Links (commits/PRs):
 	Notes:
+- 2026-01-28:
+	Summary: Step 1 complete. Replaced per-call debounce with a worker + channel; `update_and_bg()` now enqueues coalesced updates.
+	Links (commits/PRs):
+	Notes: `cargo build` succeeded with existing warnings (deprecated `State::global_groups`, unused `get_filtered_workspaces`, unused `Workspace::get_neighbor`).
+- 2026-01-28:
+	Summary: Step 2 complete. Added blocking CLI path and reaped background commands; `group assign` now blocks until background update completes.
+	Links (commits/PRs):
+	Notes: `cargo build` succeeded with the same existing warnings.
+- 2026-01-28:
+	Summary: Step 3 attempted. README updates were reverted; rustdoc was built.
+	Links (commits/PRs):
+	Notes: `cargo doc --no-deps` succeeded. Manual i3/polybar validation not run in this environment.
+- 2026-01-28:
+	Summary: Manual validation completed by Joseph; README documentation changes reverted.
+	Links (commits/PRs):
+	Notes: Confirmed no zombies and CLI blocking behavior in real session (per user).
 
 ## Change Log (workitem edits)
 - 2026-01-28:
 	What changed: Rewrote workitem to new template, added frontmatter, system context, requirements, design, and plan.
 	Why: Align with updated workitem process and folder conventions.
+- 2026-01-28:
+	What changed: Moved to in-progress and consolidated steps to cover worker wiring plus CLI blocking + reaping.
+	Why: Avoid unused worker code and keep execution steps cohesive.

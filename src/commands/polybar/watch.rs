@@ -1,9 +1,6 @@
-use std::process::Command;
-use std::sync::{
-	atomic::{AtomicBool, Ordering},
-	Mutex,
-};
-use std::thread::{self, JoinHandle};
+use std::process::{Child, Command};
+use std::sync::mpsc;
+use std::thread;
 use std::time::Duration;
 
 use i3_ipc::{
@@ -14,8 +11,33 @@ use once_cell::sync::Lazy;
 
 use crate::{groups, i3, polybar};
 
-static SHOULD_PROCEED: Lazy<AtomicBool> = Lazy::new(|| AtomicBool::new(true));
-static PENDING_THREAD: Lazy<Mutex<Option<JoinHandle<()>>>> = Lazy::new(|| Mutex::new(None));
+enum BgRequest {
+	Update,
+}
+
+#[derive(Clone, Copy)]
+enum BgRunMode {
+	Async,
+	Blocking,
+}
+
+struct BgWorker {
+	sender: mpsc::Sender<BgRequest>,
+}
+
+impl BgWorker {
+	fn start() -> Self {
+		let (sender, receiver) = mpsc::channel();
+		thread::spawn(move || worker_loop(receiver));
+		Self { sender }
+	}
+
+	fn request_update(&self) {
+		let _ = self.sender.send(BgRequest::Update);
+	}
+}
+
+static BG_WORKER: Lazy<BgWorker> = Lazy::new(BgWorker::start);
 
 fn update() {
 	polybar::update();
@@ -23,30 +45,22 @@ fn update() {
 
 pub fn update_and_bg() {
 	update();
-
-	// Inform any currently sleeping thread that it should not proceed.
-	SHOULD_PROCEED.store(false, Ordering::Relaxed);
-
-	let handle = thread::spawn(|| {
-		// This is the most recent thread, so it should proceed after sleeping.
-		SHOULD_PROCEED.store(true, Ordering::Relaxed);
-		thread::sleep(Duration::from_millis(50));
-
-		// Check the flag to determine whether to call update_bg().
-		if SHOULD_PROCEED.load(Ordering::Relaxed) {
-			update_bg();
-		}
-	});
-
-	// Update the handle of the current thread.
-	let mut pending = PENDING_THREAD.lock().unwrap();
-	if let Some(old_handle) = pending.take() {
-		let _ = old_handle.join(); // Ensure the old thread completes (but it should just exit without calling update_bg() if flagged).
-	}
-	*pending = Some(handle);
+	BG_WORKER.request_update();
 }
 
-fn update_bg() {
+pub fn update_and_bg_blocking() {
+	update();
+	update_bg_with_mode(BgRunMode::Blocking);
+}
+
+fn worker_loop(receiver: mpsc::Receiver<BgRequest>) {
+	while receiver.recv().is_ok() {
+		while receiver.recv_timeout(Duration::from_millis(50)).is_ok() {}
+		update_bg_with_mode(BgRunMode::Async);
+	}
+}
+
+fn update_bg_with_mode(mode: BgRunMode) {
 	let config = crate::config::global::load_cfg();
 
 	let bgs = config.groups.backgrounds.clone();
@@ -91,8 +105,27 @@ fn update_bg() {
 
 		println!("nitrogen {:?}", argv);
 
-		Command::new(cmd_name.clone()).args(argv).spawn().ok();
+		run_background_command(cmd_name.as_str(), argv, mode);
 	}
+}
+
+fn run_background_command(cmd_name: &str, argv: Vec<String>, mode: BgRunMode) {
+	match mode {
+		BgRunMode::Async => {
+			if let Ok(child) = Command::new(cmd_name).args(argv).spawn() {
+				reap_child(child);
+			}
+		}
+		BgRunMode::Blocking => {
+			let _ = Command::new(cmd_name).args(argv).status();
+		}
+	}
+}
+
+fn reap_child(mut child: Child) {
+	thread::spawn(move || {
+		let _ = child.wait();
+	});
 }
 
 pub fn exec(_: Vec<String>) {
