@@ -11,6 +11,14 @@ use once_cell::sync::Lazy;
 
 use crate::{groups, i3, polybar};
 
+const WATCH_EVENTS: [Subscribe; 5] = [
+	Subscribe::Window,
+	Subscribe::Workspace,
+	Subscribe::Output,
+	Subscribe::Mode,
+	Subscribe::BarConfigUpdate,
+];
+
 enum BgRequest {
 	Update,
 }
@@ -129,16 +137,36 @@ fn reap_child(mut child: Child) {
 }
 
 pub fn exec(_: Vec<String>) {
-	let mut i3 = I3Stream::conn_sub(&[Subscribe::Window, Subscribe::Workspace]).unwrap();
-	for e in i3.listen() {
-		match e.unwrap() {
-			Event::Workspace(_) => update_and_bg(),
-			Event::Window(_) => update(),
-			Event::Output(_) => update(),
-			Event::Mode(_) => update(),
-			Event::BarConfig(_) => update(),
-			_ => {}
+	loop {
+		let Some(mut i3) = connect_event_stream() else {
+			return;
+		};
+
+		for e in i3.listen() {
+			match e {
+				Ok(Event::Workspace(_)) => update_and_bg(),
+				Ok(Event::Window(_)) => update(),
+				Ok(Event::Output(_)) => update(),
+				Ok(Event::Mode(_)) => update(),
+				Ok(Event::BarConfig(_)) => update(),
+				Ok(_) => {}
+				Err(err) => {
+					eprintln!("i3-wsman: lost i3 event stream: {}. Reconnecting.", err);
+					thread::sleep(Duration::from_secs(1));
+					break;
+				}
+			}
 		}
 	}
-	exec(vec![]);
+}
+
+fn connect_event_stream() -> Option<I3Stream> {
+	match i3::conn_sub(&WATCH_EVENTS) {
+		Ok(i3) => Some(i3),
+		Err(err) => {
+			eprintln!("i3-wsman: unable to subscribe to i3 events: {}", err);
+			eprintln!("i3-wsman: start i3 or set I3SOCK to the active i3 IPC socket.");
+			None
+		}
+	}
 }

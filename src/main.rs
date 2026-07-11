@@ -1,6 +1,6 @@
 use once_cell::sync::Lazy;
 
-use i3_ipc::{Connect, I3Stream, I3 as I3_api};
+use i3_ipc::I3Stream;
 use std::collections::HashMap;
 
 mod commands;
@@ -13,7 +13,7 @@ mod state;
 
 pub static CONFIG: Lazy<config::global::Config> = Lazy::new(|| config::global::load_cfg());
 pub static POLYBAR_CFG: Lazy<config::polybar::Config> = Lazy::new(|| Default::default());
-pub static I3: Lazy<I3Stream> = Lazy::new(|| I3_api::connect().unwrap());
+pub static I3: Lazy<I3Stream> = Lazy::new(i3::connect);
 
 pub type CommandFn = fn(Vec<String>);
 pub type Commands = HashMap<&'static str, CommandFn>;
